@@ -37,7 +37,16 @@ echo "  ✅ সব Python প্যাকেজ ইনস্টল হয়ে�
 # ── ধাপ ৩: Django মাইগ্রেশন ────────────────────────────────────────────────
 echo ""
 echo "▶ ধাপ ৩/৫: ডেটাবেজ তৈরি করছি..."
-python manage.py migrate --run-syncdb 2>/dev/null || python manage.py migrate
+
+echo "  → মাইগ্রেশন ফাইল তৈরি করছি..."
+python manage.py makemigrations accounts
+python manage.py makemigrations products
+python manage.py makemigrations cart
+python manage.py makemigrations wishlist
+python manage.py makemigrations notifications
+
+echo "  → ডেটাবেজে টেবিল তৈরি করছি..."
+python manage.py migrate
 echo "  ✅ ডেটাবেজ রেডি"
 
 # ── ধাপ ৪: Static ফাইল ─────────────────────────────────────────────────────
