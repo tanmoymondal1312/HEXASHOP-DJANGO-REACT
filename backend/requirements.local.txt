@@ -1,0 +1,46 @@
+# লোকাল ডেভেলপমেন্টের জন্য — production requirements.txt-এর হালকা ভার্সন
+
+# Django core
+Django==4.2.11
+djangorestframework==3.15.1
+django-cors-headers==4.3.1
+django-filter==24.1
+django-extensions==3.2.3
+
+# Database — SQLite দিয়েও চলবে, PostgreSQL হলে ভালো
+psycopg2-binary==2.9.9
+dj-database-url==2.1.0
+
+# Auth
+djangorestframework-simplejwt==5.3.1
+
+# Cache & Tasks
+django-redis==5.4.0
+celery==5.3.6
+django-celery-beat==2.6.0
+django-celery-results==2.5.1
+redis==5.0.3
+
+# Media — local storage ব্যবহার হবে
+cloudinary==1.38.0
+django-cloudinary-storage==0.3.0
+Pillow==10.2.0
+
+# Utilities
+python-dotenv==1.0.1
+gunicorn==21.2.0
+whitenoise==6.6.0
+python-slugify==8.0.4
+python-json-logger==2.0.7
+
+# Health check
+django-health-check==3.18.1
+django-prometheus==2.3.1
+
+# Brute force protection
+django-axes==6.4.0
+
+# Dev & Testing
+pytest==8.1.1
+pytest-django==4.8.0
+factory-boy==3.3.0
