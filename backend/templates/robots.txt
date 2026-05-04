@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Prevent indexing of filter/sort pages
+Disallow: /shop/?*sort=
+Disallow: /shop/?*page=
+Disallow: /api/
+
+Sitemap: https://hexashop.com/sitemap.xml

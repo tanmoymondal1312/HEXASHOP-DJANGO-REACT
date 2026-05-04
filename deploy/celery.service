@@ -1,0 +1,20 @@
+[Unit]
+Description=HEXASHOP Celery Worker
+After=network.target redis.service
+
+[Service]
+User=hexashop
+Group=www-data
+WorkingDirectory=/var/www/hexashop/backend
+EnvironmentFile=/var/www/hexashop/.env
+ExecStart=/var/www/hexashop/venv/bin/celery \
+    -A celery_app worker \
+    -l info \
+    -Q default,emails,inventory,reporting \
+    -c 4 \
+    --logfile=/var/log/hexashop/celery.log
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

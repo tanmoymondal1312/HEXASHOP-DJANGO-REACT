@@ -1,0 +1,16 @@
+import type { Metadata } from "next";
+import { WishlistContent } from "./WishlistContent";
+
+export const metadata: Metadata = {
+  title: "My Wishlist",
+  robots: { index: false, follow: false },
+};
+
+export default function WishlistPage() {
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <h1 className="text-2xl font-bold mb-8">My Wishlist</h1>
+      <WishlistContent />
+    </div>
+  );
+}
