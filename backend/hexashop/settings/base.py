@@ -12,6 +12,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
 INSTALLED_APPS = [
+    # Jazzmin must come before django.contrib.admin
+    "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -40,6 +42,8 @@ INSTALLED_APPS = [
     "apps.cart",
     "apps.wishlist",
     "apps.notifications",
+    "apps.store_settings",
+    "apps.orders",
 ]
 
 MIDDLEWARE = [
@@ -296,3 +300,126 @@ LOGGING = {
 }
 
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
+
+# ─── Jazzmin ─────────────────────────────────────────────────────────────────
+JAZZMIN_SETTINGS = {
+    "site_title": "HEXASHOP Admin",
+    "site_header": "HEXASHOP",
+    "site_brand": "HEXASHOP",
+    "site_logo": None,
+    "site_icon": None,
+    "welcome_sign": "Welcome to HEXASHOP Admin Panel",
+    "copyright": "© 2025 HEXASHOP. All rights reserved.",
+    "search_model": ["accounts.User", "products.Product", "orders.Order"],
+    "user_avatar": "avatar",
+
+    "topmenu_links": [
+        {"name": "Dashboard", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {
+            "name": "🛍️ View Store",
+            "url": os.environ.get("FRONTEND_URL", "http://localhost:3000"),
+            "new_window": True,
+        },
+    ],
+
+    "usermenu_links": [
+        {"model": "accounts.user"},
+    ],
+
+    "show_sidebar": True,
+    "navigation_expanded": True,
+
+    "order_with_respect_to": [
+        "store_settings",
+        "orders",
+        "products",
+        "accounts",
+        "notifications",
+        "cart",
+        "wishlist",
+    ],
+
+    "custom_links": {
+        "store_settings": [
+            {
+                "name": "View Store",
+                "url": os.environ.get("FRONTEND_URL", "http://localhost:3000"),
+                "icon": "fas fa-store",
+                "new_window": True,
+            }
+        ],
+    },
+
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "accounts": "fas fa-users",
+        "accounts.User": "fas fa-user",
+        "accounts.UserProfile": "fas fa-id-card",
+        "accounts.Address": "fas fa-map-marker-alt",
+        "accounts.AuditLog": "fas fa-history",
+        "products": "fas fa-boxes",
+        "products.Product": "fas fa-box",
+        "products.Category": "fas fa-sitemap",
+        "products.Brand": "fas fa-trademark",
+        "products.Review": "fas fa-star",
+        "store_settings": "fas fa-store",
+        "store_settings.SiteSettings": "fas fa-cog",
+        "store_settings.Banner": "fas fa-image",
+        "store_settings.PromoCode": "fas fa-tag",
+        "orders": "fas fa-shopping-bag",
+        "orders.Order": "fas fa-receipt",
+        "notifications": "fas fa-bell",
+        "notifications.StockAlert": "fas fa-bell",
+        "notifications.NewsletterSubscriber": "fas fa-envelope",
+        "cart": "fas fa-shopping-cart",
+        "cart.Cart": "fas fa-shopping-cart",
+        "wishlist": "fas fa-heart",
+        "wishlist.Wishlist": "fas fa-heart",
+        "django_celery_beat": "fas fa-clock",
+        "axes": "fas fa-shield-alt",
+    },
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-circle",
+
+    "related_modal_active": True,
+    "show_ui_builder": False,
+    "changeform_format": "horizontal_tabs",
+    "changeform_format_overrides": {
+        "accounts.user": "collapsible",
+        "store_settings.sitesettings": "vertical_tabs",
+    },
+    "language_chooser": False,
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": True,
+    "brand_small_text": False,
+    "brand_colour": "navbar-primary",
+    "accent": "accent-primary",
+    "navbar": "navbar-dark",
+    "no_navbar_border": False,
+    "navbar_fixed": True,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": True,
+    "sidebar": "sidebar-dark-primary",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": True,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "theme": "darkly",
+    "dark_mode_theme": None,
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success",
+    },
+    "actions_sticky_top": True,
+}
