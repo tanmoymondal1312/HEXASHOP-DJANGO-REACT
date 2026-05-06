@@ -36,6 +36,12 @@ class ProductForm(forms.ModelForm):
             "base_price", "compare_at_price",
             "short_description", "description",
         ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Default new products to Active so they appear on the store right away.
+        if not self.instance.pk:
+            self.initial.setdefault("status", Product.Status.ACTIVE)
         widgets = {
             "name": forms.TextInput(attrs={"class": "form-input"}),
             "slug": forms.TextInput(attrs={"class": "form-input"}),

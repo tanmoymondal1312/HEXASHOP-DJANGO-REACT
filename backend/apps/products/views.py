@@ -141,7 +141,8 @@ class ProductViewSet(ReadOnlyModelViewSet):
                 Prefetch("images", queryset=ProductImage.objects.order_by("sort_order"))
             )[:8]
         )
-        return Response(ProductListSerializer(related, many=True).data)
+        ctx = {"request": request}
+        return Response(ProductListSerializer(related, many=True, context=ctx).data)
 
     @action(detail=False, methods=["get"], url_path="featured")
     def featured(self, request):
@@ -157,7 +158,8 @@ class ProductViewSet(ReadOnlyModelViewSet):
                 Prefetch("images", queryset=ProductImage.objects.order_by("sort_order"))
             )[:8]
         )
-        data = ProductListSerializer(products, many=True).data
+        ctx = {"request": request}
+        data = ProductListSerializer(products, many=True, context=ctx).data
         cache.set(cache_key, data, 1800)
         return Response(data)
 
@@ -189,7 +191,8 @@ class ProductViewSet(ReadOnlyModelViewSet):
             )
             .order_by("-viral_score")[:8]
         )
-        data = ProductListSerializer(products, many=True).data
+        ctx = {"request": request}
+        data = ProductListSerializer(products, many=True, context=ctx).data
         cache.set(cache_key, data, 900)
         return Response(data)
 
@@ -216,7 +219,8 @@ class RecentlyViewedView(APIView):
                         Prefetch("images", queryset=ProductImage.objects.filter(is_primary=True))
                     )}
         ordered = [products[pid] for pid in ids if pid in products]
-        return Response(ProductListSerializer(ordered, many=True).data)
+        ctx = {"request": request}
+        return Response(ProductListSerializer(ordered, many=True, context=ctx).data)
 
 
 class SearchSuggestView(APIView):
@@ -247,7 +251,7 @@ class SearchSuggestView(APIView):
                 Category.objects.filter(name__icontains=q, is_active=True)
                 .values_list("name", flat=True)[:5]
             ),
-            "products": ProductListSerializer(products, many=True).data,
+            "products": ProductListSerializer(products, many=True, context={"request": request}).data,
             "categories": [{"name": c.name, "slug": c.slug} for c in categories],
         }
         cache.set(cache_key, data, SEARCH_SUGGEST_TTL)

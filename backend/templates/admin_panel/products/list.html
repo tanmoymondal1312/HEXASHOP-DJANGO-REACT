@@ -4,20 +4,50 @@
 
 {% block content %}
 
+<!-- ── Success toast ─────────────────────────────────────────────────────── -->
+{% if msg %}
+<div id="success-toast"
+     style="display:flex;align-items:center;gap:0.75rem;
+            background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);
+            color:#34d399;border-radius:0.75rem;padding:0.875rem 1.25rem;
+            font-size:0.875rem;font-weight:500;margin-bottom:1.25rem;">
+  <svg style="width:1.25rem;height:1.25rem;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+  </svg>
+  <span>
+    {% if msg == 'added' %}
+      <strong style="color:#fff;">{{ msg_name }}</strong> was added successfully and is now live on the store.
+    {% elif msg == 'updated' %}
+      <strong style="color:#fff;">{{ msg_name }}</strong> was updated successfully.
+    {% elif msg == 'deleted' %}
+      Product deleted successfully.
+    {% endif %}
+  </span>
+  <button onclick="document.getElementById('success-toast').remove()"
+          style="margin-left:auto;opacity:0.6;cursor:pointer;background:none;border:none;color:inherit;font-size:1.1rem;line-height:1;">
+    ×
+  </button>
+</div>
+{% endif %}
+
+<!-- ── Info tip: draft products ──────────────────────────────────────────── -->
+{% with draft_count=products|length %}
+{% endwith %}
+
 <!-- Toolbar -->
-<div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6">
+<div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-5">
   <form method="get" class="flex items-center gap-2 flex-1">
-    <div class="relative flex-1 max-w-sm">
-      <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500"
+    <div style="position:relative;flex:1;max-width:20rem;">
+      <svg style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);width:1rem;height:1rem;color:#6b7280;"
            fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/>
       </svg>
       <input type="text" name="q" value="{{ q }}"
              placeholder="Search products…"
-             class="form-input pl-9" />
+             class="form-input" style="padding-left:2.25rem;" />
     </div>
-    <select name="status" class="form-select w-36">
+    <select name="status" class="form-select" style="width:9rem;">
       <option value="">All status</option>
       <option value="active"   {% if status_filter == 'active'   %}selected{% endif %}>Active</option>
       <option value="draft"    {% if status_filter == 'draft'    %}selected{% endif %}>Draft</option>
@@ -26,13 +56,30 @@
     <button type="submit" class="btn-ghost">Filter</button>
   </form>
 
-  <a href="{% url 'admin_panel:product_add' %}" class="btn-primary shrink-0">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <a href="{% url 'admin_panel:product_add' %}" class="btn-primary" style="flex-shrink:0;">
+    <svg style="width:1rem;height:1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
     </svg>
     Add Product
   </a>
 </div>
+
+<!-- Draft warning banner -->
+{% for p in products %}{% if p.status == 'draft' %}{% if forloop.first %}
+<div style="display:flex;align-items:center;gap:0.625rem;
+            background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);
+            color:#fbbf24;border-radius:0.75rem;padding:0.75rem 1rem;
+            font-size:0.8125rem;margin-bottom:1rem;">
+  <svg style="width:1rem;height:1rem;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+  </svg>
+  <span>
+    Some products are in <strong>Draft</strong> status — they are hidden from the store.
+    Edit them and set status to <strong>Active</strong> to make them visible.
+  </span>
+</div>
+{% endif %}{% endif %}{% endfor %}
 
 <!-- Table -->
 <div class="bg-[#1a1d27] border border-[#2a2d3a] rounded-xl overflow-hidden">
@@ -49,38 +96,60 @@
     <tbody class="divide-y divide-[#2a2d3a]">
       {% for p in products %}
       <tr class="hover:bg-white/[0.02] transition">
+
+        <!-- Name + SKU -->
         <td class="px-5 py-3.5">
-          <div>
-            <p class="font-medium text-white">{{ p.name }}</p>
-            <p class="text-xs text-gray-500 mt-0.5">SKU: {{ p.sku }}</p>
-          </div>
+          <p class="font-medium text-white">{{ p.name }}</p>
+          <p class="text-xs text-gray-500 mt-0.5">SKU: {{ p.sku }}</p>
         </td>
-        <td class="px-4 py-3.5 hidden md:table-cell text-gray-400">{{ p.category.name }}</td>
+
+        <!-- Category -->
+        <td class="px-4 py-3.5 hidden md:table-cell text-gray-400">
+          {{ p.category.name }}
+        </td>
+
+        <!-- Price -->
         <td class="px-4 py-3.5">
           <span class="font-semibold text-white">${{ p.base_price }}</span>
           {% if p.compare_at_price %}
           <span class="text-xs text-gray-500 line-through ml-1">${{ p.compare_at_price }}</span>
           {% endif %}
         </td>
+
+        <!-- Status badge -->
         <td class="px-4 py-3.5 hidden sm:table-cell">
           {% if p.status == 'active' %}
-            <span class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-full">Active</span>
+            <span style="font-size:0.7rem;background:rgba(16,185,129,0.1);color:#34d399;
+                         border:1px solid rgba(16,185,129,0.2);padding:0.2rem 0.7rem;border-radius:999px;
+                         font-weight:600;">Active</span>
           {% elif p.status == 'draft' %}
-            <span class="text-xs bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 px-2.5 py-1 rounded-full">Draft</span>
+            <span style="font-size:0.7rem;background:rgba(245,158,11,0.1);color:#fbbf24;
+                         border:1px solid rgba(245,158,11,0.2);padding:0.2rem 0.7rem;border-radius:999px;
+                         font-weight:600;">Draft · Hidden</span>
           {% else %}
-            <span class="text-xs bg-gray-500/10 text-gray-400 border border-gray-500/20 px-2.5 py-1 rounded-full">Archived</span>
+            <span style="font-size:0.7rem;background:rgba(107,114,128,0.1);color:#9ca3af;
+                         border:1px solid rgba(107,114,128,0.2);padding:0.2rem 0.7rem;border-radius:999px;
+                         font-weight:600;">Archived</span>
           {% endif %}
         </td>
+
+        <!-- Actions -->
         <td class="px-5 py-3.5 text-right">
           <div class="flex items-center justify-end gap-2">
             <a href="{% url 'admin_panel:product_edit' p.pk %}"
-               class="text-xs text-indigo-400 hover:text-indigo-300 font-medium transition px-3 py-1.5
-                      bg-indigo-500/10 hover:bg-indigo-500/20 rounded-lg border border-indigo-500/20">
+               style="font-size:0.75rem;color:#818cf8;font-weight:500;padding:0.3rem 0.75rem;
+                      background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.2);
+                      border-radius:0.5rem;text-decoration:none;transition:background 0.15s;"
+               onmouseover="this.style.background='rgba(99,102,241,0.2)'"
+               onmouseout="this.style.background='rgba(99,102,241,0.1)'">
               Edit
             </a>
             <a href="{% url 'admin_panel:product_delete' p.pk %}"
-               class="text-xs text-red-400 hover:text-red-300 font-medium transition px-3 py-1.5
-                      bg-red-500/10 hover:bg-red-500/20 rounded-lg border border-red-500/20">
+               style="font-size:0.75rem;color:#f87171;font-weight:500;padding:0.3rem 0.75rem;
+                      background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);
+                      border-radius:0.5rem;text-decoration:none;transition:background 0.15s;"
+               onmouseover="this.style.background='rgba(239,68,68,0.2)'"
+               onmouseout="this.style.background='rgba(239,68,68,0.1)'">
               Delete
             </a>
           </div>
@@ -88,13 +157,24 @@
       </tr>
       {% empty %}
       <tr>
-        <td colspan="5" class="px-5 py-12 text-center text-gray-500 text-sm">
+        <td colspan="5" style="padding:3rem 1.25rem;text-align:center;color:#6b7280;font-size:0.875rem;">
           No products found.
-          <a href="{% url 'admin_panel:product_add' %}" class="text-indigo-400 hover:underline ml-1">Add one →</a>
+          <a href="{% url 'admin_panel:product_add' %}" style="color:#818cf8;margin-left:0.25rem;">Add one →</a>
         </td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
 </div>
+
+<!-- Auto-dismiss toast after 5 s -->
+{% if msg %}
+<script>
+  setTimeout(() => {
+    const t = document.getElementById('success-toast');
+    if (t) t.style.transition = 'opacity 0.4s', t.style.opacity = '0', setTimeout(() => t.remove(), 400);
+  }, 5000);
+</script>
+{% endif %}
+
 {% endblock %}

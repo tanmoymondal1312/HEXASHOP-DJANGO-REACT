@@ -108,10 +108,18 @@
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-gray-400 mb-1.5">Status</label>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">
+            Status
+            <span style="font-weight:400;color:#6b7280;margin-left:0.25rem;">— only Active products show on the store</span>
+          </label>
           <select name="status" class="form-select">
             {% for val, label in form.status.field.choices %}
-            <option value="{{ val }}" {% if form.status.value == val %}selected{% endif %}>{{ label }}</option>
+            <option value="{{ val }}"
+              {% if form.status.value == val %}selected
+              {% elif not form.status.value and val == 'active' %}selected
+              {% endif %}>
+              {{ label }}{% if val == 'draft' %} (hidden from store){% endif %}
+            </option>
             {% endfor %}
           </select>
         </div>

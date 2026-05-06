@@ -1,6 +1,8 @@
 import json
 from datetime import timedelta
 
+from urllib.parse import urlencode
+
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import user_passes_test
 from django.db.models import Count
@@ -180,7 +182,13 @@ def product_list(request):
     return render(
         request,
         "admin_panel/products/list.html",
-        {"products": qs, "q": q, "status_filter": status_filter},
+        {
+            "products": qs,
+            "q": q,
+            "status_filter": status_filter,
+            "msg": request.GET.get("msg", ""),
+            "msg_name": request.GET.get("name", ""),
+        },
     )
 
 
@@ -196,7 +204,8 @@ def product_add(request):
         product = form.save()
         image_formset.instance = product
         image_formset.save()
-        return redirect("admin_panel:product_list")
+        qs = urlencode({"msg": "added", "name": product.name})
+        return redirect(f"/panel/products/?{qs}")
     return render(request, "admin_panel/products/form.html", {
         "form": form,
         "image_formset": image_formset,
@@ -215,9 +224,10 @@ def product_edit(request, pk):
         prefix="images",
     )
     if request.method == "POST" and form.is_valid() and image_formset.is_valid():
-        form.save()
+        saved_product = form.save()
         image_formset.save()
-        return redirect("admin_panel:product_list")
+        qs = urlencode({"msg": "updated", "name": saved_product.name})
+        return redirect(f"/panel/products/?{qs}")
     return render(
         request,
         "admin_panel/products/form.html",
@@ -230,7 +240,7 @@ def product_delete(request, pk):
     product = get_object_or_404(Product, pk=pk)
     if request.method == "POST":
         product.delete()
-        return redirect("admin_panel:product_list")
+        return redirect("/panel/products/?msg=deleted")
     return render(
         request, "admin_panel/products/confirm_delete.html", {"object": product, "type": "Product"}
     )

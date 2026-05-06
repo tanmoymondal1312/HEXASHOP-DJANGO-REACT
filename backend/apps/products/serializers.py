@@ -87,7 +87,13 @@ class ProductListSerializer(serializers.ModelSerializer):
             primary = [i for i in images if i.is_primary]
             img = primary[0] if primary else (images[0] if images else None)
         if img and img.image:
-            return img.image.url
+            url = img.image.url
+            # Build absolute URL so Next.js Image (port 3000) can load from
+            # the Django media server (port 8000).
+            request = self.context.get("request")
+            if request:
+                return request.build_absolute_uri(url)
+            return url
         return None
 
 
