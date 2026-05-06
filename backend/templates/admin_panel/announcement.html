@@ -1,0 +1,158 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Announcement Bar{% endblock %}
+{% block heading %}Announcement Bar{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl">
+
+  {% if saved %}
+  <div class="mb-6 flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/30
+              text-emerald-400 rounded-xl px-5 py-3.5 text-sm font-medium">
+    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+    </svg>
+    Announcement bar updated successfully.
+  </div>
+  {% endif %}
+
+  <!-- Preview -->
+  <div class="mb-6 rounded-xl overflow-hidden border border-[#2a2d3a]">
+    <p class="text-xs text-gray-500 px-4 py-2 bg-[#1a1d27] border-b border-[#2a2d3a] font-medium uppercase tracking-wider">
+      Live Preview
+    </p>
+    <div id="preview-bar"
+         style="background-color: {{ form.instance.announcement_bar_bg_color|default:'#111111' }};
+                color: {{ form.instance.announcement_bar_text_color|default:'#ffffff' }};"
+         class="text-center py-2.5 px-4 text-sm font-medium transition-all">
+      <span id="preview-text">{{ form.instance.announcement_bar_text }}</span>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <div class="bg-[#1a1d27] border border-[#2a2d3a] rounded-xl p-6">
+    <form method="post" class="space-y-5">
+      {% csrf_token %}
+
+      <!-- Toggle -->
+      <div class="flex items-center justify-between py-3 border-b border-[#2a2d3a]">
+        <div>
+          <p class="text-sm font-medium text-white">Show announcement bar</p>
+          <p class="text-xs text-gray-500 mt-0.5">Toggle the top banner on your store</p>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" name="{{ form.announcement_bar_is_active.html_name }}"
+                 id="id_announcement_bar_is_active"
+                 {% if form.instance.announcement_bar_is_active %}checked{% endif %}
+                 class="sr-only peer" />
+          <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer
+                      peer-checked:after:translate-x-full peer-checked:after:border-white
+                      after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+                      after:bg-white after:border-gray-300 after:border after:rounded-full
+                      after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+        </label>
+      </div>
+
+      <!-- Text -->
+      <div>
+        <label class="block text-xs font-medium text-gray-400 mb-1.5">
+          Announcement text
+        </label>
+        <input type="text"
+               name="{{ form.announcement_bar_text.html_name }}"
+               id="id_announcement_bar_text"
+               value="{{ form.instance.announcement_bar_text }}"
+               class="form-input"
+               placeholder="🔥 Big Sale Live! Get Up to 40% OFF on All Products." />
+        <p class="text-xs text-gray-600 mt-1">Emojis are supported.</p>
+      </div>
+
+      <!-- Link -->
+      <div>
+        <label class="block text-xs font-medium text-gray-400 mb-1.5">
+          Click-through link <span class="text-gray-600">(optional)</span>
+        </label>
+        <input type="url"
+               name="{{ form.announcement_bar_link.html_name }}"
+               value="{{ form.instance.announcement_bar_link }}"
+               class="form-input"
+               placeholder="https://your-store.com/sale" />
+      </div>
+
+      <!-- Colours -->
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">Background colour</label>
+          <div class="flex items-center gap-3">
+            <input type="color"
+                   name="{{ form.announcement_bar_bg_color.html_name }}"
+                   id="id_bg_color"
+                   value="{{ form.instance.announcement_bar_bg_color|default:'#111111' }}"
+                   class="h-10 w-14 rounded-lg border border-[#2a2d3a] cursor-pointer bg-transparent" />
+            <input type="text"
+                   id="bg_color_text"
+                   value="{{ form.instance.announcement_bar_bg_color|default:'#111111' }}"
+                   class="form-input flex-1" maxlength="7" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">Text colour</label>
+          <div class="flex items-center gap-3">
+            <input type="color"
+                   name="{{ form.announcement_bar_text_color.html_name }}"
+                   id="id_text_color"
+                   value="{{ form.instance.announcement_bar_text_color|default:'#ffffff' }}"
+                   class="h-10 w-14 rounded-lg border border-[#2a2d3a] cursor-pointer bg-transparent" />
+            <input type="text"
+                   id="text_color_text"
+                   value="{{ form.instance.announcement_bar_text_color|default:'#ffffff' }}"
+                   class="form-input flex-1" maxlength="7" />
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-2 flex gap-3">
+        <button type="submit" class="btn-primary">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          Save Changes
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const textInput  = document.getElementById('id_announcement_bar_text');
+  const bgPicker   = document.getElementById('id_bg_color');
+  const txtPicker  = document.getElementById('id_text_color');
+  const bgText     = document.getElementById('bg_color_text');
+  const txtText    = document.getElementById('text_color_text');
+  const bar        = document.getElementById('preview-bar');
+  const previewTxt = document.getElementById('preview-text');
+
+  textInput.addEventListener('input', () => previewTxt.textContent = textInput.value);
+
+  bgPicker.addEventListener('input', () => {
+    bar.style.backgroundColor = bgPicker.value;
+    bgText.value = bgPicker.value;
+  });
+  bgText.addEventListener('input', () => {
+    bgPicker.value = bgText.value;
+    bar.style.backgroundColor = bgText.value;
+    // sync hidden field
+    bgPicker.dispatchEvent(new Event('input'));
+  });
+
+  txtPicker.addEventListener('input', () => {
+    bar.style.color = txtPicker.value;
+    txtText.value = txtPicker.value;
+  });
+  txtText.addEventListener('input', () => {
+    txtPicker.value = txtText.value;
+    bar.style.color = txtText.value;
+  });
+</script>
+{% endblock %}

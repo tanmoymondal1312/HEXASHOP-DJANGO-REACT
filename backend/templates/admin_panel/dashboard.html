@@ -1,0 +1,259 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block heading %}Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- ── Stats cards ──────────────────────────────────────────────────────────── -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+
+  <!-- Visitors / hr -->
+  <div class="bg-[#1a1d27] border border-[#2a2d3a] rounded-xl p-5">
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Visitors / hr</span>
+      <span class="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center">
+        <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+        </svg>
+      </span>
+    </div>
+    <p class="text-3xl font-bold text-white" id="stat-views">{{ views_last_hour }}</p>
+    <p class="text-xs text-gray-500 mt-1">API calls in last hour</p>
+  </div>
+
+  <!-- Cart adds / hr -->
+  <div class="bg-[#1a1d27] border border-[#2a2d3a] rounded-xl p-5">
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Cart Adds / hr</span>
+      <span class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+        </svg>
+      </span>
+    </div>
+    <p class="text-3xl font-bold text-white" id="stat-cart">{{ cart_last_hour }}</p>
+    <p class="text-xs text-gray-500 mt-1">Items added to cart</p>
+  </div>
+
+  <!-- Products -->
+  <div class="bg-[#1a1d27] border border-[#2a2d3a] rounded-xl p-5">
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Active Products</span>
+      <span class="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center">
+        <svg class="w-4 h-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+        </svg>
+      </span>
+    </div>
+    <p class="text-3xl font-bold text-white">{{ total_products }}</p>
+    <p class="text-xs text-gray-500 mt-1">Published in store</p>
+  </div>
+
+  <!-- Users -->
+  <div class="bg-[#1a1d27] border border-[#2a2d3a] rounded-xl p-5">
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Users</span>
+      <span class="w-8 h-8 rounded-lg bg-pink-500/10 flex items-center justify-center">
+        <svg class="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+      </span>
+    </div>
+    <p class="text-3xl font-bold text-white">{{ total_users }}</p>
+    <p class="text-xs text-gray-500 mt-1">
+      <span class="text-emerald-400 font-semibold">+{{ new_users_today }}</span> joined today
+    </p>
+  </div>
+</div>
+
+<!-- ── Charts ──────────────────────────────────────────────────────────────── -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+
+  <!-- Visitors chart -->
+  <div class="bg-[#1a1d27] border border-[#2a2d3a] rounded-xl p-6">
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <h3 class="text-sm font-semibold text-white">Site Visitors</h3>
+        <p class="text-xs text-gray-500 mt-0.5">API requests — last 24 hours</p>
+      </div>
+      <span class="text-xs bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2.5 py-1 rounded-full">Live</span>
+    </div>
+    <canvas id="visitorsChart" height="200"></canvas>
+  </div>
+
+  <!-- Cart additions chart -->
+  <div class="bg-[#1a1d27] border border-[#2a2d3a] rounded-xl p-6">
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <h3 class="text-sm font-semibold text-white">Cart Additions</h3>
+        <p class="text-xs text-gray-500 mt-0.5">Items added to cart — last 24 hours</p>
+      </div>
+      <span class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-full">Live</span>
+    </div>
+    <canvas id="cartChart" height="200"></canvas>
+  </div>
+</div>
+
+<!-- ── Quick actions + Recent products ────────────────────────────────────── -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+  <!-- Quick actions -->
+  <div class="bg-[#1a1d27] border border-[#2a2d3a] rounded-xl p-6">
+    <h3 class="text-sm font-semibold text-white mb-4">Quick Actions</h3>
+    <div class="space-y-2.5">
+      <a href="{% url 'admin_panel:product_add' %}"
+         class="flex items-center gap-3 w-full bg-indigo-600 hover:bg-indigo-700 text-white
+                font-medium px-4 py-3 rounded-lg transition text-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Add New Product
+      </a>
+      <a href="{% url 'admin_panel:category_add' %}"
+         class="flex items-center gap-3 w-full bg-white/5 hover:bg-white/10 text-gray-200
+                font-medium px-4 py-3 rounded-lg transition text-sm border border-[#2a2d3a]">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Add New Category
+      </a>
+      <a href="{% url 'admin_panel:announcement' %}"
+         class="flex items-center gap-3 w-full bg-white/5 hover:bg-white/10 text-gray-200
+                font-medium px-4 py-3 rounded-lg transition text-sm border border-[#2a2d3a]">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6"/>
+        </svg>
+        Edit Announcement Bar
+      </a>
+    </div>
+
+    <!-- Summary row -->
+    <div class="mt-6 pt-4 border-t border-[#2a2d3a] grid grid-cols-2 gap-3">
+      <div class="text-center">
+        <p class="text-2xl font-bold text-white">{{ total_categories }}</p>
+        <p class="text-xs text-gray-500 mt-0.5">Categories</p>
+      </div>
+      <div class="text-center">
+        <p class="text-2xl font-bold text-white">{{ total_products }}</p>
+        <p class="text-xs text-gray-500 mt-0.5">Products</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent products -->
+  <div class="lg:col-span-2 bg-[#1a1d27] border border-[#2a2d3a] rounded-xl p-6">
+    <div class="flex items-center justify-between mb-5">
+      <h3 class="text-sm font-semibold text-white">Recent Products</h3>
+      <a href="{% url 'admin_panel:product_list' %}"
+         class="text-xs text-indigo-400 hover:text-indigo-300 transition">View all →</a>
+    </div>
+
+    <div class="space-y-3">
+      {% for p in recent_products %}
+      <div class="flex items-center justify-between py-2.5 border-b border-[#2a2d3a] last:border-0">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-9 h-9 rounded-lg bg-[#0f1117] flex items-center justify-center shrink-0 border border-[#2a2d3a]">
+            <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <p class="text-sm font-medium text-white truncate">{{ p.name }}</p>
+            <p class="text-xs text-gray-500">{{ p.category.name }}</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 shrink-0 ml-3">
+          <span class="text-sm font-semibold text-white">${{ p.base_price }}</span>
+          {% if p.status == 'active' %}
+            <span class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full">Active</span>
+          {% elif p.status == 'draft' %}
+            <span class="text-xs bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 px-2 py-0.5 rounded-full">Draft</span>
+          {% else %}
+            <span class="text-xs bg-gray-500/10 text-gray-400 border border-gray-500/20 px-2 py-0.5 rounded-full">Archived</span>
+          {% endif %}
+          <a href="{% url 'admin_panel:product_edit' p.pk %}"
+             class="text-xs text-gray-500 hover:text-indigo-400 transition">Edit</a>
+        </div>
+      </div>
+      {% empty %}
+      <p class="text-sm text-gray-500 text-center py-6">No products yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+  const labels   = {{ chart_labels|safe }};
+  const pvData   = {{ pv_values|safe }};
+  const cartData = {{ cart_values|safe }};
+
+  const gridColor  = 'rgba(255,255,255,0.05)';
+  const tickColor  = '#6b7280';
+
+  const baseOptions = {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: {
+        grid: { color: gridColor },
+        ticks: { color: tickColor, font: { size: 11 }, maxTicksLimit: 8 },
+      },
+      y: {
+        grid: { color: gridColor },
+        ticks: { color: tickColor, font: { size: 11 }, precision: 0 },
+        beginAtZero: true,
+      },
+    },
+  };
+
+  new Chart(document.getElementById('visitorsChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data: pvData,
+        borderColor: '#6366f1',
+        backgroundColor: 'rgba(99,102,241,0.08)',
+        borderWidth: 2,
+        pointRadius: 3,
+        pointBackgroundColor: '#6366f1',
+        tension: 0.4,
+        fill: true,
+      }],
+    },
+    options: baseOptions,
+  });
+
+  new Chart(document.getElementById('cartChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data: cartData,
+        backgroundColor: 'rgba(52,211,153,0.7)',
+        borderRadius: 4,
+        borderSkipped: false,
+      }],
+    },
+    options: baseOptions,
+  });
+
+  /* ── Live polling every 30 s ───────────────────────────────────────────── */
+  setInterval(async () => {
+    try {
+      const r = await fetch("{% url 'admin_panel:stats_api' %}");
+      const d = await r.json();
+      document.getElementById('stat-views').textContent = d.views_last_hour;
+      document.getElementById('stat-cart').textContent  = d.cart_last_hour;
+    } catch (_) {}
+  }, 30_000);
+</script>
+{% endblock %}

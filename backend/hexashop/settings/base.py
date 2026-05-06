@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "apps.notifications",
     "apps.store_settings",
     "apps.orders",
+    "apps.admin_panel",
 ]
 
 MIDDLEWARE = [
@@ -59,6 +60,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "axes.middleware.AxesMiddleware",
     "django_prometheus.middleware.PrometheusAfterMiddleware",
+    "apps.admin_panel.middleware.PageViewMiddleware",
 ]
 
 ROOT_URLCONF = "hexashop.urls"

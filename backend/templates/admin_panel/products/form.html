@@ -1,0 +1,173 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}{{ action }} Product{% endblock %}
+{% block heading %}{{ action }} Product{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl">
+
+  <!-- Breadcrumb -->
+  <div class="flex items-center gap-2 text-xs text-gray-500 mb-6">
+    <a href="{% url 'admin_panel:product_list' %}" class="hover:text-gray-300 transition">Products</a>
+    <span>›</span>
+    <span class="text-gray-400">{{ action }}</span>
+  </div>
+
+  <div class="bg-[#1a1d27] border border-[#2a2d3a] rounded-xl overflow-hidden">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <!-- Section: Basic Info -->
+      <div class="px-6 py-5 border-b border-[#2a2d3a]">
+        <h3 class="text-sm font-semibold text-white mb-4">Basic Information</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-medium text-gray-400 mb-1.5">Product name *</label>
+            <input type="text" name="name" id="id_name"
+                   value="{{ form.name.value|default:'' }}"
+                   class="form-input" placeholder="e.g. Classic White Sneakers" required />
+            {% if form.name.errors %}<p class="text-xs text-red-400 mt-1">{{ form.name.errors.0 }}</p>{% endif %}
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-gray-400 mb-1.5">Slug</label>
+            <input type="text" name="slug" id="id_slug"
+                   value="{{ form.slug.value|default:'' }}"
+                   class="form-input" placeholder="auto-filled from name" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-gray-400 mb-1.5">SKU *</label>
+            <input type="text" name="sku"
+                   value="{{ form.sku.value|default:'' }}"
+                   class="form-input" placeholder="e.g. SNK-WHT-001" required />
+            {% if form.sku.errors %}<p class="text-xs text-red-400 mt-1">{{ form.sku.errors.0 }}</p>{% endif %}
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-gray-400 mb-1.5">Category *</label>
+            <select name="category" class="form-select" required>
+              <option value="">— Select category —</option>
+              {% for cat in form.category.field.queryset %}
+              <option value="{{ cat.pk }}"
+                {% if form.category.value|stringformat:"s" == cat.pk|stringformat:"s" %}selected{% endif %}>
+                {{ cat.full_path }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-gray-400 mb-1.5">Brand</label>
+            <select name="brand" class="form-select">
+              <option value="">— No brand —</option>
+              {% for b in form.brand.field.queryset %}
+              <option value="{{ b.pk }}"
+                {% if form.brand.value|stringformat:"s" == b.pk|stringformat:"s" %}selected{% endif %}>
+                {{ b.name }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Pricing & Status -->
+      <div class="px-6 py-5 border-b border-[#2a2d3a]">
+        <h3 class="text-sm font-semibold text-white mb-4">Pricing & Status</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-xs font-medium text-gray-400 mb-1.5">Price *</label>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">$</span>
+              <input type="number" name="base_price" step="0.01" min="0"
+                     value="{{ form.base_price.value|default:'' }}"
+                     class="form-input pl-7" placeholder="0.00" required />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-400 mb-1.5">Compare price</label>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">$</span>
+              <input type="number" name="compare_at_price" step="0.01" min="0"
+                     value="{{ form.compare_at_price.value|default:'' }}"
+                     class="form-input pl-7" placeholder="0.00" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-400 mb-1.5">Status</label>
+            <select name="status" class="form-select">
+              {% for val, label in form.status.field.choices %}
+              <option value="{{ val }}" {% if form.status.value == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="flex flex-col justify-end">
+            <label class="flex items-center gap-2.5 cursor-pointer h-10">
+              <input type="checkbox" name="is_featured"
+                     {% if form.is_featured.value %}checked{% endif %}
+                     class="w-4 h-4 rounded accent-indigo-600 bg-[#0f1117] border-gray-600" />
+              <span class="text-sm text-gray-300 font-medium">Featured</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Description -->
+      <div class="px-6 py-5 border-b border-[#2a2d3a]">
+        <h3 class="text-sm font-semibold text-white mb-4">Description</h3>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-medium text-gray-400 mb-1.5">Short description</label>
+            <input type="text" name="short_description"
+                   value="{{ form.short_description.value|default:'' }}"
+                   class="form-input" placeholder="Brief product summary (shown in listings)" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-400 mb-1.5">Full description</label>
+            <textarea name="description" rows="5" class="form-input"
+                      placeholder="Detailed product description…">{{ form.description.value|default:'' }}</textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Errors summary -->
+      {% if form.non_field_errors %}
+      <div class="px-6 py-4 border-b border-[#2a2d3a]">
+        {% for e in form.non_field_errors %}
+        <p class="text-sm text-red-400">{{ e }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Actions -->
+      <div class="px-6 py-4 flex items-center gap-3">
+        <button type="submit" class="btn-primary">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          {{ action }} Product
+        </button>
+        <a href="{% url 'admin_panel:product_list' %}" class="btn-ghost">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  /* Auto-fill slug from name */
+  const nameEl = document.getElementById('id_name');
+  const slugEl = document.getElementById('id_slug');
+  let userEditedSlug = slugEl.value.length > 0;
+
+  slugEl.addEventListener('input', () => { userEditedSlug = true; });
+  nameEl.addEventListener('input', () => {
+    if (userEditedSlug) return;
+    slugEl.value = nameEl.value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  });
+</script>
+{% endblock %}

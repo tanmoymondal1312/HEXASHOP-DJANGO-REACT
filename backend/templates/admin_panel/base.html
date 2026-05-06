@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Admin{% endblock %} · HEXASHOP</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            surface: '#0f1117',
+            card:    '#1a1d27',
+            border:  '#2a2d3a',
+            accent:  '#6366f1',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    * { font-family: 'Inter', sans-serif; }
+    .form-input {
+      @apply w-full bg-[#1a1d27] border border-[#2a2d3a] text-gray-200 rounded-lg px-4 py-2.5
+             placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
+             transition text-sm;
+    }
+    .form-select {
+      @apply w-full bg-[#1a1d27] border border-[#2a2d3a] text-gray-200 rounded-lg px-4 py-2.5
+             focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
+             transition text-sm;
+    }
+    .btn-primary {
+      @apply bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-lg
+             transition text-sm flex items-center gap-2;
+    }
+    .btn-danger {
+      @apply bg-red-600 hover:bg-red-700 text-white font-semibold px-5 py-2.5 rounded-lg
+             transition text-sm;
+    }
+    .btn-ghost {
+      @apply bg-transparent hover:bg-white/5 text-gray-400 hover:text-white border border-[#2a2d3a]
+             font-medium px-5 py-2.5 rounded-lg transition text-sm;
+    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0f1117; }
+    ::-webkit-scrollbar-thumb { background: #2a2d3a; border-radius: 3px; }
+  </style>
+</head>
+<body class="bg-[#0f1117] text-gray-200 min-h-screen flex">
+
+  <!-- ── Sidebar ───────────────────────────────────────────────────────────── -->
+  <aside class="w-60 bg-[#1a1d27] border-r border-[#2a2d3a] fixed top-0 left-0 h-full flex flex-col z-40">
+
+    <!-- Logo -->
+    <div class="px-6 py-5 border-b border-[#2a2d3a]">
+      <span class="text-lg font-bold tracking-tight">
+        <span class="text-white">HEXA</span><span class="text-indigo-400">SHOP</span>
+      </span>
+      <p class="text-[11px] text-gray-500 mt-0.5 uppercase tracking-widest">Admin Panel</p>
+    </div>
+
+    <!-- Nav -->
+    <nav class="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+
+      {% with url_name=request.resolver_match.url_name %}
+
+      <a href="{% url 'admin_panel:dashboard' %}"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition
+                {% if url_name == 'dashboard' %}bg-indigo-600 text-white{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %}">
+        <svg class="w-4.5 h-4.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+        </svg>
+        Dashboard
+      </a>
+
+      <a href="{% url 'admin_panel:product_list' %}"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition
+                {% if 'product' in url_name %}bg-indigo-600 text-white{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %}">
+        <svg class="w-4.5 h-4.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+        </svg>
+        Products
+      </a>
+
+      <a href="{% url 'admin_panel:category_list' %}"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition
+                {% if 'category' in url_name %}bg-indigo-600 text-white{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %}">
+        <svg class="w-4.5 h-4.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+        </svg>
+        Categories
+      </a>
+
+      <div class="pt-3 pb-1 px-3">
+        <p class="text-[10px] uppercase tracking-widest text-gray-600 font-semibold">Store</p>
+      </div>
+
+      <a href="{% url 'admin_panel:announcement' %}"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition
+                {% if url_name == 'announcement' %}bg-indigo-600 text-white{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %}">
+        <svg class="w-4.5 h-4.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+        </svg>
+        Announcement Bar
+      </a>
+
+      {% endwith %}
+    </nav>
+
+    <!-- Bottom -->
+    <div class="px-3 py-4 border-t border-[#2a2d3a] space-y-0.5">
+      <a href="http://localhost:3000" target="_blank"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:bg-white/5 hover:text-white transition">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+        </svg>
+        View Store
+      </a>
+      <a href="{% url 'admin_panel:logout' %}"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+        </svg>
+        Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- ── Main content ────────────────────────────────────────────────────── -->
+  <div class="ml-60 flex-1 min-h-screen flex flex-col">
+
+    <!-- Top bar -->
+    <header class="sticky top-0 z-30 bg-[#0f1117]/80 backdrop-blur border-b border-[#2a2d3a] px-8 py-4 flex items-center justify-between">
+      <h1 class="text-base font-semibold text-white">{% block heading %}Dashboard{% endblock %}</h1>
+      <div class="flex items-center gap-3">
+        <span class="text-xs text-gray-500">Logged in as</span>
+        <span class="text-xs font-medium text-indigo-400">{{ request.user.email }}</span>
+      </div>
+    </header>
+
+    <main class="flex-1 p-8">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

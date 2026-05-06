@@ -28,6 +28,8 @@ urlpatterns = [
     path("robots.txt", TemplateView.as_view(
         template_name="robots.txt", content_type="text/plain"
     )),
+    # Custom admin panel
+    path("panel/", include("apps.admin_panel.urls")),
     # API v1
     path("api/v1/", include([
         path("auth/", include("apps.accounts.urls")),

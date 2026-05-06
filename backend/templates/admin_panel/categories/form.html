@@ -1,0 +1,101 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}{{ action }} Category{% endblock %}
+{% block heading %}{{ action }} Category{% endblock %}
+
+{% block content %}
+<div class="max-w-xl">
+
+  <!-- Breadcrumb -->
+  <div class="flex items-center gap-2 text-xs text-gray-500 mb-6">
+    <a href="{% url 'admin_panel:category_list' %}" class="hover:text-gray-300 transition">Categories</a>
+    <span>›</span>
+    <span class="text-gray-400">{{ action }}</span>
+  </div>
+
+  <div class="bg-[#1a1d27] border border-[#2a2d3a] rounded-xl overflow-hidden">
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="px-6 py-5 space-y-4">
+
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">Category name *</label>
+          <input type="text" name="name" id="id_cat_name"
+                 value="{{ form.name.value|default:'' }}"
+                 class="form-input" placeholder="e.g. Men's Clothing" required />
+          {% if form.name.errors %}<p class="text-xs text-red-400 mt-1">{{ form.name.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">Slug</label>
+          <input type="text" name="slug" id="id_cat_slug"
+                 value="{{ form.slug.value|default:'' }}"
+                 class="form-input" placeholder="auto-filled from name" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">Parent category</label>
+          <select name="parent" class="form-select">
+            <option value="">— Top-level category —</option>
+            {% for cat in form.parent.field.queryset %}
+            <option value="{{ cat.pk }}"
+              {% if form.parent.value|stringformat:"s" == cat.pk|stringformat:"s" %}selected{% endif %}>
+              {{ cat.name }}
+            </option>
+            {% endfor %}
+          </select>
+          <p class="text-xs text-gray-600 mt-1">Leave blank to make this a top-level category.</p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">Description</label>
+          <textarea name="description" rows="3" class="form-input"
+                    placeholder="Optional description…">{{ form.description.value|default:'' }}</textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-medium text-gray-400 mb-1.5">Sort order</label>
+            <input type="number" name="sort_order"
+                   value="{{ form.sort_order.value|default:'0' }}"
+                   class="form-input" min="0" />
+            <p class="text-xs text-gray-600 mt-1">Lower = shown first.</p>
+          </div>
+          <div class="flex flex-col justify-end">
+            <label class="flex items-center gap-2.5 cursor-pointer h-10">
+              <input type="checkbox" name="is_active"
+                     {% if form.is_active.value %}checked{% endif %}
+                     class="w-4 h-4 rounded accent-indigo-600 bg-[#0f1117]" />
+              <span class="text-sm text-gray-300 font-medium">Active (visible in store)</span>
+            </label>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="px-6 py-4 border-t border-[#2a2d3a] flex items-center gap-3">
+        <button type="submit" class="btn-primary">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          {{ action }} Category
+        </button>
+        <a href="{% url 'admin_panel:category_list' %}" class="btn-ghost">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const nameEl = document.getElementById('id_cat_name');
+  const slugEl = document.getElementById('id_cat_slug');
+  let userEdited = slugEl.value.length > 0;
+  slugEl.addEventListener('input', () => { userEdited = true; });
+  nameEl.addEventListener('input', () => {
+    if (userEdited) return;
+    slugEl.value = nameEl.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  });
+</script>
+{% endblock %}
