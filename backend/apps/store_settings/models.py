@@ -62,6 +62,20 @@ class SiteSettings(models.Model):
     youtube_url = models.URLField(blank=True)
     tiktok_url = models.URLField(blank=True)
 
+    # ── Hero Section ──────────────────────────────────────────────────────────
+    hero_image = models.ImageField(
+        upload_to="hero/",
+        blank=True,
+        null=True,
+        help_text="Clothing/product image displayed in the hero circle on the home page.",
+    )
+    hero_image_alt = models.CharField(
+        max_length=200,
+        blank=True,
+        default="Featured collection",
+        help_text="Alt text for the hero image (accessibility).",
+    )
+
     # ── Contact ───────────────────────────────────────────────────────────────
     support_email = models.EmailField(blank=True, default="support@hexashop.com")
     support_phone = models.CharField(max_length=50, blank=True)

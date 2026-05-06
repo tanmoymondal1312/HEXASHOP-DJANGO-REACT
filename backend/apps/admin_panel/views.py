@@ -14,6 +14,8 @@ from apps.cart.models import CartItem
 from apps.products.models import Category, Product
 from apps.store_settings.models import SiteSettings
 
+from django.core.cache import cache
+
 from .forms import AnnouncementForm, CategoryForm, ProductForm, ProductImageFormSet
 from .models import PageView
 
@@ -136,12 +138,28 @@ def announcement(request):
     form = AnnouncementForm(request.POST or None, instance=obj)
     if request.method == "POST" and form.is_valid():
         form.save()
-        return render(
-            request,
-            "admin_panel/announcement.html",
-            {"form": form, "saved": True},
-        )
+        cache.delete("public_site_settings")
+        return render(request, "admin_panel/announcement.html", {"form": form, "saved": True})
     return render(request, "admin_panel/announcement.html", {"form": form})
+
+
+# ── Hero Image ────────────────────────────────────────────────────────────────
+
+@staff_required
+def hero_image(request):
+    obj = SiteSettings.load()
+    saved = False
+    if request.method == "POST":
+        alt = request.POST.get("hero_image_alt", "").strip()
+        obj.hero_image_alt = alt
+        if "hero_image" in request.FILES:
+            obj.hero_image = request.FILES["hero_image"]
+        elif request.POST.get("clear_hero_image"):
+            obj.hero_image = None
+        obj.save()
+        cache.delete("public_site_settings")
+        saved = True
+    return render(request, "admin_panel/hero_image.html", {"obj": obj, "saved": saved})
 
 
 # ── Products ──────────────────────────────────────────────────────────────────

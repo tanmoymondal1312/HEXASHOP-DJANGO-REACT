@@ -11,15 +11,11 @@ _CACHE_TTL = 300  # 5 minutes
 
 
 class SiteSettingsPublicView(APIView):
-    """Public endpoint that exposes only the fields the frontend needs."""
-
     permission_classes = [permissions.AllowAny]
 
     def get(self, request):
-        cached = cache.get(_CACHE_KEY)
-        if cached is not None:
-            return Response(cached)
-
-        data = SiteSettingsPublicSerializer(SiteSettings.load()).data
-        cache.set(_CACHE_KEY, data, _CACHE_TTL)
+        # Build absolute URLs so the frontend gets a ready-to-use src for images.
+        # We skip the shared cache here so build_absolute_uri uses the real host.
+        obj = SiteSettings.load()
+        data = SiteSettingsPublicSerializer(obj, context={"request": request}).data
         return Response(data)

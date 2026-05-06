@@ -64,6 +64,7 @@ export const productsApi = {
     api.get("/products/", { params }),
   detail: (slug: string) => api.get(`/products/${slug}/`),
   featured: () => api.get("/products/featured/"),
+  viral: () => api.get("/products/viral/"),
   related: (slug: string) => api.get(`/products/${slug}/related/`),
   recentlyViewed: () => api.get("/products/recently-viewed/"),
   categories: () => api.get("/products/categories/"),

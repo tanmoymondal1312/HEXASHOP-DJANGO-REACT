@@ -161,6 +161,38 @@ class ProductViewSet(ReadOnlyModelViewSet):
         cache.set(cache_key, data, 1800)
         return Response(data)
 
+    @action(detail=False, methods=["get"], url_path="viral")
+    def viral(self, request):
+        """
+        Returns the 8 most 'viral' active products.
+        Virality score = sold_count × 3 + review_count × 2 + view_count × 0.1
+        Cached for 15 minutes.
+        """
+        from django.db.models import ExpressionWrapper, FloatField
+
+        cache_key = "viral_products"
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return Response(cached)
+
+        products = (
+            Product.objects.filter(status=Product.Status.ACTIVE)
+            .annotate(
+                viral_score=ExpressionWrapper(
+                    F("sold_count") * 3 + F("review_count") * 2 + F("view_count") * 0.1,
+                    output_field=FloatField(),
+                )
+            )
+            .select_related("category", "brand")
+            .prefetch_related(
+                Prefetch("images", queryset=ProductImage.objects.order_by("sort_order"))
+            )
+            .order_by("-viral_score")[:8]
+        )
+        data = ProductListSerializer(products, many=True).data
+        cache.set(cache_key, data, 900)
+        return Response(data)
+
 
 class RecentlyViewedView(APIView):
     permission_classes = [permissions.AllowAny]
