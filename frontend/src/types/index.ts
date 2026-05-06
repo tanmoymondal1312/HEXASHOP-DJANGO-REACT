@@ -49,6 +49,12 @@ export interface Review {
   created_at: string;
 }
 
+export interface FirstVariant {
+  id: number;
+  is_in_stock: boolean;
+  stock: number;
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -70,6 +76,7 @@ export interface Product {
   review_count: number;
   sold_count?: number;
   is_featured: boolean;
+  first_variant?: FirstVariant | null;
   tags?: string[];
   attributes?: Record<string, unknown>;
   meta_title?: string;

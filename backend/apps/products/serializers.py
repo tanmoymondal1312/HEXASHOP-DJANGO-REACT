@@ -67,6 +67,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class ProductListSerializer(serializers.ModelSerializer):
     primary_image = serializers.SerializerMethodField()
+    first_variant = serializers.SerializerMethodField()
     category_name = serializers.CharField(source="category.name", read_only=True)
     brand_name = serializers.CharField(source="brand.name", read_only=True, default=None)
     discount_percentage = serializers.ReadOnlyField()
@@ -77,7 +78,20 @@ class ProductListSerializer(serializers.ModelSerializer):
             "id", "name", "slug", "base_price", "compare_at_price",
             "discount_percentage", "primary_image", "category_name",
             "brand_name", "avg_rating", "review_count", "is_featured",
+            "first_variant",
         )
+
+    def get_first_variant(self, obj):
+        """Return the first active in-stock variant id (for Quick Add from listings)."""
+        variants = getattr(obj, "prefetched_variants", None)
+        if variants is None:
+            v = obj.variants.filter(is_active=True).first()
+        else:
+            in_stock = [v for v in variants if v.is_active and v.stock > 0]
+            v = in_stock[0] if in_stock else (variants[0] if variants else None)
+        if v:
+            return {"id": v.id, "is_in_stock": v.is_in_stock, "stock": v.stock}
+        return None
 
     def get_primary_image(self, obj) -> str | None:
         images = getattr(obj, "prefetched_images", None)

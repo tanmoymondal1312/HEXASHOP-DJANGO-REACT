@@ -171,176 +171,123 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* ── Right: Dr Strange magic portal ──────────────────── */}
-            <div className="hidden lg:flex items-center justify-center py-6">
+            {/* ── Right: full product image + animated gradient bg ── */}
+            <div className="hidden lg:flex items-end justify-center">
               <style>{`
-                @keyframes hx-cw   { to { transform: rotate(360deg);  } }
-                @keyframes hx-ccw  { to { transform: rotate(-360deg); } }
-                @keyframes hx-glow {
-                  0%,100% { opacity:.55; filter:blur(18px); }
-                  50%     { opacity:1;   filter:blur(24px); }
+                @keyframes hx-aura {
+                  0%,100% { background-position: 0% 50%; }
+                  50%      { background-position: 100% 50%; }
                 }
-                @keyframes hx-float {
-                  0%,100% { transform:translateY(0);    }
-                  50%     { transform:translateY(-10px); }
+                @keyframes hx-morph {
+                  0%,100% { border-radius: 42% 58% 60% 40% / 55% 35% 65% 45%; }
+                  33%      { border-radius: 65% 35% 35% 65% / 40% 60% 40% 60%; }
+                  66%      { border-radius: 35% 65% 70% 30% / 60% 40% 55% 45%; }
                 }
-                @keyframes hx-spark {
-                  0%,100% { opacity:1; transform:scale(1);   box-shadow:0 0 8px currentColor,0 0 16px currentColor; }
-                  50%     { opacity:.6; transform:scale(0.7); box-shadow:0 0 4px currentColor; }
+                @keyframes hx-morph2 {
+                  0%,100% { border-radius: 60% 40% 40% 60% / 45% 60% 40% 55%; }
+                  50%      { border-radius: 40% 60% 60% 40% / 60% 40% 65% 35%; }
+                }
+                @keyframes hx-float-img {
+                  0%,100% { transform: translateY(0px) rotate(-0.5deg); }
+                  50%      { transform: translateY(-16px) rotate(0.5deg); }
+                }
+                @keyframes hx-badge-in {
+                  from { opacity:0; transform:translateY(8px); }
+                  to   { opacity:1; transform:translateY(0); }
                 }
               `}</style>
 
-              <div style={{ position:"relative", width:"420px", height:"420px" }}>
+              <div style={{ position:"relative", width:"420px" }}>
 
-                {/* ── Background radial glow ── */}
+                {/* ── Animated colorful gradient blob (main) ── */}
                 <div style={{
-                  position:"absolute", inset:"-70px", borderRadius:"50%",
-                  background:"radial-gradient(circle at 45% 50%, rgba(99,102,241,0.22) 0%, rgba(245,166,35,0.1) 45%, transparent 70%)",
-                  animation:"hx-glow 4s ease-in-out infinite",
+                  position:"absolute",
+                  top:"-10%", left:"-8%", right:"-8%", bottom:"-5%",
+                  background:"linear-gradient(135deg,#6366f1,#f59e0b,#06b6d4,#ec4899,#8b5cf6,#6366f1)",
+                  backgroundSize:"300% 300%",
+                  animation:"hx-aura 6s ease infinite, hx-morph 10s ease-in-out infinite",
+                  filter:"blur(55px)",
+                  opacity:0.45,
+                  zIndex:0,
                 }} />
 
-                {/* ── Ring 0: outermost dashed amber ── */}
+                {/* ── Secondary accent blob ── */}
                 <div style={{
-                  position:"absolute", inset:"-14px", borderRadius:"50%",
-                  border:"2px dashed rgba(245,166,35,0.45)",
-                  boxShadow:"0 0 28px rgba(245,166,35,0.15)",
-                  animation:"hx-cw 18s linear infinite",
+                  position:"absolute",
+                  top:"20%", left:"5%", right:"5%", bottom:"-8%",
+                  background:"linear-gradient(45deg,rgba(99,102,241,0.6),rgba(245,166,35,0.5),rgba(6,182,212,0.4))",
+                  backgroundSize:"250% 250%",
+                  animation:"hx-aura 4s ease infinite reverse, hx-morph2 7s ease-in-out infinite",
+                  filter:"blur(35px)",
+                  opacity:0.35,
+                  zIndex:0,
                 }} />
 
-                {/* ── Ring 1: solid amber ── */}
+                {/* ── Floating full product image ── */}
                 <div style={{
-                  position:"absolute", inset:"0", borderRadius:"50%",
-                  border:"3px solid rgba(245,166,35,0.75)",
-                  boxShadow:"0 0 22px rgba(245,166,35,0.35), inset 0 0 22px rgba(245,166,35,0.08)",
-                  animation:"hx-ccw 11s linear infinite",
-                }} />
-
-                {/* ── Ring 2: indigo fast ── */}
-                <div style={{
-                  position:"absolute", inset:"20px", borderRadius:"50%",
-                  border:"2.5px solid rgba(99,102,241,0.85)",
-                  boxShadow:"0 0 18px rgba(99,102,241,0.5)",
-                  animation:"hx-cw 7s linear infinite",
-                }} />
-
-                {/* ── Ring 3: small dashed amber ── */}
-                <div style={{
-                  position:"absolute", inset:"34px", borderRadius:"50%",
-                  border:"1.5px dashed rgba(245,166,35,0.35)",
-                  animation:"hx-ccw 5s linear infinite",
-                }} />
-
-                {/* ── Ring 4: inner indigo ── */}
-                <div style={{
-                  position:"absolute", inset:"46px", borderRadius:"50%",
-                  border:"2px solid rgba(99,102,241,0.55)",
-                  boxShadow:"0 0 12px rgba(99,102,241,0.35)",
-                  animation:"hx-cw 3.5s linear infinite",
-                }} />
-
-                {/* ── Orbiting spark — amber (outer ring) ── */}
-                <div style={{ position:"absolute", inset:0, animation:"hx-cw 4s linear infinite" }}>
-                  <div style={{
-                    position:"absolute", top:"50%", left:"-5px",
-                    width:"10px", height:"10px", marginTop:"-5px",
-                    borderRadius:"50%", background:"#f59e0b", color:"#f59e0b",
-                    boxShadow:"0 0 8px #f59e0b, 0 0 20px rgba(245,158,11,0.7)",
-                    animation:"hx-spark 1.5s ease-in-out infinite",
-                  }} />
-                </div>
-
-                {/* ── Orbiting spark — indigo (outer ring opposite) ── */}
-                <div style={{ position:"absolute", inset:0, animation:"hx-ccw 6s linear infinite" }}>
-                  <div style={{
-                    position:"absolute", top:"-5px", left:"50%",
-                    width:"9px", height:"9px", marginLeft:"-4px",
-                    borderRadius:"50%", background:"#818cf8", color:"#818cf8",
-                    boxShadow:"0 0 8px #818cf8, 0 0 18px rgba(129,140,248,0.6)",
-                    animation:"hx-spark 2s ease-in-out infinite .5s",
-                  }} />
-                </div>
-
-                {/* ── Orbiting spark — amber (inner ring) ── */}
-                <div style={{ position:"absolute", inset:"20px", animation:"hx-cw 9s linear infinite" }}>
-                  <div style={{
-                    position:"absolute", bottom:"-4px", right:"10%",
-                    width:"7px", height:"7px",
-                    borderRadius:"50%", background:"#fbbf24",
-                    boxShadow:"0 0 6px #fbbf24, 0 0 12px rgba(251,191,36,0.5)",
-                  }} />
-                </div>
-
-                {/* ── Orbiting spark — indigo (inner ring) ── */}
-                <div style={{ position:"absolute", inset:"46px", animation:"hx-ccw 4s linear infinite" }}>
-                  <div style={{
-                    position:"absolute", top:"10%", right:"-4px",
-                    width:"6px", height:"6px",
-                    borderRadius:"50%", background:"#6366f1",
-                    boxShadow:"0 0 6px #6366f1",
-                  }} />
-                </div>
-
-                {/* ── Center image (floating) ── */}
-                <div style={{
-                  position:"absolute", inset:"60px", borderRadius:"50%",
-                  overflow:"hidden",
-                  background:"linear-gradient(135deg,#1a1d27 0%,#0f1117 100%)",
-                  border:"2px solid rgba(99,102,241,0.45)",
-                  boxShadow:"inset 0 0 40px rgba(0,0,0,0.6), 0 0 30px rgba(99,102,241,0.2)",
-                  animation:"hx-float 5s ease-in-out infinite",
+                  position:"relative", zIndex:1,
+                  animation:"hx-float-img 5s ease-in-out infinite",
                 }}>
                   {hero_image_url ? (
                     <Image
                       src={hero_image_url}
-                      alt={hero_image_alt || "Featured collection"}
-                      fill className="object-cover object-center"
-                      priority sizes="300px"
+                      alt={hero_image_alt || "Featured product"}
+                      width={420}
+                      height={520}
+                      className="object-contain w-full"
+                      style={{
+                        maxHeight:"520px",
+                        filter:"drop-shadow(0 30px 60px rgba(0,0,0,0.6)) drop-shadow(0 0 40px rgba(99,102,241,0.25))",
+                      }}
+                      priority
                     />
                   ) : (
                     <div style={{
-                      width:"100%", height:"100%",
-                      display:"grid", gridTemplateColumns:"1fr 1fr", gap:0,
+                      width:"100%", height:"480px",
+                      display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
+                      gap:"1rem", borderRadius:"1.5rem",
+                      border:"1px dashed rgba(99,102,241,0.3)",
+                      background:"rgba(26,29,39,0.4)",
+                      backdropFilter:"blur(12px)",
                     }}>
-                      {categories.slice(0,4).map((cat, i) => (
-                        <div key={cat.id} className={`flex flex-col items-center justify-center gap-1 bg-gradient-to-br ${CAT_COLORS[i%CAT_COLORS.length]}`}>
-                          <span className="text-xl font-black text-white/50">{cat.name.charAt(0)}</span>
-                          <span className="text-[9px] text-white/30">{cat.name}</span>
-                        </div>
-                      ))}
-                      {categories.length === 0 && (
-                        <div style={{gridColumn:"1/-1",display:"flex",alignItems:"center",justifyContent:"center"}}>
-                          <p className="text-[10px] text-brand-muted text-center px-6">
-                            Upload a hero image<br/>from Admin → Hero Image
-                          </p>
-                        </div>
-                      )}
+                      <svg style={{width:"3.5rem",height:"3.5rem",color:"rgba(99,102,241,0.4)"}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1}
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <div style={{textAlign:"center"}}>
+                        <p style={{color:"rgba(129,140,248,0.8)",fontSize:"0.9rem",fontWeight:600}}>Upload a hero image</p>
+                        <p style={{color:"rgba(107,114,128,0.7)",fontSize:"0.75rem",marginTop:"0.25rem"}}>Admin → Hero Image</p>
+                      </div>
                     </div>
                   )}
                 </div>
 
-                {/* ── Floating badge top-right ── */}
+                {/* ── Floating badge — top right ── */}
                 <div style={{
-                  position:"absolute", top:"8px", right:"-8px",
+                  position:"absolute", top:"12px", right:"-16px", zIndex:2,
                   display:"flex", alignItems:"center", gap:"0.375rem",
-                  padding:"0.375rem 0.75rem", borderRadius:"0.75rem",
-                  background:"#6366f1", color:"#fff",
-                  fontSize:"0.7rem", fontWeight:700,
-                  boxShadow:"0 4px 20px rgba(99,102,241,0.5)",
+                  padding:"0.4rem 0.875rem", borderRadius:"0.875rem",
+                  background:"linear-gradient(135deg,#6366f1,#4f46e5)",
+                  color:"#fff", fontSize:"0.7rem", fontWeight:700,
+                  boxShadow:"0 6px 24px rgba(99,102,241,0.55)",
+                  animation:"hx-badge-in 0.6s ease 0.3s both",
                 }}>
-                  <Flame className="h-3 w-3 fill-white" /> New Drop
+                  <Flame className="h-3.5 w-3.5 fill-white" /> New Drop
                 </div>
 
-                {/* ── Floating badge bottom-left ── */}
+                {/* ── Floating badge — bottom left ── */}
                 <div style={{
-                  position:"absolute", bottom:"12px", left:"-12px",
+                  position:"absolute", bottom:"48px", left:"-16px", zIndex:2,
                   display:"flex", alignItems:"center", gap:"0.375rem",
-                  padding:"0.375rem 0.75rem", borderRadius:"0.75rem",
-                  background:"#1a1d27", color:"#f5a623",
-                  fontSize:"0.7rem", fontWeight:700,
-                  border:"1px solid rgba(245,166,35,0.35)",
-                  boxShadow:"0 4px 20px rgba(0,0,0,0.5)",
+                  padding:"0.4rem 0.875rem", borderRadius:"0.875rem",
+                  background:"rgba(15,17,23,0.9)",
+                  border:"1px solid rgba(245,166,35,0.4)",
+                  color:"#f5a623", fontSize:"0.7rem", fontWeight:700,
+                  boxShadow:"0 6px 24px rgba(0,0,0,0.5), 0 0 20px rgba(245,166,35,0.15)",
+                  backdropFilter:"blur(8px)",
+                  animation:"hx-badge-in 0.6s ease 0.5s both",
                 }}>
-                  <Star className="h-3 w-3 fill-brand-primary" /> 4.9 Rating
+                  <Star className="h-3.5 w-3.5 fill-brand-primary" /> 4.9 Rating
                 </div>
 
               </div>

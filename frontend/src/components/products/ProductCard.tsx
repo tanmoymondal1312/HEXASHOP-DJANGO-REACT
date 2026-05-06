@@ -37,17 +37,20 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const variant = (
-      product as unknown as {
-        variants?: Array<{ id: number; is_in_stock: boolean }>;
-      }
-    ).variants?.find((v) => v.is_in_stock);
-    if (!variant) {
-      toast.error("Out of stock");
+
+    // Use first_variant from list serializer (lightweight, no full variants array needed)
+    const fv = product.first_variant;
+    if (!fv) {
+      // No variant info at all — go to product page to pick one
+      window.location.href = `/products/${product.slug}`;
+      return;
+    }
+    if (!fv.is_in_stock) {
+      toast.error("This product is out of stock");
       return;
     }
     setAddingToCart(true);
-    await addItem(variant.id, 1);
+    await addItem(fv.id, 1);
     setAddingToCart(false);
   };
 

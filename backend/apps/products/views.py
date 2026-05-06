@@ -75,7 +75,12 @@ class ProductViewSet(ReadOnlyModelViewSet):
                     "images",
                     queryset=ProductImage.objects.order_by("sort_order"),
                     to_attr="prefetched_images",
-                )
+                ),
+                Prefetch(
+                    "variants",
+                    queryset=ProductVariant.objects.filter(is_active=True),
+                    to_attr="prefetched_variants",
+                ),
             )
         )
         return qs
@@ -104,7 +109,9 @@ class ProductViewSet(ReadOnlyModelViewSet):
                     ),
                     Prefetch(
                         "reviews",
-                        queryset=Review.objects.select_related("user").order_by("-created_at")[:10],
+                        # NOTE: no slice here — Django cannot add a product_id
+                        # filter on an already-sliced queryset. Limit in the serializer.
+                        queryset=Review.objects.select_related("user").order_by("-created_at"),
                     ),
                 )
                 .get(slug=slug)
