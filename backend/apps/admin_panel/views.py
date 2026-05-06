@@ -200,16 +200,22 @@ def product_add(request):
         request.FILES or None,
         prefix="images",
     )
-    if request.method == "POST" and form.is_valid() and image_formset.is_valid():
-        product = form.save()
-        image_formset.instance = product
-        image_formset.save()
-        qs = urlencode({"msg": "added", "name": product.name})
-        return redirect(f"/panel/products/?{qs}")
+    if request.method == "POST":
+        # Evaluate both separately so errors are fully populated on failure.
+        form_ok = form.is_valid()
+        imgs_ok = image_formset.is_valid()
+        if form_ok and imgs_ok:
+            product = form.save()
+            image_formset.instance = product
+            image_formset.save()
+            qs = urlencode({"msg": "added", "name": product.name})
+            return redirect(f"/panel/products/?{qs}")
+
     return render(request, "admin_panel/products/form.html", {
         "form": form,
         "image_formset": image_formset,
         "action": "Add",
+        "submitted": request.method == "POST",
     })
 
 
@@ -223,15 +229,24 @@ def product_edit(request, pk):
         instance=product,
         prefix="images",
     )
-    if request.method == "POST" and form.is_valid() and image_formset.is_valid():
-        saved_product = form.save()
-        image_formset.save()
-        qs = urlencode({"msg": "updated", "name": saved_product.name})
-        return redirect(f"/panel/products/?{qs}")
+    if request.method == "POST":
+        form_ok = form.is_valid()
+        imgs_ok = image_formset.is_valid()
+        if form_ok and imgs_ok:
+            saved_product = form.save()
+            image_formset.save()
+            qs = urlencode({"msg": "updated", "name": saved_product.name})
+            return redirect(f"/panel/products/?{qs}")
     return render(
         request,
         "admin_panel/products/form.html",
-        {"form": form, "image_formset": image_formset, "action": "Edit", "product": product},
+        {
+            "form": form,
+            "image_formset": image_formset,
+            "action": "Edit",
+            "product": product,
+            "submitted": request.method == "POST",
+        },
     )
 
 

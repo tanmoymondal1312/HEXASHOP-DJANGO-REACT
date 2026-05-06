@@ -36,12 +36,8 @@ class ProductForm(forms.ModelForm):
             "base_price", "compare_at_price",
             "short_description", "description",
         ]
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Default new products to Active so they appear on the store right away.
-        if not self.instance.pk:
-            self.initial.setdefault("status", Product.Status.ACTIVE)
+        # Widgets MUST live in Meta — defining them in __init__ as a local
+        # variable has no effect on the form.
         widgets = {
             "name": forms.TextInput(attrs={"class": "form-input"}),
             "slug": forms.TextInput(attrs={"class": "form-input"}),
@@ -55,6 +51,17 @@ class ProductForm(forms.ModelForm):
             "description": forms.Textarea(attrs={"class": "form-input", "rows": 5}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Default new products to Active so they show on the store immediately.
+        if not self.instance.pk:
+            self.initial.setdefault("status", Product.Status.ACTIVE)
+        # brand is optional
+        self.fields["brand"].required = False
+        self.fields["compare_at_price"].required = False
+        self.fields["short_description"].required = False
+        self.fields["description"].required = False
+
 
 class ProductImageForm(forms.ModelForm):
     class Meta:
@@ -64,10 +71,17 @@ class ProductImageForm(forms.ModelForm):
             "alt_text": forms.TextInput(
                 attrs={"class": "form-input", "placeholder": "Alt text (optional)"}
             ),
-            "sort_order": forms.NumberInput(
-                attrs={"class": "form-input", "min": "0"}
-            ),
+            # Hidden — always defaults to 0 so it never causes a missing-field error.
+            "sort_order": forms.HiddenInput(),
+            "is_primary": forms.CheckboxInput(),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["alt_text"].required = False
+        self.fields["is_primary"].required = False
+        self.fields["sort_order"].required = False
+        self.fields["sort_order"].initial = 0
 
 
 ProductImageFormSet = inlineformset_factory(
@@ -91,3 +105,10 @@ class CategoryForm(forms.ModelForm):
             "description": forms.Textarea(attrs={"class": "form-input", "rows": 3}),
             "sort_order": forms.NumberInput(attrs={"class": "form-input"}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["parent"].required = False
+        self.fields["description"].required = False
+        self.fields["sort_order"].required = False
+        self.fields["sort_order"].initial = 0
