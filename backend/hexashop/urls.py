@@ -37,6 +37,7 @@ urlpatterns = [
         path("cart/", include("apps.cart.urls")),
         path("wishlist/", include("apps.wishlist.urls")),
         path("notifications/", include("apps.notifications.urls")),
+        path("settings/", include("apps.store_settings.urls")),
     ])),
 ]
 

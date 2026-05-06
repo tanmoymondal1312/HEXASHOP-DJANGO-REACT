@@ -61,6 +61,15 @@
   }
 }
 
+/* Hide scrollbar (horizontal category strip) */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Swiper customization */
 .swiper-pagination-bullet {
   background: #6B7280 !important;

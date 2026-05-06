@@ -53,9 +53,9 @@ export function WishlistContent() {
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-      {wishlist.items.map(({ product }) => {
+      {wishlist.items.map(({ product }: { product: import("@/types").Product }) => {
         const image = product.primary_image || product.images?.[0]?.image;
-        const variant = product.variants?.find((v) => v.is_in_stock);
+        const variant = product.variants?.find((v: import("@/types").ProductVariant) => v.is_in_stock);
 
         return (
           <div key={product.id} className="card group relative">

@@ -90,6 +90,11 @@ export const wishlistApi = {
   check: (productId: number) => api.get(`/wishlist/check/${productId}/`),
 };
 
+// ─── Site Settings ────────────────────────────────────────────────────────────
+export const siteApi = {
+  settings: () => api.get("/settings/"),
+};
+
 // ─── Notifications ────────────────────────────────────────────────────────────
 export const notificationsApi = {
   subscribeStockAlert: (email: string, variantId: number) =>
