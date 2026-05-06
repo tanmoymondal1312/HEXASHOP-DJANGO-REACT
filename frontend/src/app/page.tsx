@@ -109,7 +109,7 @@ export default async function HomePage() {
       <WebsiteJsonLd />
 
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-hero-gradient">
+      <section className="relative bg-hero-gradient overflow-hidden">
         {/* bg rings */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute -right-40 -top-40 w-[700px] h-[700px] rounded-full border border-brand-secondary/8" />
@@ -171,59 +171,146 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* ── Right: hero image circle ─────────────────────────── */}
-            <div className="hidden lg:flex items-center justify-center">
-              <div className="relative">
-                {/* Outer glow */}
-                <div
-                  className="absolute inset-0 rounded-full blur-3xl"
-                  style={{
-                    background:
-                      "radial-gradient(circle, rgba(99,102,241,0.18) 0%, rgba(245,166,35,0.08) 60%, transparent 80%)",
-                  }}
-                />
+            {/* ── Right: Dr Strange magic portal ──────────────────── */}
+            <div className="hidden lg:flex items-center justify-center py-6">
+              <style>{`
+                @keyframes hx-cw   { to { transform: rotate(360deg);  } }
+                @keyframes hx-ccw  { to { transform: rotate(-360deg); } }
+                @keyframes hx-glow {
+                  0%,100% { opacity:.55; filter:blur(18px); }
+                  50%     { opacity:1;   filter:blur(24px); }
+                }
+                @keyframes hx-float {
+                  0%,100% { transform:translateY(0);    }
+                  50%     { transform:translateY(-10px); }
+                }
+                @keyframes hx-spark {
+                  0%,100% { opacity:1; transform:scale(1);   box-shadow:0 0 8px currentColor,0 0 16px currentColor; }
+                  50%     { opacity:.6; transform:scale(0.7); box-shadow:0 0 4px currentColor; }
+                }
+              `}</style>
 
-                {/* Decorative rings */}
-                <div className="absolute -inset-5 rounded-full border border-white/[0.04]" />
-                <div className="absolute -inset-10 rounded-full border border-white/[0.025]" />
+              <div style={{ position:"relative", width:"420px", height:"420px" }}>
 
-                {/* Main circle */}
-                <div
-                  className="relative w-[380px] h-[380px] rounded-full overflow-hidden"
-                  style={{
-                    border: "2px solid rgba(99,102,241,0.35)",
-                    background: "linear-gradient(135deg, #1a1d27 0%, #0f1117 100%)",
-                    boxShadow: "0 0 60px rgba(99,102,241,0.12), inset 0 0 40px rgba(0,0,0,0.4)",
-                  }}
-                >
+                {/* ── Background radial glow ── */}
+                <div style={{
+                  position:"absolute", inset:"-70px", borderRadius:"50%",
+                  background:"radial-gradient(circle at 45% 50%, rgba(99,102,241,0.22) 0%, rgba(245,166,35,0.1) 45%, transparent 70%)",
+                  animation:"hx-glow 4s ease-in-out infinite",
+                }} />
+
+                {/* ── Ring 0: outermost dashed amber ── */}
+                <div style={{
+                  position:"absolute", inset:"-14px", borderRadius:"50%",
+                  border:"2px dashed rgba(245,166,35,0.45)",
+                  boxShadow:"0 0 28px rgba(245,166,35,0.15)",
+                  animation:"hx-cw 18s linear infinite",
+                }} />
+
+                {/* ── Ring 1: solid amber ── */}
+                <div style={{
+                  position:"absolute", inset:"0", borderRadius:"50%",
+                  border:"3px solid rgba(245,166,35,0.75)",
+                  boxShadow:"0 0 22px rgba(245,166,35,0.35), inset 0 0 22px rgba(245,166,35,0.08)",
+                  animation:"hx-ccw 11s linear infinite",
+                }} />
+
+                {/* ── Ring 2: indigo fast ── */}
+                <div style={{
+                  position:"absolute", inset:"20px", borderRadius:"50%",
+                  border:"2.5px solid rgba(99,102,241,0.85)",
+                  boxShadow:"0 0 18px rgba(99,102,241,0.5)",
+                  animation:"hx-cw 7s linear infinite",
+                }} />
+
+                {/* ── Ring 3: small dashed amber ── */}
+                <div style={{
+                  position:"absolute", inset:"34px", borderRadius:"50%",
+                  border:"1.5px dashed rgba(245,166,35,0.35)",
+                  animation:"hx-ccw 5s linear infinite",
+                }} />
+
+                {/* ── Ring 4: inner indigo ── */}
+                <div style={{
+                  position:"absolute", inset:"46px", borderRadius:"50%",
+                  border:"2px solid rgba(99,102,241,0.55)",
+                  boxShadow:"0 0 12px rgba(99,102,241,0.35)",
+                  animation:"hx-cw 3.5s linear infinite",
+                }} />
+
+                {/* ── Orbiting spark — amber (outer ring) ── */}
+                <div style={{ position:"absolute", inset:0, animation:"hx-cw 4s linear infinite" }}>
+                  <div style={{
+                    position:"absolute", top:"50%", left:"-5px",
+                    width:"10px", height:"10px", marginTop:"-5px",
+                    borderRadius:"50%", background:"#f59e0b", color:"#f59e0b",
+                    boxShadow:"0 0 8px #f59e0b, 0 0 20px rgba(245,158,11,0.7)",
+                    animation:"hx-spark 1.5s ease-in-out infinite",
+                  }} />
+                </div>
+
+                {/* ── Orbiting spark — indigo (outer ring opposite) ── */}
+                <div style={{ position:"absolute", inset:0, animation:"hx-ccw 6s linear infinite" }}>
+                  <div style={{
+                    position:"absolute", top:"-5px", left:"50%",
+                    width:"9px", height:"9px", marginLeft:"-4px",
+                    borderRadius:"50%", background:"#818cf8", color:"#818cf8",
+                    boxShadow:"0 0 8px #818cf8, 0 0 18px rgba(129,140,248,0.6)",
+                    animation:"hx-spark 2s ease-in-out infinite .5s",
+                  }} />
+                </div>
+
+                {/* ── Orbiting spark — amber (inner ring) ── */}
+                <div style={{ position:"absolute", inset:"20px", animation:"hx-cw 9s linear infinite" }}>
+                  <div style={{
+                    position:"absolute", bottom:"-4px", right:"10%",
+                    width:"7px", height:"7px",
+                    borderRadius:"50%", background:"#fbbf24",
+                    boxShadow:"0 0 6px #fbbf24, 0 0 12px rgba(251,191,36,0.5)",
+                  }} />
+                </div>
+
+                {/* ── Orbiting spark — indigo (inner ring) ── */}
+                <div style={{ position:"absolute", inset:"46px", animation:"hx-ccw 4s linear infinite" }}>
+                  <div style={{
+                    position:"absolute", top:"10%", right:"-4px",
+                    width:"6px", height:"6px",
+                    borderRadius:"50%", background:"#6366f1",
+                    boxShadow:"0 0 6px #6366f1",
+                  }} />
+                </div>
+
+                {/* ── Center image (floating) ── */}
+                <div style={{
+                  position:"absolute", inset:"60px", borderRadius:"50%",
+                  overflow:"hidden",
+                  background:"linear-gradient(135deg,#1a1d27 0%,#0f1117 100%)",
+                  border:"2px solid rgba(99,102,241,0.45)",
+                  boxShadow:"inset 0 0 40px rgba(0,0,0,0.6), 0 0 30px rgba(99,102,241,0.2)",
+                  animation:"hx-float 5s ease-in-out infinite",
+                }}>
                   {hero_image_url ? (
                     <Image
                       src={hero_image_url}
                       alt={hero_image_alt || "Featured collection"}
-                      fill
-                      className="object-cover object-center"
-                      priority
-                      sizes="380px"
+                      fill className="object-cover object-center"
+                      priority sizes="300px"
                     />
                   ) : (
-                    /* Placeholder grid when no image is set */
-                    <div className="w-full h-full grid grid-cols-2 gap-0">
-                      {categories.slice(0, 4).map((cat, i) => (
-                        <div
-                          key={cat.id}
-                          className={`flex flex-col items-center justify-center gap-1.5 bg-gradient-to-br ${CAT_COLORS[i % CAT_COLORS.length]} border-0`}
-                        >
-                          <span className="text-2xl font-black text-white/60">
-                            {cat.name.charAt(0)}
-                          </span>
-                          <span className="text-[10px] text-white/40 font-medium">{cat.name}</span>
+                    <div style={{
+                      width:"100%", height:"100%",
+                      display:"grid", gridTemplateColumns:"1fr 1fr", gap:0,
+                    }}>
+                      {categories.slice(0,4).map((cat, i) => (
+                        <div key={cat.id} className={`flex flex-col items-center justify-center gap-1 bg-gradient-to-br ${CAT_COLORS[i%CAT_COLORS.length]}`}>
+                          <span className="text-xl font-black text-white/50">{cat.name.charAt(0)}</span>
+                          <span className="text-[9px] text-white/30">{cat.name}</span>
                         </div>
                       ))}
                       {categories.length === 0 && (
-                        <div className="col-span-2 row-span-2 flex items-center justify-center">
-                          <p className="text-xs text-brand-muted text-center px-8">
-                            Upload a hero image from<br />
-                            <span className="text-indigo-400">Admin → Hero Image</span>
+                        <div style={{gridColumn:"1/-1",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                          <p className="text-[10px] text-brand-muted text-center px-6">
+                            Upload a hero image<br/>from Admin → Hero Image
                           </p>
                         </div>
                       )}
@@ -231,31 +318,50 @@ export default async function HomePage() {
                   )}
                 </div>
 
-                {/* Floating badge — top right */}
-                <div
-                  className="absolute top-4 -right-4 flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-white"
-                  style={{ background: "#6366f1", boxShadow: "0 4px 20px rgba(99,102,241,0.4)" }}
-                >
-                  <Flame className="h-3.5 w-3.5 fill-white" /> New Drop
+                {/* ── Floating badge top-right ── */}
+                <div style={{
+                  position:"absolute", top:"8px", right:"-8px",
+                  display:"flex", alignItems:"center", gap:"0.375rem",
+                  padding:"0.375rem 0.75rem", borderRadius:"0.75rem",
+                  background:"#6366f1", color:"#fff",
+                  fontSize:"0.7rem", fontWeight:700,
+                  boxShadow:"0 4px 20px rgba(99,102,241,0.5)",
+                }}>
+                  <Flame className="h-3 w-3 fill-white" /> New Drop
                 </div>
 
-                {/* Floating badge — bottom left */}
-                <div
-                  className="absolute bottom-6 -left-6 flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold"
-                  style={{
-                    background: "#1a1d27",
-                    border: "1px solid rgba(245,166,35,0.3)",
-                    color: "#f5a623",
-                    boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
-                  }}
-                >
-                  <Star className="h-3.5 w-3.5 fill-brand-primary" /> 4.9 Rating
+                {/* ── Floating badge bottom-left ── */}
+                <div style={{
+                  position:"absolute", bottom:"12px", left:"-12px",
+                  display:"flex", alignItems:"center", gap:"0.375rem",
+                  padding:"0.375rem 0.75rem", borderRadius:"0.75rem",
+                  background:"#1a1d27", color:"#f5a623",
+                  fontSize:"0.7rem", fontWeight:700,
+                  border:"1px solid rgba(245,166,35,0.35)",
+                  boxShadow:"0 4px 20px rgba(0,0,0,0.5)",
+                }}>
+                  <Star className="h-3 w-3 fill-brand-primary" /> 4.9 Rating
                 </div>
+
               </div>
             </div>
 
           </div>
         </div>
+
+        {/* ── Animated scroll indicator ─────────────────────────────────── */}
+        <div className="flex flex-col items-center gap-1 pb-6 pt-2">
+          <span className="text-[10px] uppercase tracking-[0.2em] text-brand-muted font-medium">
+            Scroll to explore
+          </span>
+          <div className="flex flex-col items-center" style={{ animation: "bounce 1.6s ease-in-out infinite" }}>
+            <svg width="20" height="24" viewBox="0 0 20 24" fill="none">
+              <path d="M10 0 L10 16 M4 10 L10 16 L16 10" stroke="#F5A623" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M4 17 L10 23 L16 17" stroke="#F5A623" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.4"/>
+            </svg>
+          </div>
+        </div>
+
       </section>
 
       {/* ── Trust bar ────────────────────────────────────────────────────── */}

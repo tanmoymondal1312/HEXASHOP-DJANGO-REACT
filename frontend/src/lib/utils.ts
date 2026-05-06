@@ -50,3 +50,15 @@ export function slugToTitle(slug: string): string {
 }
 
 export const FREE_SHIPPING_THRESHOLD = 75;
+
+/**
+ * Convert relative Django media paths (/media/...) to absolute backend URLs.
+ * Returns null when no URL is given (shows placeholder in UI).
+ */
+export function resolveImageUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  const origin = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1")
+    .replace(/\/api\/v1\/?$/, "");
+  return `${origin}${url}`;
+}
