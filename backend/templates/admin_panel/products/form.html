@@ -7,159 +7,298 @@
 
   <!-- Breadcrumb -->
   <div class="flex items-center gap-2 text-xs text-gray-500 mb-6">
-    <a href="{% url 'admin_panel:product_list' %}" class="hover:text-gray-300 transition">Products</a>
-    <span>›</span>
+    <a href="{% url 'admin_panel:product_list' %}" class="hover:text-gray-300 transition-colors">Products</a>
+    <span class="text-gray-700">›</span>
     <span class="text-gray-400">{{ action }}</span>
   </div>
 
-  <div class="bg-[#1a1d27] border border-[#2a2d3a] rounded-xl overflow-hidden">
-    <form method="post" enctype="multipart/form-data">
-      {% csrf_token %}
+  <form method="post" enctype="multipart/form-data" id="product-form">
+    {% csrf_token %}
 
-      <!-- Section: Basic Info -->
-      <div class="px-6 py-5 border-b border-[#2a2d3a]">
-        <h3 class="text-sm font-semibold text-white mb-4">Basic Information</h3>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div class="sm:col-span-2">
-            <label class="block text-xs font-medium text-gray-400 mb-1.5">Product name *</label>
-            <input type="text" name="name" id="id_name"
-                   value="{{ form.name.value|default:'' }}"
-                   class="form-input" placeholder="e.g. Classic White Sneakers" required />
-            {% if form.name.errors %}<p class="text-xs text-red-400 mt-1">{{ form.name.errors.0 }}</p>{% endif %}
-          </div>
+    <!-- ── Basic Info ─────────────────────────────────────────────────────── -->
+    <div class="bg-[#1a1d27] border border-[#2a2d3a] rounded-xl overflow-hidden mb-4">
+      <div class="px-5 py-4 border-b border-[#2a2d3a] flex items-center gap-2">
+        <span class="w-1 h-4 bg-indigo-500 rounded-full inline-block"></span>
+        <h3 class="text-sm font-semibold text-white">Basic Information</h3>
+      </div>
+      <div class="px-5 py-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-          <div>
-            <label class="block text-xs font-medium text-gray-400 mb-1.5">Slug</label>
-            <input type="text" name="slug" id="id_slug"
-                   value="{{ form.slug.value|default:'' }}"
-                   class="form-input" placeholder="auto-filled from name" />
-          </div>
+        <div class="sm:col-span-2">
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">Product name <span class="text-red-400">*</span></label>
+          <input type="text" name="name" id="id_name"
+                 value="{{ form.name.value|default:'' }}"
+                 class="form-input" placeholder="e.g. Classic White Sneakers" required />
+          {% if form.name.errors %}
+          <p class="text-xs text-red-400 mt-1">{{ form.name.errors.0 }}</p>
+          {% endif %}
+        </div>
 
-          <div>
-            <label class="block text-xs font-medium text-gray-400 mb-1.5">SKU *</label>
-            <input type="text" name="sku"
-                   value="{{ form.sku.value|default:'' }}"
-                   class="form-input" placeholder="e.g. SNK-WHT-001" required />
-            {% if form.sku.errors %}<p class="text-xs text-red-400 mt-1">{{ form.sku.errors.0 }}</p>{% endif %}
-          </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">Slug</label>
+          <input type="text" name="slug" id="id_slug"
+                 value="{{ form.slug.value|default:'' }}"
+                 class="form-input" placeholder="auto-filled from name" />
+        </div>
 
-          <div>
-            <label class="block text-xs font-medium text-gray-400 mb-1.5">Category *</label>
-            <select name="category" class="form-select" required>
-              <option value="">— Select category —</option>
-              {% for cat in form.category.field.queryset %}
-              <option value="{{ cat.pk }}"
-                {% if form.category.value|stringformat:"s" == cat.pk|stringformat:"s" %}selected{% endif %}>
-                {{ cat.full_path }}
-              </option>
-              {% endfor %}
-            </select>
-          </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">SKU <span class="text-red-400">*</span></label>
+          <input type="text" name="sku"
+                 value="{{ form.sku.value|default:'' }}"
+                 class="form-input" placeholder="e.g. SNK-WHT-001" required />
+          {% if form.sku.errors %}
+          <p class="text-xs text-red-400 mt-1">{{ form.sku.errors.0 }}</p>
+          {% endif %}
+        </div>
 
-          <div>
-            <label class="block text-xs font-medium text-gray-400 mb-1.5">Brand</label>
-            <select name="brand" class="form-select">
-              <option value="">— No brand —</option>
-              {% for b in form.brand.field.queryset %}
-              <option value="{{ b.pk }}"
-                {% if form.brand.value|stringformat:"s" == b.pk|stringformat:"s" %}selected{% endif %}>
-                {{ b.name }}
-              </option>
-              {% endfor %}
-            </select>
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">Category <span class="text-red-400">*</span></label>
+          <select name="category" class="form-select" required>
+            <option value="">— Select category —</option>
+            {% for cat in form.category.field.queryset %}
+            <option value="{{ cat.pk }}"
+              {% if form.category.value|stringformat:"s" == cat.pk|stringformat:"s" %}selected{% endif %}>
+              {{ cat.full_path }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">Brand</label>
+          <select name="brand" class="form-select">
+            <option value="">— No brand —</option>
+            {% for b in form.brand.field.queryset %}
+            <option value="{{ b.pk }}"
+              {% if form.brand.value|stringformat:"s" == b.pk|stringformat:"s" %}selected{% endif %}>
+              {{ b.name }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Pricing & Status ───────────────────────────────────────────────── -->
+    <div class="bg-[#1a1d27] border border-[#2a2d3a] rounded-xl overflow-hidden mb-4">
+      <div class="px-5 py-4 border-b border-[#2a2d3a] flex items-center gap-2">
+        <span class="w-1 h-4 bg-emerald-500 rounded-full inline-block"></span>
+        <h3 class="text-sm font-semibold text-white">Pricing & Status</h3>
+      </div>
+      <div class="px-5 py-5 grid grid-cols-2 sm:grid-cols-4 gap-4">
+
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">Price <span class="text-red-400">*</span></label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm select-none">$</span>
+            <input type="number" name="base_price" step="0.01" min="0"
+                   value="{{ form.base_price.value|default:'' }}"
+                   class="form-input" style="padding-left:1.75rem;" placeholder="0.00" required />
           </div>
         </div>
-      </div>
 
-      <!-- Section: Pricing & Status -->
-      <div class="px-6 py-5 border-b border-[#2a2d3a]">
-        <h3 class="text-sm font-semibold text-white mb-4">Pricing & Status</h3>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div>
-            <label class="block text-xs font-medium text-gray-400 mb-1.5">Price *</label>
-            <div class="relative">
-              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">$</span>
-              <input type="number" name="base_price" step="0.01" min="0"
-                     value="{{ form.base_price.value|default:'' }}"
-                     class="form-input pl-7" placeholder="0.00" required />
-            </div>
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-gray-400 mb-1.5">Compare price</label>
-            <div class="relative">
-              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">$</span>
-              <input type="number" name="compare_at_price" step="0.01" min="0"
-                     value="{{ form.compare_at_price.value|default:'' }}"
-                     class="form-input pl-7" placeholder="0.00" />
-            </div>
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-gray-400 mb-1.5">Status</label>
-            <select name="status" class="form-select">
-              {% for val, label in form.status.field.choices %}
-              <option value="{{ val }}" {% if form.status.value == val %}selected{% endif %}>{{ label }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="flex flex-col justify-end">
-            <label class="flex items-center gap-2.5 cursor-pointer h-10">
-              <input type="checkbox" name="is_featured"
-                     {% if form.is_featured.value %}checked{% endif %}
-                     class="w-4 h-4 rounded accent-indigo-600 bg-[#0f1117] border-gray-600" />
-              <span class="text-sm text-gray-300 font-medium">Featured</span>
-            </label>
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">Compare price</label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm select-none">$</span>
+            <input type="number" name="compare_at_price" step="0.01" min="0"
+                   value="{{ form.compare_at_price.value|default:'' }}"
+                   class="form-input" style="padding-left:1.75rem;" placeholder="0.00" />
           </div>
         </div>
-      </div>
 
-      <!-- Section: Description -->
-      <div class="px-6 py-5 border-b border-[#2a2d3a]">
-        <h3 class="text-sm font-semibold text-white mb-4">Description</h3>
-        <div class="space-y-4">
-          <div>
-            <label class="block text-xs font-medium text-gray-400 mb-1.5">Short description</label>
-            <input type="text" name="short_description"
-                   value="{{ form.short_description.value|default:'' }}"
-                   class="form-input" placeholder="Brief product summary (shown in listings)" />
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-gray-400 mb-1.5">Full description</label>
-            <textarea name="description" rows="5" class="form-input"
-                      placeholder="Detailed product description…">{{ form.description.value|default:'' }}</textarea>
-          </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">Status</label>
+          <select name="status" class="form-select">
+            {% for val, label in form.status.field.choices %}
+            <option value="{{ val }}" {% if form.status.value == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
         </div>
+
+        <div class="flex items-end pb-1">
+          <label class="flex items-center gap-2.5 cursor-pointer select-none">
+            <input type="checkbox" name="is_featured"
+                   {% if form.is_featured.value %}checked{% endif %}
+                   style="width:1rem;height:1rem;accent-color:#6366f1;cursor:pointer;" />
+            <span class="text-sm text-gray-300 font-medium">Featured</span>
+          </label>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Product Images ─────────────────────────────────────────────────── -->
+    <div class="bg-[#1a1d27] border border-[#2a2d3a] rounded-xl overflow-hidden mb-4">
+      <div class="px-5 py-4 border-b border-[#2a2d3a] flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-1 h-4 bg-violet-500 rounded-full inline-block"></span>
+          <h3 class="text-sm font-semibold text-white">Product Images</h3>
+        </div>
+        <span class="text-xs text-gray-500">PNG, JPG, WEBP · max 10 MB each</span>
       </div>
 
-      <!-- Errors summary -->
-      {% if form.non_field_errors %}
-      <div class="px-6 py-4 border-b border-[#2a2d3a]">
-        {% for e in form.non_field_errors %}
-        <p class="text-sm text-red-400">{{ e }}</p>
+      <div class="px-5 py-5">
+        {{ image_formset.management_form }}
+
+        {% if image_formset.non_form_errors %}
+        <div class="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-xs">
+          {% for e in image_formset.non_form_errors %}{{ e }}{% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Existing images (only on edit when images exist) -->
+        {% with has_existing=False %}
+        {% for img_form in image_formset %}
+          {% if img_form.instance.pk %}{% with has_existing=True %}{% endwith %}{% endif %}
         {% endfor %}
-      </div>
-      {% endif %}
+        {% endwith %}
 
-      <!-- Actions -->
-      <div class="px-6 py-4 flex items-center gap-3">
-        <button type="submit" class="btn-primary">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-          </svg>
-          {{ action }} Product
-        </button>
-        <a href="{% url 'admin_panel:product_list' %}" class="btn-ghost">Cancel</a>
+        <div id="existing-images-grid" class="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-5">
+          {% for img_form in image_formset %}
+          {% if img_form.instance.pk %}
+          <div class="relative group" style="display:block;">
+
+            {{ img_form.id }}
+            {{ img_form.sort_order.as_hidden }}
+
+            <!-- Thumbnail -->
+            <div class="relative aspect-square rounded-xl overflow-hidden border border-[#2a2d3a] bg-[#0f1117]"
+                 style="transition:border-color 0.15s;">
+              {% if img_form.instance.image %}
+              <img src="{{ img_form.instance.image.url }}"
+                   alt="{{ img_form.instance.alt_text }}"
+                   style="width:100%;height:100%;object-fit:cover;" />
+              {% endif %}
+
+              {% if img_form.instance.is_primary %}
+              <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(99,102,241,0.85);
+                          color:#fff;font-size:9px;text-align:center;padding:3px 0;font-weight:700;
+                          letter-spacing:0.05em;">
+                PRIMARY
+              </div>
+              {% endif %}
+            </div>
+
+            <!-- Controls below thumbnail -->
+            <div class="flex items-center justify-between mt-1.5 px-0.5">
+              <label style="display:flex;align-items:center;gap:4px;cursor:pointer;
+                            font-size:10px;color:#818cf8;user-select:none;">
+                {{ img_form.is_primary }}
+                <span>Primary</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:4px;cursor:pointer;
+                            font-size:10px;color:#f87171;user-select:none;">
+                {{ img_form.DELETE }}
+                <span>Delete</span>
+              </label>
+            </div>
+
+          </div>
+          {% endif %}
+          {% endfor %}
+        </div>
+
+        <!-- New upload slots -->
+        <div>
+          <!-- Visual upload grid (3 slots) -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="upload-grid">
+            {% for img_form in image_formset %}
+            {% if not img_form.instance.pk %}
+            <div>
+              {{ img_form.id }}
+
+              <label class="img-upload-label" id="upload-label-{{ forloop.counter0 }}">
+                <div class="upload-placeholder" id="upload-placeholder-{{ forloop.counter0 }}"
+                     style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;">
+                  <svg style="width:2rem;height:2rem;color:#374151;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                  </svg>
+                  <span style="font-size:0.75rem;color:#6b7280;font-weight:500;">Upload image</span>
+                  <span style="font-size:0.7rem;color:#374151;">Click to browse</span>
+                </div>
+                <img id="preview-{{ forloop.counter0 }}"
+                     style="display:none;width:100%;height:100%;object-fit:cover;border-radius:0.75rem;" />
+                <input type="file"
+                       name="{{ img_form.image.html_name }}"
+                       accept="image/*"
+                       style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;"
+                       data-preview-id="preview-{{ forloop.counter0 }}"
+                       data-label-id="upload-label-{{ forloop.counter0 }}"
+                       data-placeholder-id="upload-placeholder-{{ forloop.counter0 }}"
+                       class="image-file-input" />
+              </label>
+
+              <!-- Alt text for new upload -->
+              <div style="margin-top:0.5rem;">
+                <input type="text"
+                       name="{{ img_form.alt_text.html_name }}"
+                       value="{{ img_form.alt_text.value|default:'' }}"
+                       class="form-input" style="font-size:0.75rem;"
+                       placeholder="Alt text (optional)" />
+              </div>
+
+            </div>
+            {% endif %}
+            {% endfor %}
+          </div>
+
+        </div>
       </div>
-    </form>
-  </div>
+    </div>
+
+    <!-- ── Description ───────────────────────────────────────────────────── -->
+    <div class="bg-[#1a1d27] border border-[#2a2d3a] rounded-xl overflow-hidden mb-4">
+      <div class="px-5 py-4 border-b border-[#2a2d3a] flex items-center gap-2">
+        <span class="w-1 h-4 bg-amber-500 rounded-full inline-block"></span>
+        <h3 class="text-sm font-semibold text-white">Description</h3>
+      </div>
+      <div class="px-5 py-5 space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">Short description</label>
+          <input type="text" name="short_description"
+                 value="{{ form.short_description.value|default:'' }}"
+                 class="form-input" placeholder="Brief summary shown in product listings" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5">Full description</label>
+          <textarea name="description" rows="5" class="form-input"
+                    placeholder="Detailed product description…">{{ form.description.value|default:'' }}</textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Errors ─────────────────────────────────────────────────────────── -->
+    {% if form.non_field_errors %}
+    <div class="mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+      {% for e in form.non_field_errors %}
+      <p class="text-sm text-red-400">{{ e }}</p>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- ── Actions ───────────────────────────────────────────────────────── -->
+    <div class="flex items-center gap-3">
+      <button type="submit" class="btn-primary">
+        <svg style="width:1rem;height:1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+        </svg>
+        {{ action }} Product
+      </button>
+      <a href="{% url 'admin_panel:product_list' %}" class="btn-ghost">Cancel</a>
+    </div>
+
+  </form>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-  /* Auto-fill slug from name */
+  // ── Auto-fill slug from name ──────────────────────────────────────────────
   const nameEl = document.getElementById('id_name');
   const slugEl = document.getElementById('id_slug');
-  let userEditedSlug = slugEl.value.length > 0;
+  let userEditedSlug = (slugEl.value || '').length > 0;
 
   slugEl.addEventListener('input', () => { userEditedSlug = true; });
   nameEl.addEventListener('input', () => {
@@ -168,6 +307,39 @@
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
+  });
+
+  // ── Image file preview ────────────────────────────────────────────────────
+  document.querySelectorAll('.image-file-input').forEach(input => {
+    input.addEventListener('change', function () {
+      const file = this.files[0];
+      if (!file) return;
+
+      const previewId     = this.dataset.previewId;
+      const labelId       = this.dataset.labelId;
+      const placeholderId = this.dataset.placeholderId;
+
+      const previewEl     = document.getElementById(previewId);
+      const labelEl       = document.getElementById(labelId);
+      const placeholderEl = document.getElementById(placeholderId);
+
+      const reader = new FileReader();
+      reader.onload = e => {
+        previewEl.src = e.target.result;
+        previewEl.style.display = 'block';
+        if (placeholderEl) placeholderEl.style.display = 'none';
+        if (labelEl) labelEl.classList.add('has-preview');
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+
+  // ── Style the is_primary / DELETE checkboxes injected by Django ──────────
+  document.querySelectorAll('#existing-images-grid input[type="checkbox"]').forEach(cb => {
+    cb.style.cursor  = 'pointer';
+    cb.style.accentColor = cb.name.includes('DELETE') ? '#ef4444' : '#6366f1';
+    cb.style.width = '0.875rem';
+    cb.style.height = '0.875rem';
   });
 </script>
 {% endblock %}

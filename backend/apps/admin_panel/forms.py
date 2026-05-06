@@ -1,6 +1,7 @@
 from django import forms
+from django.forms import inlineformset_factory
 
-from apps.products.models import Category, Product
+from apps.products.models import Brand, Category, Product, ProductImage
 from apps.store_settings.models import SiteSettings
 
 
@@ -30,17 +31,10 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = [
-            "name",
-            "slug",
-            "sku",
-            "category",
-            "brand",
-            "status",
-            "is_featured",
-            "base_price",
-            "compare_at_price",
-            "short_description",
-            "description",
+            "name", "slug", "sku", "category", "brand",
+            "status", "is_featured",
+            "base_price", "compare_at_price",
+            "short_description", "description",
         ]
         widgets = {
             "name": forms.TextInput(attrs={"class": "form-input"}),
@@ -50,12 +44,34 @@ class ProductForm(forms.ModelForm):
             "brand": forms.Select(attrs={"class": "form-select"}),
             "status": forms.Select(attrs={"class": "form-select"}),
             "base_price": forms.NumberInput(attrs={"class": "form-input", "step": "0.01"}),
-            "compare_at_price": forms.NumberInput(
-                attrs={"class": "form-input", "step": "0.01"}
-            ),
+            "compare_at_price": forms.NumberInput(attrs={"class": "form-input", "step": "0.01"}),
             "short_description": forms.TextInput(attrs={"class": "form-input"}),
             "description": forms.Textarea(attrs={"class": "form-input", "rows": 5}),
         }
+
+
+class ProductImageForm(forms.ModelForm):
+    class Meta:
+        model = ProductImage
+        fields = ["image", "alt_text", "sort_order", "is_primary"]
+        widgets = {
+            "alt_text": forms.TextInput(
+                attrs={"class": "form-input", "placeholder": "Alt text (optional)"}
+            ),
+            "sort_order": forms.NumberInput(
+                attrs={"class": "form-input", "min": "0"}
+            ),
+        }
+
+
+ProductImageFormSet = inlineformset_factory(
+    Product,
+    ProductImage,
+    form=ProductImageForm,
+    extra=3,
+    can_delete=True,
+    max_num=10,
+)
 
 
 class CategoryForm(forms.ModelForm):

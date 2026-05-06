@@ -14,7 +14,7 @@ from apps.cart.models import CartItem
 from apps.products.models import Category, Product
 from apps.store_settings.models import SiteSettings
 
-from .forms import AnnouncementForm, CategoryForm, ProductForm
+from .forms import AnnouncementForm, CategoryForm, ProductForm, ProductImageFormSet
 from .models import PageView
 
 # ── Auth helper ───────────────────────────────────────────────────────────────
@@ -169,23 +169,41 @@ def product_list(request):
 @staff_required
 def product_add(request):
     form = ProductForm(request.POST or None)
-    if request.method == "POST" and form.is_valid():
-        form.save()
+    image_formset = ProductImageFormSet(
+        request.POST or None,
+        request.FILES or None,
+        prefix="images",
+    )
+    if request.method == "POST" and form.is_valid() and image_formset.is_valid():
+        product = form.save()
+        image_formset.instance = product
+        image_formset.save()
         return redirect("admin_panel:product_list")
-    return render(request, "admin_panel/products/form.html", {"form": form, "action": "Add"})
+    return render(request, "admin_panel/products/form.html", {
+        "form": form,
+        "image_formset": image_formset,
+        "action": "Add",
+    })
 
 
 @staff_required
 def product_edit(request, pk):
     product = get_object_or_404(Product, pk=pk)
     form = ProductForm(request.POST or None, instance=product)
-    if request.method == "POST" and form.is_valid():
+    image_formset = ProductImageFormSet(
+        request.POST or None,
+        request.FILES or None,
+        instance=product,
+        prefix="images",
+    )
+    if request.method == "POST" and form.is_valid() and image_formset.is_valid():
         form.save()
+        image_formset.save()
         return redirect("admin_panel:product_list")
     return render(
         request,
         "admin_panel/products/form.html",
-        {"form": form, "action": "Edit", "product": product},
+        {"form": form, "image_formset": image_formset, "action": "Edit", "product": product},
     )
 
 
