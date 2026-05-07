@@ -22,6 +22,9 @@ media/
 staticfiles/
 .env
 
+# Temporary product image source folder (delete after seeding)
+products_images/
+
 # Node
 node_modules/
 npm-debug.log*
