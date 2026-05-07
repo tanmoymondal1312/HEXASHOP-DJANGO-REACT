@@ -114,6 +114,12 @@ export default async function HomePage() {
         .viral-card:hover { transform: translateY(-4px); }
         .viral-card:hover img { transform: scale(1.06); }
         .viral-card img { transition: transform 0.3s ease; }
+        .see-more-btn:hover {
+          background: rgba(245,166,35,0.08) !important;
+          border-color: rgba(245,166,35,0.75) !important;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 20px rgba(245,166,35,0.15);
+        }
       `}</style>
 
       <div style={{ background: "#0b0f14" }}>
@@ -130,6 +136,13 @@ export default async function HomePage() {
             {/* Ambient glows */}
             <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 78% 45%, rgba(30,144,255,0.17) 0%, transparent 60%)", pointerEvents: "none" }} />
             <div style={{ position: "absolute", bottom: 0, right: "18%", width: "30%", height: "55%", background: "radial-gradient(ellipse at center bottom, rgba(245,166,35,0.07) 0%, transparent 65%)", pointerEvents: "none" }} />
+
+            {/* Gradient fade — smoothly blends hero bottom into the viral strip below */}
+            <div style={{
+              position: "absolute", bottom: 0, left: 0, right: 0, height: "80px",
+              background: "linear-gradient(to bottom, transparent 0%, #0b0f14 100%)",
+              pointerEvents: "none", zIndex: 10,
+            }} />
 
             <div style={{ height: "100%", maxWidth: 1280, margin: "0 auto", padding: "0 2.5rem", display: "grid", gridTemplateColumns: "52% 48%", alignItems: "center" }}>
 
@@ -256,6 +269,32 @@ export default async function HomePage() {
                     <div key={i} style={{ aspectRatio: "4/3", borderRadius: "0.625rem", background: "#141929", opacity: 0.4 }} />
                   ))
               }
+            </div>
+
+            {/* See more button */}
+            <div style={{ textAlign: "center", marginTop: "2.5rem" }}>
+              <Link
+                href="/shop"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  background: "transparent",
+                  border: "1.5px solid rgba(245,166,35,0.45)",
+                  color: "#f5a623",
+                  fontWeight: 700,
+                  fontSize: "0.875rem",
+                  letterSpacing: "0.06em",
+                  padding: "0.75rem 2.5rem",
+                  borderRadius: "0.5rem",
+                  textDecoration: "none",
+                  transition: "all 0.2s",
+                }}
+                className="see-more-btn"
+              >
+                See more products
+                <ChevronRight style={{ width: 16, height: 16 }} />
+              </Link>
             </div>
           </div>
         </section>
