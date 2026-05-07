@@ -36,7 +36,17 @@ api.interceptors.response.use(
       } catch {
         refreshQueue.forEach((cb) => cb());
         refreshQueue = [];
-        if (typeof window !== "undefined") {
+
+        // Do NOT redirect when:
+        // 1. The original request was /auth/me — it naturally returns 401 for
+        //    anonymous/guest users; the authStore catch handles it gracefully.
+        // 2. We're already on an /auth/* page — prevents the infinite loop.
+        const isAuthCheck = !!original.url?.includes("/auth/me");
+        const onAuthPage =
+          typeof window !== "undefined" &&
+          window.location.pathname.startsWith("/auth/");
+
+        if (typeof window !== "undefined" && !isAuthCheck && !onAuthPage) {
           window.location.href = "/auth/login";
         }
       } finally {
