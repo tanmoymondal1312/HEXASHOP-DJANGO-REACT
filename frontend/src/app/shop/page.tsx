@@ -222,10 +222,8 @@ export default async function ShopPage({ searchParams }: Props) {
   const { count, results: products } = productsData;
   const totalPages = Math.ceil(count / PAGE_SIZE);
 
-  const flatCategories = categories.flatMap((c) => [
-    { name: c.name, slug: c.slug },
-    ...(c.children || []).map((ch) => ({ name: ch.name, slug: ch.slug })),
-  ]);
+  // Pass the full tree — ProductFilters renders parent/child hierarchy
+  const flatCategories = categories; // kept variable name for the JSX below
 
   const ordering = searchParams.ordering || "-created_at";
   const hasActiveFilters = [

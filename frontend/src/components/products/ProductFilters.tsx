@@ -1,28 +1,40 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import * as Slider from "@radix-ui/react-slider";
-import { Filter, X } from "lucide-react";
+import { Filter, X, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
-const COLORS = [
-  { name: "Black", hex: "#000000" },
-  { name: "White", hex: "#FFFFFF" },
-  { name: "Blue", hex: "#1E90FF" },
-  { name: "Red", hex: "#EF4444" },
-  { name: "Green", hex: "#10B981" },
-];
+import type { Category } from "@/types";
 
 interface ProductFiltersProps {
-  categories: Array<{ name: string; slug: string }>;
+  /** Full category tree (parents with children) from the API */
+  categories: Category[];
 }
 
 export function ProductFilters({ categories }: ProductFiltersProps) {
-  const router = useRouter();
+  const router   = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  // Which parent categories are expanded in the sidebar
+  const [expanded, setExpanded] = useState<Record<string, boolean>>(() => {
+    const current = searchParams.get("category");
+    if (!current) return {};
+    // Auto-expand whichever parent owns the active subcategory
+    const map: Record<string, boolean> = {};
+    for (const parent of categories) {
+      if (parent.children?.some((c) => c.slug === current)) {
+        map[parent.slug] = true;
+        break;
+      }
+      if (parent.slug === current) {
+        map[parent.slug] = true;
+        break;
+      }
+    }
+    return map;
+  });
 
   const updateParam = useCallback(
     (key: string, value: string | null) => {
@@ -32,26 +44,35 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
       } else {
         params.set(key, value);
       }
+      // Reset to page 1 on any filter change
+      params.delete("page");
       router.push(`${pathname}?${params.toString()}`, { scroll: false });
     },
     [router, pathname, searchParams]
   );
 
-  const currentSize = searchParams.get("size");
-  const currentColor = searchParams.get("color");
   const currentCategory = searchParams.get("category");
   const minPrice = searchParams.get("min_price") || "0";
   const maxPrice = searchParams.get("max_price") || "500";
+  const hasFilters = !![
+    currentCategory,
+    searchParams.get("min_price"),
+    searchParams.get("max_price"),
+    searchParams.get("in_stock"),
+    searchParams.get("on_sale"),
+  ].some(Boolean);
 
-  const hasFilters = [currentSize, currentColor, currentCategory, searchParams.get("min_price"), searchParams.get("max_price")].some(Boolean);
+  const toggleExpand = (slug: string) =>
+    setExpanded((prev) => ({ ...prev, [slug]: !prev[slug] }));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 text-sm">
+
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-sm font-semibold">
-          <Filter className="h-4 w-4 text-brand-primary" />
-          FILTERS
+        <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider">
+          <Filter className="h-3.5 w-3.5 text-brand-primary" />
+          Filters
         </div>
         {hasFilters && (
           <button
@@ -63,55 +84,100 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
         )}
       </div>
 
-      {/* Category */}
+      {/* ── Hierarchical categories ─────────────────────────────────────── */}
       <div>
-        <h4 className="text-xs font-semibold text-brand-muted uppercase tracking-wider mb-3">
+        <h4 className="text-[10px] font-semibold text-brand-muted uppercase tracking-widest mb-2">
           Categories
         </h4>
-        <ul className="space-y-1.5">
-          <li>
-            <button
-              onClick={() => updateParam("category", null)}
-              className={cn(
-                "text-sm w-full text-left px-2 py-1 rounded transition-colors",
-                !currentCategory ? "text-brand-primary font-medium" : "text-brand-muted hover:text-white"
-              )}
-            >
-              All Categories
-            </button>
-          </li>
-          {categories.map((cat) => (
-            <li key={cat.slug}>
-              <button
-                onClick={() => updateParam("category", cat.slug)}
-                className={cn(
-                  "text-sm w-full text-left px-2 py-1 rounded transition-colors",
-                  currentCategory === cat.slug
-                    ? "text-brand-primary font-medium"
-                    : "text-brand-muted hover:text-white"
+
+        {/* All categories */}
+        <button
+          onClick={() => updateParam("category", null)}
+          className={cn(
+            "w-full text-left px-2 py-1.5 rounded-lg text-sm transition-colors",
+            !currentCategory
+              ? "text-brand-primary font-semibold bg-brand-primary/8"
+              : "text-brand-muted hover:text-white"
+          )}
+        >
+          All Categories
+        </button>
+
+        <div className="mt-1 space-y-0.5">
+          {categories.map((parent) => {
+            const isOpen = !!expanded[parent.slug];
+            const subs = parent.children || [];
+            const parentActive = currentCategory === parent.slug;
+            const childActive = subs.some((c) => c.slug === currentCategory);
+            const anyActive = parentActive || childActive;
+
+            return (
+              <div key={parent.slug}>
+                {/* Parent row */}
+                <div className="flex items-center gap-0">
+                  {/* Click name → filter by parent */}
+                  <button
+                    onClick={() => updateParam("category", parent.slug)}
+                    className={cn(
+                      "flex-1 text-left px-2 py-1.5 rounded-l-lg text-sm font-medium transition-colors",
+                      anyActive
+                        ? "text-brand-primary"
+                        : "text-brand-muted hover:text-white"
+                    )}
+                  >
+                    {parent.name}
+                  </button>
+                  {/* Chevron → toggle children */}
+                  {subs.length > 0 && (
+                    <button
+                      onClick={() => toggleExpand(parent.slug)}
+                      className="px-1.5 py-1.5 rounded-r-lg text-brand-muted hover:text-white transition-colors"
+                      aria-label={isOpen ? "Collapse" : "Expand"}
+                    >
+                      <ChevronDown
+                        className={cn("h-3.5 w-3.5 transition-transform", isOpen && "rotate-180")}
+                      />
+                    </button>
+                  )}
+                </div>
+
+                {/* Children */}
+                {isOpen && subs.length > 0 && (
+                  <div className="ml-3 border-l border-brand-border/50 pl-3 mt-0.5 space-y-0.5">
+                    {subs.map((sub) => (
+                      <button
+                        key={sub.slug}
+                        onClick={() => updateParam("category", sub.slug)}
+                        className={cn(
+                          "w-full text-left px-2 py-1 rounded-lg text-[12px] transition-colors",
+                          currentCategory === sub.slug
+                            ? "text-brand-primary font-semibold"
+                            : "text-brand-muted hover:text-white"
+                        )}
+                      >
+                        {sub.name}
+                      </button>
+                    ))}
+                  </div>
                 )}
-              >
-                {cat.name}
-              </button>
-            </li>
-          ))}
-        </ul>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Price Range */}
+      {/* ── Price range ──────────────────────────────────────────────────── */}
       <div>
-        <h4 className="text-xs font-semibold text-brand-muted uppercase tracking-wider mb-3">
+        <h4 className="text-[10px] font-semibold text-brand-muted uppercase tracking-widest mb-3">
           Price Range
         </h4>
         <div className="px-1">
           <Slider.Root
             className="relative flex items-center select-none touch-none w-full h-5"
             value={[parseInt(minPrice), parseInt(maxPrice)]}
-            min={0}
-            max={500}
-            step={10}
+            min={0} max={500} step={10}
             onValueChange={([min, max]) => {
-              updateParam("min_price", min > 0 ? String(min) : "");
+              updateParam("min_price", min > 0   ? String(min) : "");
               updateParam("max_price", max < 500 ? String(max) : "");
             }}
           >
@@ -128,75 +194,33 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
         </div>
       </div>
 
-      {/* Size */}
+      {/* ── Deals ────────────────────────────────────────────────────────── */}
       <div>
-        <h4 className="text-xs font-semibold text-brand-muted uppercase tracking-wider mb-3">
-          Size
-        </h4>
-        <div className="flex flex-wrap gap-2">
-          {SIZES.map((size) => (
-            <button
-              key={size}
-              onClick={() => updateParam("size", currentSize === size ? null : size)}
-              className={cn(
-                "px-3 py-1.5 text-xs rounded-md border transition-colors font-medium",
-                currentSize === size
-                  ? "bg-brand-primary text-black border-brand-primary"
-                  : "border-brand-border text-brand-muted hover:border-brand-primary hover:text-white"
-              )}
-            >
-              {size}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Color */}
-      <div>
-        <h4 className="text-xs font-semibold text-brand-muted uppercase tracking-wider mb-3">
-          Color
-        </h4>
-        <div className="flex flex-wrap gap-2">
-          {COLORS.map(({ name, hex }) => (
-            <button
-              key={name}
-              onClick={() => updateParam("color", currentColor === name ? null : name)}
-              title={name}
-              className={cn(
-                "w-7 h-7 rounded-full border-2 transition-all",
-                currentColor === name ? "border-brand-primary scale-110" : "border-brand-border"
-              )}
-              style={{ backgroundColor: hex }}
-              aria-label={name}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* On Sale toggle */}
-      <div>
-        <h4 className="text-xs font-semibold text-brand-muted uppercase tracking-wider mb-3">
+        <h4 className="text-[10px] font-semibold text-brand-muted uppercase tracking-widest mb-2">
           Deals
         </h4>
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={searchParams.get("on_sale") === "true"}
-            onChange={(e) => updateParam("on_sale", e.target.checked ? "true" : null)}
-            className="rounded border-brand-border bg-brand-border text-brand-primary focus:ring-brand-primary"
-          />
-          <span className="text-sm">On Sale Only</span>
-        </label>
-        <label className="flex items-center gap-2 cursor-pointer mt-2">
-          <input
-            type="checkbox"
-            checked={searchParams.get("in_stock") === "true"}
-            onChange={(e) => updateParam("in_stock", e.target.checked ? "true" : null)}
-            className="rounded border-brand-border bg-brand-border text-brand-primary focus:ring-brand-primary"
-          />
-          <span className="text-sm">In Stock Only</span>
-        </label>
+        <div className="space-y-2">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={searchParams.get("on_sale") === "true"}
+              onChange={(e) => updateParam("on_sale", e.target.checked ? "true" : null)}
+              className="rounded border-brand-border bg-brand-border text-brand-primary focus:ring-brand-primary"
+            />
+            <span className="text-[12px] text-brand-muted">On Sale</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={searchParams.get("in_stock") === "true"}
+              onChange={(e) => updateParam("in_stock", e.target.checked ? "true" : null)}
+              className="rounded border-brand-border bg-brand-border text-brand-primary focus:ring-brand-primary"
+            />
+            <span className="text-[12px] text-brand-muted">In Stock Only</span>
+          </label>
+        </div>
       </div>
+
     </div>
   );
 }
