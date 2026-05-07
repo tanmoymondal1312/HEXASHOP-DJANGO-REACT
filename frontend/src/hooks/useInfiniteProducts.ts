@@ -8,19 +8,21 @@ export function useInfiniteProducts(filters: ProductFilters) {
   return useInfiniteQuery<PaginatedResponse<Product>>({
     queryKey: ["products", filters],
     queryFn: async ({ pageParam }) => {
-      const params: Record<string, string | number | boolean> = {};
+      const params: Record<string, string | number | boolean> = {
+        page_size: 20,
+      };
       Object.entries(filters).forEach(([k, v]) => {
         if (v !== undefined && v !== "") params[k] = v as string | number | boolean;
       });
-      if (pageParam) params["cursor"] = pageParam as string;
+      // Page-number based — backend now uses StandardPageNumberPagination
+      params.page = (pageParam as number) ?? 1;
       const { data } = await productsApi.list(params);
       return data;
     },
-    initialPageParam: undefined,
-    getNextPageParam: (last) => {
-      if (!last.next) return undefined;
-      const url = new URL(last.next);
-      return url.searchParams.get("cursor") || undefined;
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) => {
+      if (!lastPage.next) return undefined;
+      return (lastPageParam as number) + 1;
     },
     staleTime: 1000 * 60 * 5,
   });

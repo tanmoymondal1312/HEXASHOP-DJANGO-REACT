@@ -15,7 +15,7 @@ from core.cache import (
     add_recently_viewed,
     get_recently_viewed,
 )
-from core.pagination import CursorSetPagination
+from core.pagination import StandardPageNumberPagination
 from core.permissions import IsAdminOrReadOnly
 
 from .filters import ProductFilter
@@ -64,7 +64,7 @@ class ProductViewSet(ReadOnlyModelViewSet):
     search_fields = ["name", "description", "tags", "brand__name", "category__name"]
     ordering_fields = ["base_price", "avg_rating", "sold_count", "created_at", "name"]
     ordering = ["-created_at"]
-    pagination_class = CursorSetPagination
+    pagination_class = StandardPageNumberPagination
 
     def get_queryset(self):
         qs = (
