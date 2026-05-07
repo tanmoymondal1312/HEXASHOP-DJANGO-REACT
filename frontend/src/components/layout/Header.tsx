@@ -192,50 +192,100 @@ export function Header() {
               role="search"
               aria-label="Site search"
             >
-              {/* Pill input */}
+              {/*
+                Gradient-border pill:
+                  outer div carries the gradient background (acts as the border)
+                  inner div clips to the dark background
+                  This is the only reliable way to get gradient borders + border-radius.
+              */}
               <div
-                className={cn(
-                  "w-full flex items-center rounded-full border transition-all duration-200 overflow-hidden",
-                  focused
-                    ? "border-brand-primary bg-[#1a1d27] shadow-[0_0_0_3px_rgba(245,166,35,0.15)]"
-                    : "border-[#2a2d3a] bg-[#141929] hover:border-[#3a3f52]"
-                )}
+                style={{
+                  padding: "1.5px",
+                  borderRadius: "9999px",
+                  background: focused
+                    ? "linear-gradient(120deg, #f5a623 0%, #1e90ff 100%)"
+                    : "linear-gradient(120deg, rgba(245,166,35,0.55) 0%, rgba(30,144,255,0.55) 100%)",
+                  boxShadow: focused
+                    ? "0 0 18px rgba(245,166,35,0.22), 0 0 36px rgba(30,144,255,0.12)"
+                    : "0 0 8px rgba(245,166,35,0.08), 0 0 16px rgba(30,144,255,0.06)",
+                  transition: "background 0.25s ease, box-shadow 0.25s ease",
+                  width: "100%",
+                }}
               >
-                {/* Search icon — left, always visible */}
-                <Search
-                  className={cn(
-                    "ml-4 flex-shrink-0 h-4 w-4 transition-colors",
-                    focused ? "text-brand-primary" : "text-brand-muted"
-                  )}
-                />
-
-                <input
-                  ref={desktopInputRef}
-                  type="search"
-                  name="q"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  onFocus={() => setFocused(true)}
-                  onBlur={() => setTimeout(() => setFocused(false), 200)}
-                  placeholder="Search products, categories…"
-                  autoComplete="off"
-                  aria-label="Search"
-                  className="flex-1 bg-transparent py-2.5 px-3 text-sm text-white placeholder-[#5a6075] focus:outline-none min-w-0"
-                />
-
-                {/* Submit button — inside the pill on the right */}
-                <button
-                  type="submit"
-                  aria-label="Submit search"
-                  className={cn(
-                    "mr-1 flex-shrink-0 p-1.5 rounded-full transition-all duration-150",
-                    query.trim()
-                      ? "bg-brand-primary text-black hover:bg-yellow-400"
-                      : "bg-transparent text-brand-muted cursor-default"
-                  )}
+                {/* Inner dark background */}
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    background: "#111520",
+                    borderRadius: "9999px",
+                    overflow: "hidden",
+                  }}
                 >
-                  <Search className="h-3.5 w-3.5" />
-                </button>
+                  {/* Left search icon */}
+                  <Search
+                    style={{
+                      marginLeft: 14,
+                      flexShrink: 0,
+                      width: 15,
+                      height: 15,
+                      color: focused ? "#f5a623" : "#6b7280",
+                      transition: "color 0.2s",
+                    }}
+                  />
+
+                  <input
+                    ref={desktopInputRef}
+                    type="search"
+                    name="q"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onFocus={() => setFocused(true)}
+                    onBlur={() => setTimeout(() => setFocused(false), 200)}
+                    placeholder="Search products, categories…"
+                    autoComplete="off"
+                    aria-label="Search"
+                    style={{
+                      flex: 1,
+                      background: "transparent",
+                      padding: "0.6rem 0.75rem",
+                      fontSize: "0.8rem",
+                      color: "#fff",
+                      outline: "none",
+                      border: "none",
+                      minWidth: 0,
+                    }}
+                  />
+
+                  {/* Gold submit button — always visible */}
+                  <button
+                    type="submit"
+                    aria-label="Submit search"
+                    style={{
+                      margin: "3px",
+                      flexShrink: 0,
+                      background: "linear-gradient(135deg, #f5a623 0%, #f59e0b 100%)",
+                      color: "#000",
+                      fontWeight: 700,
+                      fontSize: "0.72rem",
+                      padding: "0.42rem 1rem",
+                      borderRadius: "9999px",
+                      border: "none",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 5,
+                      letterSpacing: "0.03em",
+                      whiteSpace: "nowrap",
+                      transition: "opacity 0.15s",
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.88")}
+                    onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+                  >
+                    <Search style={{ width: 12, height: 12 }} />
+                    Search
+                  </button>
+                </div>
               </div>
 
               {/* Popular searches hint — shows when focused and empty */}
