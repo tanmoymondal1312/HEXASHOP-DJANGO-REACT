@@ -300,7 +300,7 @@ export default async function HomePage() {
         </div>
 
         {featuredProducts.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
             {featuredProducts.slice(0, 4).map((p, i) => (
               <ProductCard key={p.id} product={p} priority={i < 4} />
             ))}
@@ -331,7 +331,7 @@ export default async function HomePage() {
               View All <ChevronRight className="h-3.5 w-3.5" />
             </Link>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
             {viralProducts.slice(0, 4).map((p, i) => (
               <ProductCard key={p.id} product={p} priority={i < 2} />
             ))}
@@ -377,7 +377,7 @@ export default async function HomePage() {
               View All <ChevronRight className="h-3.5 w-3.5" />
             </Link>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
             {newArrivals.map((p, i) => (
               <ProductCard key={p.id} product={p} priority={i < 2} />
             ))}

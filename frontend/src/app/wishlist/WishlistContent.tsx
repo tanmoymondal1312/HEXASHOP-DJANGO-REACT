@@ -30,7 +30,7 @@ export function WishlistContent() {
 
   if (!wishlist) {
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
         {Array.from({ length: 4 }).map((_, i) => (
           <Skeleton key={i} className="aspect-square rounded-xl" />
         ))}
@@ -52,7 +52,7 @@ export function WishlistContent() {
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
       {wishlist.items.map(({ product }: { product: import("@/types").Product }) => {
         const image = product.primary_image || product.images?.[0]?.image;
         const variant = product.variants?.find((v: import("@/types").ProductVariant) => v.is_in_stock);

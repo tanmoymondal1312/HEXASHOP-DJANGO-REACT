@@ -148,6 +148,7 @@ class Command(BaseCommand):
 
         sku_base = Product.objects.count() * 10 + 1000
         total_products = 0
+        total_images = 0
 
         for p_idx, (parent_name, parent_data) in enumerate(STRUCTURE.items()):
             parent_folder = parent_data["folder"]
@@ -168,12 +169,18 @@ class Command(BaseCommand):
                     )
                     continue
 
-                imgs = sorted(
+                # Grab first 15 images so each product gets 3 unique ones
+                imgs_all = sorted(
                     f
                     for f in sub_path.iterdir()
                     if f.is_file()
                     and f.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"}
-                )[:5]
+                )[:15]
+
+                # Split into groups of 3: product 0 → [0,1,2], product 1 → [3,4,5] …
+                img_groups = [imgs_all[i * 3 : i * 3 + 3] for i in range(5)]
+                # Fall back gracefully if not enough images
+                imgs = [g[0] for g in img_groups if g]  # primary images
 
                 if len(imgs) < 1:
                     self.stdout.write(
@@ -201,6 +208,7 @@ class Command(BaseCommand):
                 step = (price_max - price_min) / max(len(imgs) - 1, 1)
 
                 for idx, (adj, img_path) in enumerate(zip(ADJECTIVES, imgs)):
+                    extra_imgs = img_groups[idx][1:]  # up to 2 extra images for this product
                     sku_base += 1
                     sku = f"HEX-{sku_base:05d}"
 
@@ -241,13 +249,28 @@ class Command(BaseCommand):
                         tags=["seeded", parent_name.lower(), sub_folder],
                     )
 
+                    # Primary image
                     ProductImage.objects.create(
                         product=product,
                         image=f"products/{dest_name}",
-                        alt_text=product_name,
+                        alt_text=f"{product_name} — front view",
                         sort_order=0,
                         is_primary=True,
                     )
+
+                    # Extra images (up to 2 more angles)
+                    for extra_idx, extra_img_path in enumerate(extra_imgs, start=1):
+                        extra_dest_name = f"{sku.lower()}-{extra_idx}{extra_img_path.suffix}"
+                        extra_dest_path = media_products / extra_dest_name
+                        shutil.copy2(extra_img_path, extra_dest_path)
+                        ProductImage.objects.create(
+                            product=product,
+                            image=f"products/{extra_dest_name}",
+                            alt_text=f"{product_name} — view {extra_idx + 1}",
+                            sort_order=extra_idx,
+                            is_primary=False,
+                        )
+                        total_images += 1
 
                     for size in sizes:
                         var_key = size.replace(" ", "").upper()
@@ -262,8 +285,14 @@ class Command(BaseCommand):
                         )
 
                     total_products += 1
-                    self.stdout.write(f"  ✅  {product_name} ({sku})  ${base_price}")
+                    total_images += 1 + len(extra_imgs)
+                    self.stdout.write(
+                        f"  ✅  {product_name} ({sku})  ${base_price}  "
+                        f"[{1 + len(extra_imgs)} images]"
+                    )
 
         self.stdout.write(
-            self.style.SUCCESS(f"\n🎉  Done! Created {total_products} products.")
+            self.style.SUCCESS(
+                f"\n🎉  Done! Created {total_products} products with {total_images} images total."
+            )
         )

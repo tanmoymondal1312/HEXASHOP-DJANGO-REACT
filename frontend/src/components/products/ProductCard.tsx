@@ -73,15 +73,16 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
       {/* ── Image area ───────────────────────────────────────────────── */}
       <div className="relative aspect-square overflow-hidden bg-brand-dark">
         {imageUrl && !imgError ? (
+          /* Use unoptimized for localhost (dev) — bypasses the Next.js image proxy
+             which can't always reach Django on :8000 from inside the optimizer. */
           <Image
             src={imageUrl}
             alt={product.name}
             fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            sizes="(max-width: 640px) 50vw, (max-width: 1280px) 25vw, 20vw"
             className="object-cover transition-transform duration-500 group-hover:scale-105"
             priority={priority}
-            placeholder="blur"
-            blurDataURL={BLUR}
+            unoptimized={imageUrl.includes("localhost") || imageUrl.startsWith("/media")}
             onError={() => setImgError(true)}
           />
         ) : (
