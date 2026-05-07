@@ -319,7 +319,7 @@ export default async function HomePage() {
               </div>
 
               {/* Right: hero image + hexagon — desktop only */}
-              <div style={{ display:"none" }} className="lg:flex items-center justify-center relative h-full">
+              <div className="hidden lg:flex items-center justify-center relative h-full">
                 {/* Hexagon SVG */}
                 <svg style={{ position:"absolute", zIndex:1 }} width="340" height="392" viewBox="0 0 340 392" fill="none">
                   <defs>
