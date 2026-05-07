@@ -297,14 +297,15 @@ export default async function HomePage() {
         </div>
 
         {/* ── Animated scroll indicator ─────────────────────────────────── */}
-        <div className="flex flex-col items-center gap-1 pb-6 pt-2">
-          <span className="text-[10px] uppercase tracking-[0.2em] text-brand-muted font-medium">
+        {/* Scroll indicator — absolute at bottom of hero, always in view */}
+        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 pointer-events-none">
+          <span className="text-[10px] uppercase tracking-[0.22em] text-brand-muted/70 font-semibold">
             Scroll to explore
           </span>
-          <div className="flex flex-col items-center" style={{ animation: "bounce 1.6s ease-in-out infinite" }}>
+          <div style={{ animation: "bounce 1.6s ease-in-out infinite" }}>
             <svg width="20" height="24" viewBox="0 0 20 24" fill="none">
               <path d="M10 0 L10 16 M4 10 L10 16 L16 10" stroke="#F5A623" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M4 17 L10 23 L16 17" stroke="#F5A623" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.4"/>
+              <path d="M4 17 L10 23 L16 17" stroke="#F5A623" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.35"/>
             </svg>
           </div>
         </div>

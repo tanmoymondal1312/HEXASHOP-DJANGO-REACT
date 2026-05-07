@@ -39,6 +39,16 @@ export function AddToCartSection({ product }: AddToCartSectionProps) {
     });
   };
 
+  /** Sync gallery to the variant's image when one is selected. */
+  const selectVariant = (variant: ProductVariant) => {
+    setSelectedVariant(variant);
+    window.dispatchEvent(
+      new CustomEvent("hexashop:variant-select", {
+        detail: { imageId: variant.image?.id ?? null },
+      })
+    );
+  };
+
   const handleAddToCart = async () => {
     if (!selectedVariant) return;
     await addItem(selectedVariant.id, quantity);
@@ -81,7 +91,7 @@ export function AddToCartSection({ product }: AddToCartSectionProps) {
               return (
                 <button
                   key={size}
-                  onClick={() => variant && setSelectedVariant(variant)}
+                  onClick={() => variant && selectVariant(variant)}
                   disabled={!inStock}
                   className={cn(
                     "px-4 py-2 text-sm rounded-lg border-2 font-medium transition-all",
@@ -113,7 +123,7 @@ export function AddToCartSection({ product }: AddToCartSectionProps) {
               return (
                 <button
                   key={color}
-                  onClick={() => variant && setSelectedVariant(variant)}
+                  onClick={() => variant && selectVariant(variant)}
                   title={color}
                   className={cn(
                     "w-8 h-8 rounded-full border-2 transition-all",

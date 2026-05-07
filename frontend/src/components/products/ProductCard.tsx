@@ -22,6 +22,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product, priority = false }: ProductCardProps) {
   const [addingToCart, setAddingToCart] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   const addItem = useCartStore((s) => s.addItem);
   const { isInWishlist, toggle } = useWishlist();
@@ -71,7 +72,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
     >
       {/* ── Image area ───────────────────────────────────────────────── */}
       <div className="relative aspect-[3/4] overflow-hidden bg-brand-dark">
-        {imageUrl ? (
+        {imageUrl && !imgError ? (
           <Image
             src={imageUrl}
             alt={product.name}
@@ -81,6 +82,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             priority={priority}
             placeholder="blur"
             blurDataURL={BLUR}
+            onError={() => setImgError(true)}
           />
         ) : (
           /* Placeholder when no image */

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, X, ZoomIn } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, resolveImageUrl } from "@/lib/utils";
 import type { ProductImage } from "@/types";
 
 interface ProductGalleryProps {
@@ -36,6 +36,18 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
   const prev = useCallback(() => goTo(active - 1), [active, goTo]);
   const next = useCallback(() => goTo(active + 1), [active, goTo]);
 
+  // Listen for variant-image sync from AddToCartSection
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const imageId = (e as CustomEvent<{ imageId: number | null }>).detail?.imageId;
+      if (imageId == null) return;
+      const idx = images.findIndex((img) => img.id === imageId);
+      if (idx >= 0) goTo(idx);
+    };
+    window.addEventListener("hexashop:variant-select", handler);
+    return () => window.removeEventListener("hexashop:variant-select", handler);
+  }, [images, goTo]);
+
   // Keyboard navigation in lightbox
   useEffect(() => {
     if (!lightbox) return;
@@ -66,17 +78,25 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
     );
   }
 
+  // Resolve URLs so relative /media/... paths work from localhost:3000
+  const resolvedImages = images.map((img) => ({
+    ...img,
+    image: resolveImageUrl(img.image) ?? img.image,
+  }));
+  const currentImg = resolvedImages[active];
+
   return (
     <>
       <div className="flex flex-col gap-3 lg:sticky lg:top-24">
-        {/* ── Main image ──────────────────────────────────────────────────── */}
+
+        {/* ── Main image ───────────────────────────────────────────────── */}
         <div
           className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-brand-surface border border-brand-border group cursor-zoom-in"
           onClick={() => setLightbox(true)}
         >
           <Image
-            src={current.image}
-            alt={current.alt_text || productName}
+            src={currentImg.image}
+            alt={currentImg.alt_text || productName}
             fill
             sizes="(max-width: 768px) 100vw, 50vw"
             className={cn(
@@ -88,7 +108,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
             blurDataURL={PLACEHOLDER}
           />
 
-          {/* Gradient overlay */}
+          {/* Gradient overlay on hover */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
           {/* Zoom hint */}
@@ -109,14 +129,14 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
               <button
                 onClick={(e) => { e.stopPropagation(); prev(); }}
                 className="absolute left-3 top-1/2 -translate-y-1/2 p-2.5 rounded-xl bg-black/50 backdrop-blur-sm text-white hover:bg-black/70 transition-all opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0"
-                aria-label="Previous"
+                aria-label="Previous image"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); next(); }}
                 className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-xl bg-black/50 backdrop-blur-sm text-white hover:bg-black/70 transition-all opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0"
-                aria-label="Next"
+                aria-label="Next image"
               >
                 <ChevronRight className="h-5 w-5" />
               </button>
@@ -142,10 +162,10 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
           )}
         </div>
 
-        {/* ── Thumbnail strip ─────────────────────────────────────────────── */}
+        {/* ── Thumbnail strip ──────────────────────────────────────────── */}
         {count > 1 && (
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-            {images.map((img, i) => (
+            {resolvedImages.map((img, i) => (
               <button
                 key={img.id}
                 onClick={() => goTo(i)}
@@ -171,13 +191,12 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
         )}
       </div>
 
-      {/* ── Lightbox ────────────────────────────────────────────────────── */}
+      {/* ── Lightbox ─────────────────────────────────────────────────── */}
       {lightbox && (
         <div
           className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-center justify-center"
           onClick={() => setLightbox(false)}
         >
-          {/* Close */}
           <button
             className="absolute top-4 right-4 p-2.5 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-colors z-10"
             onClick={() => setLightbox(false)}
@@ -185,19 +204,17 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
             <X className="h-6 w-6" />
           </button>
 
-          {/* Counter */}
           <div className="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-white/10 text-white text-sm font-medium">
             {active + 1} / {count}
           </div>
 
-          {/* Main lightbox image */}
           <div
             className="relative w-full h-full max-w-4xl max-h-[90vh] mx-8"
             onClick={(e) => e.stopPropagation()}
           >
             <Image
-              src={current.image}
-              alt={current.alt_text || productName}
+              src={currentImg.image}
+              alt={currentImg.alt_text || productName}
               fill
               sizes="90vw"
               className="object-contain"
@@ -205,7 +222,6 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
             />
           </div>
 
-          {/* Nav arrows */}
           {count > 1 && (
             <>
               <button
@@ -223,10 +239,9 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
             </>
           )}
 
-          {/* Thumbnail strip in lightbox */}
           {count > 1 && (
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-              {images.map((img, i) => (
+              {resolvedImages.map((img, i) => (
                 <button
                   key={img.id}
                   onClick={(e) => { e.stopPropagation(); goTo(i); }}
