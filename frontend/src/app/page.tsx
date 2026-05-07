@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronRight, Flame, Heart, Star } from "lucide-react";
+import { ChevronRight, Flame, Heart, Search, Star } from "lucide-react";
 import { productsApi, siteApi } from "@/lib/api";
 import { WebsiteJsonLd } from "@/components/seo/JsonLd";
 import { resolveImageUrl } from "@/lib/utils";
@@ -109,9 +109,17 @@ export default async function HomePage() {
         /* ─ Hero inner grid ─ */
         .hx-hero-inner {
           max-width:1280px; margin:0 auto;
-          padding:1.5rem 1.25rem;      /* mobile padding */
+          padding:1.5rem 1.25rem;
           display:grid; align-items:center;
         }
+        /* Tablet (768px+): show 2-column grid with image */
+        @media (min-width:768px) {
+          .hx-hero-inner {
+            grid-template-columns:52% 48%;
+            padding:1.5rem 2rem;
+          }
+        }
+        /* Desktop (1024px+): lock to viewport height */
         @media (min-width:1024px) {
           .hx-hero-inner {
             height:100%;
@@ -310,6 +318,46 @@ export default async function HomePage() {
                   <Link href="/shop?is_featured=true" className="hx-btn-outline">EXPLORE COLLECTION</Link>
                 </div>
 
+                {/* Mobile-only search bar (hidden on md+, where header search is accessible) */}
+                <form
+                  action="/shop"
+                  method="get"
+                  className="md:hidden"
+                  style={{ marginBottom:"0.875rem" }}
+                >
+                  <div style={{
+                    display:"flex", alignItems:"center",
+                    background:"rgba(255,255,255,0.05)",
+                    border:"1px solid rgba(255,255,255,0.12)",
+                    borderRadius:"0.5rem", overflow:"hidden",
+                  }}>
+                    <input
+                      type="text"
+                      name="q"
+                      placeholder="Search products, categories…"
+                      autoComplete="off"
+                      style={{
+                        flex:1, background:"transparent",
+                        padding:"0.55rem 0.75rem",
+                        fontSize:"0.8rem", color:"#fff",
+                        outline:"none", border:"none",
+                      }}
+                    />
+                    <button
+                      type="submit"
+                      aria-label="Search"
+                      style={{
+                        padding:"0.55rem 0.75rem",
+                        background:"transparent", border:"none",
+                        cursor:"pointer", color:"#f5a623",
+                        display:"flex", alignItems:"center",
+                      }}
+                    >
+                      <Search style={{ width:15, height:15 }} />
+                    </button>
+                  </div>
+                </form>
+
                 {/* Slider dots */}
                 <div className="hx-dots">
                   <div style={{ width:20, height:5, borderRadius:3, background:"#f5a623" }} />
@@ -318,8 +366,8 @@ export default async function HomePage() {
                 </div>
               </div>
 
-              {/* Right: hero image + hexagon — desktop only */}
-              <div className="hidden lg:flex items-center justify-center relative h-full">
+              {/* Right: hero image + hexagon — tablet & desktop */}
+              <div className="hidden md:flex items-center justify-center relative" style={{ minHeight:"260px" }}>
                 {/* Hexagon SVG */}
                 <svg style={{ position:"absolute", zIndex:1 }} width="340" height="392" viewBox="0 0 340 392" fill="none">
                   <defs>

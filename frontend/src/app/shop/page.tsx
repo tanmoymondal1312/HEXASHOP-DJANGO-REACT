@@ -243,19 +243,47 @@ export default async function ShopPage({ searchParams }: Props) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {/* Page header */}
-        <header className="mb-6">
+        <header className="mb-5">
           <h1 className="text-2xl font-bold">Shop</h1>
           <p className="text-sm text-brand-muted mt-1">
             {searchParams.q
               ? `Search results for "${searchParams.q}"`
-              : `Showing all products`}
+              : "Showing all products"}
             {count > 0 && (
-              <span className="ml-1 text-brand-primary font-semibold">
-                ({count} items)
-              </span>
+              <span className="ml-1 text-brand-primary font-semibold">({count} items)</span>
             )}
           </p>
         </header>
+
+        {/* ── Mobile search bar (auto-open, hidden on lg where sidebar handles it) ── */}
+        <form action="/shop" method="get" className="lg:hidden mb-4" role="search">
+          {/* Preserve current filters when searching */}
+          {searchParams.category && <input type="hidden" name="category" value={searchParams.category} />}
+          {searchParams.ordering  && <input type="hidden" name="ordering"  value={searchParams.ordering}  />}
+          {searchParams.on_sale   && <input type="hidden" name="on_sale"   value={searchParams.on_sale}   />}
+          {searchParams.in_stock  && <input type="hidden" name="in_stock"  value={searchParams.in_stock}  />}
+
+          <div className="flex items-center bg-brand-surface border border-brand-border rounded-xl overflow-hidden focus-within:border-brand-primary transition-colors">
+            <input
+              type="search"
+              name="q"
+              defaultValue={searchParams.q || ""}
+              placeholder="Search products, categories…"
+              autoFocus
+              className="flex-1 bg-transparent px-4 py-3 text-sm text-white placeholder-brand-muted focus:outline-none"
+              aria-label="Search products"
+            />
+            <button
+              type="submit"
+              aria-label="Submit search"
+              className="px-4 py-3 text-brand-primary hover:text-yellow-400 transition-colors"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+                <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+              </svg>
+            </button>
+          </div>
+        </form>
 
         <div className="flex gap-7">
 
