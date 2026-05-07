@@ -71,7 +71,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
       className="group block bg-brand-surface border border-brand-border rounded-2xl overflow-hidden hover:border-brand-primary/30 transition-all duration-300 hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
     >
       {/* ── Image area ───────────────────────────────────────────────── */}
-      <div className="relative aspect-[3/4] overflow-hidden bg-brand-dark">
+      <div className="relative aspect-square overflow-hidden bg-brand-dark">
         {imageUrl && !imgError ? (
           <Image
             src={imageUrl}
@@ -137,7 +137,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
       </div>
 
       {/* ── Info ─────────────────────────────────────────────────────── */}
-      <div className="p-3.5">
+      <div className="p-3">
         {/* Category */}
         <p className="text-[11px] text-brand-muted uppercase tracking-wider mb-1 truncate">
           {product.category_name}

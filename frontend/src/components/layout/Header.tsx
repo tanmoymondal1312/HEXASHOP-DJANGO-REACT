@@ -42,37 +42,31 @@ export function Header() {
   const { isAuthenticated } = useAuthStore();
   const itemCount = cart?.item_count ?? 0;
 
-  // Scroll shadow
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handler, { passive: true });
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
-  // Fetch announcement bar + categories from backend
   useEffect(() => {
-    siteApi
-      .settings()
-      .then(({ data }) => {
-        setAnnouncement({
-          text: data.announcement_bar_text || DEFAULT_ANNOUNCEMENT.text,
-          isActive: data.announcement_bar_is_active ?? true,
-          link: data.announcement_bar_link || "",
-          bgColor: data.announcement_bar_bg_color || "#111111",
-          textColor: data.announcement_bar_text_color || "#ffffff",
-        });
-      })
-      .catch(() => {});
+    siteApi.settings().then(({ data }) => {
+      setAnnouncement({
+        text: data.announcement_bar_text || DEFAULT_ANNOUNCEMENT.text,
+        isActive: data.announcement_bar_is_active ?? true,
+        link: data.announcement_bar_link || "",
+        bgColor: data.announcement_bar_bg_color || "#111111",
+        textColor: data.announcement_bar_text_color || "#ffffff",
+      });
+    }).catch(() => {});
 
-    productsApi
-      .categories()
-      .then(({ data }) => setCategories(data))
-      .catch(() => {});
+    productsApi.categories().then(({ data }) => setCategories(data)).catch(() => {});
   }, []);
 
   const NAV_LINKS = [
-    { href: "/", label: "Home" },
-    { href: "/shop", label: "Shop" },
+    { href: "/",       label: "Home" },
+    { href: "/shop",   label: "Shop" },
+    { href: "/about",  label: "About" },
+    { href: "/contact",label: "Contact" },
   ];
 
   const isActive = (href: string) =>
@@ -80,20 +74,14 @@ export function Header() {
 
   return (
     <>
-      {/* ── Announcement bar ─────────────────────────────────────────────── */}
+      {/* ── Announcement bar ─────────────────────────────────────────── */}
       {announcement.isActive && !dismissed && (
         <div
           className="relative text-center text-xs py-2.5 px-10 font-medium tracking-wide"
-          style={{
-            backgroundColor: announcement.bgColor,
-            color: announcement.textColor,
-          }}
+          style={{ backgroundColor: announcement.bgColor, color: announcement.textColor }}
         >
           {announcement.link ? (
-            <Link
-              href={announcement.link}
-              className="hover:underline underline-offset-2"
-            >
+            <Link href={announcement.link} className="hover:underline underline-offset-2">
               {announcement.text}
             </Link>
           ) : (
@@ -109,7 +97,7 @@ export function Header() {
         </div>
       )}
 
-      {/* ── Header ───────────────────────────────────────────────────────── */}
+      {/* ── Header ───────────────────────────────────────────────────── */}
       <header
         className={cn(
           "sticky top-0 z-40 border-b border-brand-border transition-all duration-300",
@@ -121,90 +109,95 @@ export function Header() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
 
-            {/* Logo */}
-            <Link
-              href="/"
-              className="flex items-center gap-2 flex-shrink-0 group"
-            >
-              <div className="w-8 h-8 bg-brand-primary rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
-                <span className="text-black font-black text-sm leading-none">H</span>
-              </div>
-              <span className="font-bold text-lg tracking-tight">
+            {/* ── Hexagon Logo ─────────────────────────────────────── */}
+            <Link href="/" className="flex items-center gap-2 flex-shrink-0 group">
+              <svg width="34" height="38" viewBox="0 0 34 38" fill="none" className="group-hover:scale-105 transition-transform duration-200">
+                <polygon
+                  points="17,1 33,10 33,28 17,37 1,28 1,10"
+                  fill="none"
+                  stroke="#F5A623"
+                  strokeWidth="1.8"
+                />
+                <polygon
+                  points="17,6 28,12.5 28,25.5 17,32 6,25.5 6,12.5"
+                  fill="rgba(245,166,35,0.08)"
+                  stroke="rgba(245,166,35,0.35)"
+                  strokeWidth="1"
+                />
+                <text
+                  x="17" y="23"
+                  textAnchor="middle"
+                  fill="#F5A623"
+                  fontSize="13"
+                  fontWeight="800"
+                  fontFamily="Inter, sans-serif"
+                >H</text>
+              </svg>
+              <span className="font-black text-lg tracking-tight">
                 HEXA<span className="text-brand-secondary">SHOP</span>
               </span>
             </Link>
 
-            {/* Desktop nav */}
+            {/* ── Desktop nav ──────────────────────────────────────── */}
             <nav className="hidden md:flex items-center gap-1">
               {NAV_LINKS.map(({ href, label }) => (
                 <Link
                   key={href}
                   href={href}
                   className={cn(
-                    "px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150",
+                    "px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150 relative",
                     isActive(href)
-                      ? "bg-brand-primary/10 text-brand-primary"
+                      ? "text-brand-primary"
                       : "text-brand-muted hover:text-white hover:bg-white/5"
                   )}
                 >
                   {label}
+                  {isActive(href) && (
+                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-brand-primary rounded-full" />
+                  )}
                 </Link>
               ))}
 
               {/* Categories dropdown */}
-              <div className="relative group">
-                <button
-                  className={cn(
+              {categories.length > 0 && (
+                <div className="relative group">
+                  <button className={cn(
                     "flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150",
                     pathname.startsWith("/categories")
-                      ? "bg-brand-primary/10 text-brand-primary"
+                      ? "text-brand-primary"
                       : "text-brand-muted hover:text-white hover:bg-white/5"
-                  )}
-                >
-                  Categories
-                  <ChevronDown className="h-3.5 w-3.5 transition-transform duration-200 group-hover:rotate-180" />
-                </button>
-
-                {/* Dropdown */}
-                <div className="absolute top-full left-0 pt-2 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 z-50">
-                  <div className="bg-[#161b2e] border border-brand-border rounded-2xl p-2 shadow-2xl shadow-black/50 min-w-[200px]">
-                    {(categories.length > 0
-                      ? categories
-                      : [
-                          { id: 0, name: "Hoodies", slug: "hoodies", description: "", image: null, children: [], sort_order: 0 },
-                          { id: 1, name: "Jackets", slug: "jackets", description: "", image: null, children: [], sort_order: 1 },
-                          { id: 2, name: "T-Shirts", slug: "t-shirts", description: "", image: null, children: [], sort_order: 2 },
-                          { id: 3, name: "Shoes", slug: "shoes", description: "", image: null, children: [], sort_order: 3 },
-                          { id: 4, name: "Accessories", slug: "accessories", description: "", image: null, children: [], sort_order: 4 },
-                        ]
-                    )
-                      .slice(0, 8)
-                      .map((cat) => (
+                  )}>
+                    Categories
+                    <ChevronDown className="h-3.5 w-3.5 transition-transform duration-200 group-hover:rotate-180" />
+                  </button>
+                  <div className="absolute top-full left-0 pt-2 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 z-50">
+                    <div className="bg-[#161b2e] border border-brand-border rounded-2xl p-2 shadow-2xl shadow-black/50 min-w-[200px]">
+                      {categories.slice(0, 8).map((cat) => (
                         <Link
                           key={cat.id}
                           href={`/categories/${cat.slug}`}
                           className="flex items-center gap-2 px-3 py-2.5 text-sm rounded-xl text-brand-muted hover:bg-white/5 hover:text-white transition-colors"
                         >
-                          <span className="w-1.5 h-1.5 rounded-full bg-brand-primary/50 group-hover:bg-brand-primary" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-brand-primary/50" />
                           {cat.name}
                         </Link>
                       ))}
-                    <div className="mt-1 pt-1 border-t border-brand-border">
-                      <Link
-                        href="/shop"
-                        className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-brand-primary hover:bg-brand-primary/10 rounded-xl transition-colors"
-                      >
-                        View all products →
-                      </Link>
+                      <div className="mt-1 pt-1 border-t border-brand-border">
+                        <Link
+                          href="/shop"
+                          className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-brand-primary hover:bg-brand-primary/10 rounded-xl transition-colors"
+                        >
+                          View all products →
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
             </nav>
 
-            {/* Actions */}
+            {/* ── Actions ──────────────────────────────────────────── */}
             <div className="flex items-center gap-0.5">
-              {/* Search toggle */}
               <button
                 onClick={() => setSearchOpen((o) => !o)}
                 className={cn(
@@ -218,25 +211,20 @@ export function Header() {
                 <Search className="h-[18px] w-[18px]" />
               </button>
 
-              {/* User */}
               <Link
                 href={isAuthenticated ? "/dashboard" : "/auth/login"}
                 className="p-2.5 rounded-lg text-brand-muted hover:text-white hover:bg-brand-surface transition-colors duration-150"
-                aria-label={isAuthenticated ? "My account" : "Sign in"}
               >
                 <User className="h-[18px] w-[18px]" />
               </Link>
 
-              {/* Wishlist */}
               <Link
                 href="/wishlist"
                 className="p-2.5 rounded-lg text-brand-muted hover:text-white hover:bg-brand-surface transition-colors duration-150 hidden sm:block"
-                aria-label="Wishlist"
               >
                 <Heart className="h-[18px] w-[18px]" />
               </Link>
 
-              {/* Cart */}
               <button
                 onClick={openCart}
                 className="relative p-2.5 rounded-lg text-brand-muted hover:text-white hover:bg-brand-surface transition-colors duration-150"
@@ -250,11 +238,9 @@ export function Header() {
                 )}
               </button>
 
-              {/* Hamburger */}
               <button
                 onClick={() => setMobileOpen(true)}
                 className="md:hidden p-2.5 rounded-lg text-brand-muted hover:text-white hover:bg-brand-surface transition-colors duration-150 ml-1"
-                aria-label="Open menu"
               >
                 <Menu className="h-[18px] w-[18px]" />
               </button>
@@ -270,11 +256,7 @@ export function Header() {
         </div>
       </header>
 
-      <MobileNav
-        isOpen={mobileOpen}
-        onClose={() => setMobileOpen(false)}
-        categories={categories}
-      />
+      <MobileNav isOpen={mobileOpen} onClose={() => setMobileOpen(false)} categories={categories} />
     </>
   );
 }
