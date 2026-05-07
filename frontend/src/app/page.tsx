@@ -1,389 +1,405 @@
 import Image from "next/image";
 import Link from "next/link";
-import {
-  ChevronRight,
-  Shield,
-  Truck,
-  RefreshCcw,
-  Headphones,
-  Star,
-  TrendingUp,
-  Flame,
-} from "lucide-react";
+import { Heart, Star } from "lucide-react";
 import { productsApi, siteApi } from "@/lib/api";
-import { ProductCard } from "@/components/products/ProductCard";
-import { ProductGridSkeleton } from "@/components/ui/Skeleton";
 import { WebsiteJsonLd } from "@/components/seo/JsonLd";
-import type { Product, PaginatedResponse } from "@/types";
+import { resolveImageUrl } from "@/lib/utils";
+import type { Product } from "@/types";
 
-// ─── Server-side fetchers ─────────────────────────────────────────────────────
+// ─── Data fetchers ────────────────────────────────────────────────────────────
 
 async function getSiteSettings() {
   try {
     const { data } = await siteApi.settings();
     return data as { hero_image_url: string | null; hero_image_alt: string };
   } catch {
-    return { hero_image_url: null, hero_image_alt: "Featured collection" };
+    return { hero_image_url: null, hero_image_alt: "HEXASHOP" };
   }
 }
 
-async function getFeaturedProducts(): Promise<Product[]> {
+async function getFeatured(): Promise<Product[]> {
   try {
     const { data } = await productsApi.featured();
-    return data ?? [];
+    return (data ?? []).slice(0, 4);
   } catch {
     return [];
   }
 }
 
-async function getViralProducts(): Promise<Product[]> {
-  try {
-    const { data } = await productsApi.viral();
-    return data ?? [];
-  } catch {
-    return [];
-  }
+// ─── Inline product card (exact match to screenshot) ─────────────────────────
+
+function FeaturedCard({ product, priority }: { product: Product; priority?: boolean }) {
+  const raw = product.primary_image ?? null;
+  const src = resolveImageUrl(raw);
+  const price = parseFloat(product.base_price).toFixed(2);
+  const rating = Math.min(5, Math.round(parseFloat(product.avg_rating)));
+
+  return (
+    <Link
+      href={`/products/${product.slug}`}
+      style={{
+        display: "block",
+        background: "#141929",
+        borderRadius: "1rem",
+        overflow: "hidden",
+        textDecoration: "none",
+        transition: "transform 0.2s",
+      }}
+      onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-3px)")}
+      onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
+    >
+      {/* Image */}
+      <div style={{ position: "relative", aspectRatio: "4/3", background: "#0d1117", overflow: "hidden" }}>
+        {src ? (
+          <Image
+            src={src}
+            alt={product.name}
+            fill
+            sizes="300px"
+            style={{ objectFit: "cover", transition: "transform 0.3s" }}
+            priority={priority}
+            unoptimized={src.includes("localhost") || src.startsWith("/media")}
+          />
+        ) : (
+          <div style={{ width: "100%", height: "100%", background: "#1a1f2e", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="1.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+        )}
+        {/* Heart */}
+        <button
+          style={{
+            position: "absolute", top: 10, right: 10,
+            width: 32, height: 32, borderRadius: "50%",
+            border: "1.5px solid rgba(255,255,255,0.3)",
+            background: "rgba(0,0,0,0.4)",
+            backdropFilter: "blur(4px)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            cursor: "pointer",
+          }}
+          onClick={(e) => e.preventDefault()}
+        >
+          <Heart style={{ width: 15, height: 15, color: "#fff" }} />
+        </button>
+      </div>
+
+      {/* Info */}
+      <div style={{ padding: "10px 12px 12px" }}>
+        <p style={{ color: "#fff", fontWeight: 600, fontSize: "0.875rem", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          {product.name}
+        </p>
+        <p style={{ color: "#f5a623", fontWeight: 700, fontSize: "0.9rem", margin: "3px 0 4px" }}>
+          ${price}
+        </p>
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          {[1, 2, 3, 4, 5].map((s) => (
+            <Star
+              key={s}
+              style={{
+                width: 12, height: 12,
+                color: s <= rating ? "#facc15" : "#374151",
+                fill: s <= rating ? "#facc15" : "none",
+              }}
+            />
+          ))}
+          <span style={{ color: "#6b7280", fontSize: "0.7rem", marginLeft: 2 }}>
+            ({product.review_count})
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
 }
-
-async function getNewArrivals(): Promise<Product[]> {
-  try {
-    const { data } = (await productsApi.list({ ordering: "-created_at" })) as {
-      data: PaginatedResponse<Product>;
-    };
-    return (data.results ?? []).slice(0, 4);
-  } catch {
-    return [];
-  }
-}
-
-// ─── Static data ──────────────────────────────────────────────────────────────
-
-const TRUST_BADGES = [
-  { icon: Shield,     label: "Secure Payment",  sub: "256-bit SSL" },
-  { icon: Truck,      label: "Free Shipping",   sub: "Orders over $50" },
-  { icon: RefreshCcw, label: "Easy Returns",    sub: "30-day policy" },
-  { icon: Headphones, label: "24/7 Support",    sub: "Always here" },
-];
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function HomePage() {
-  const [siteSettings, featuredProducts, viralProducts, newArrivals] = await Promise.all([
-    getSiteSettings(),
-    getFeaturedProducts(),
-    getViralProducts(),
-    getNewArrivals(),
-  ]);
-
-  const { hero_image_url, hero_image_alt } = siteSettings;
+  const [settings, featured] = await Promise.all([getSiteSettings(), getFeatured()]);
+  const { hero_image_url, hero_image_alt } = settings;
 
   return (
     <>
       <WebsiteJsonLd />
 
-      {/* ── Hero ─────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-brand-dark" style={{ minHeight: "72vh" }}>
+      {/*
+        Outer container: fills exactly the viewport below the sticky navbar.
+        Flex-column so hero grows freely and products stay compact at the bottom.
+        overflow-hidden prevents any accidental scroll.
+      */}
+      <div
+        style={{
+          height: "calc(100dvh - 64px)",
+          display: "flex",
+          flexDirection: "column",
+          background: "#0b0f14",
+          overflow: "hidden",
+        }}
+      >
+        {/* ── HERO ──────────────────────────────────────────────────────── */}
+        <section style={{ flex: 1, minHeight: 0, position: "relative", overflow: "hidden" }}>
 
-        {/* Background — blue radial on right, gold hint bottom */}
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute right-0 top-0 h-full w-1/2"
-            style={{ background: "radial-gradient(ellipse at 80% 40%, rgba(30,144,255,0.14) 0%, transparent 65%)" }} />
-          <div className="absolute right-1/4 bottom-0 w-2/5 h-2/3"
-            style={{ background: "radial-gradient(ellipse at center bottom, rgba(245,166,35,0.07) 0%, transparent 65%)" }} />
-          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-border to-transparent" />
-        </div>
+          {/* Ambient blue glow (right) */}
+          <div style={{
+            position: "absolute", top: 0, right: 0, width: "55%", height: "100%",
+            background: "radial-gradient(ellipse at 75% 45%, rgba(30,144,255,0.18) 0%, transparent 65%)",
+            pointerEvents: "none",
+          }} />
+          {/* Ambient gold hint (bottom-right) */}
+          <div style={{
+            position: "absolute", bottom: 0, right: "15%", width: "35%", height: "60%",
+            background: "radial-gradient(ellipse at center bottom, rgba(245,166,35,0.07) 0%, transparent 65%)",
+            pointerEvents: "none",
+          }} />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-[1fr_auto] gap-0 items-center" style={{ minHeight: "72vh" }}>
-
-            {/* ── Left: Text ──────────────────────────────────────── */}
-            <div className="py-12 lg:py-16 pr-0 lg:pr-10">
-
-              {/* Brand name */}
-              <h1 className="text-6xl sm:text-7xl xl:text-8xl font-black leading-none tracking-tight mb-3">
-                <span className="text-white">HEXA</span>
-                <span className="text-brand-secondary">SHOP</span>
+          <div style={{
+            height: "100%",
+            maxWidth: 1280,
+            margin: "0 auto",
+            padding: "0 2.5rem",
+            display: "grid",
+            gridTemplateColumns: "52% 48%",
+            alignItems: "center",
+          }}>
+            {/* ── Left column ─────────────────────────────────────────── */}
+            <div>
+              {/* Main heading */}
+              <h1 style={{
+                fontSize: "clamp(3.8rem, 7vw, 5.8rem)",
+                fontWeight: 900,
+                lineHeight: 1,
+                letterSpacing: "-0.02em",
+                margin: 0,
+              }}>
+                <span style={{ color: "#fff" }}>HEXA</span>
+                <span style={{ color: "#1e90ff" }}>SHOP</span>
               </h1>
 
-              {/* Subtitle */}
-              <p className="text-xs sm:text-sm tracking-[0.45em] text-brand-muted font-semibold uppercase mb-5">
+              {/* Subheading */}
+              <p style={{
+                fontSize: "0.8rem",
+                fontWeight: 600,
+                letterSpacing: "0.45em",
+                color: "#94a3b8",
+                textTransform: "uppercase",
+                marginTop: "0.875rem",
+                marginBottom: "1.1rem",
+              }}>
                 Style That Defines You
               </p>
 
               {/* Description */}
-              <p className="text-brand-muted leading-relaxed mb-8 max-w-md text-sm sm:text-base">
+              <p style={{
+                color: "#94a3b8",
+                fontSize: "0.95rem",
+                lineHeight: 1.7,
+                marginBottom: "2rem",
+                maxWidth: 420,
+              }}>
                 Discover the latest trends in fashion.<br />
                 Premium quality. Best prices.
               </p>
 
-              {/* CTAs */}
-              <div className="flex flex-wrap gap-4 mb-8">
+              {/* Buttons */}
+              <div style={{ display: "flex", gap: "1rem", marginBottom: "2rem" }}>
                 <Link
                   href="/shop"
-                  className="btn-primary px-8 py-3 rounded-lg text-sm font-bold uppercase tracking-wider"
+                  style={{
+                    background: "#f5a623",
+                    color: "#000",
+                    fontWeight: 700,
+                    fontSize: "0.82rem",
+                    letterSpacing: "0.08em",
+                    padding: "0.75rem 2rem",
+                    borderRadius: "0.5rem",
+                    textDecoration: "none",
+                    whiteSpace: "nowrap",
+                  }}
                 >
-                  Shop Now
+                  SHOP NOW
                 </Link>
                 <Link
                   href="/shop?is_featured=true"
-                  className="btn-secondary px-8 py-3 rounded-lg text-sm font-bold uppercase tracking-wider"
+                  style={{
+                    border: "1.5px solid rgba(255,255,255,0.25)",
+                    color: "#fff",
+                    fontWeight: 600,
+                    fontSize: "0.82rem",
+                    letterSpacing: "0.06em",
+                    padding: "0.75rem 1.5rem",
+                    borderRadius: "0.5rem",
+                    textDecoration: "none",
+                    background: "transparent",
+                    whiteSpace: "nowrap",
+                  }}
                 >
-                  Explore Collection
+                  EXPLORE COLLECTION
                 </Link>
               </div>
 
               {/* Slider dots */}
-              <div className="flex items-center gap-2">
-                <span className="w-6 h-1.5 rounded-full bg-brand-primary" />
-                <span className="w-4 h-1.5 rounded-full bg-brand-border" />
-                <span className="w-4 h-1.5 rounded-full bg-brand-border" />
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <div style={{ width: 28, height: 6, borderRadius: 3, background: "#f5a623" }} />
+                <div style={{ width: 18, height: 6, borderRadius: 3, background: "#2a2f3e" }} />
+                <div style={{ width: 18, height: 6, borderRadius: 3, background: "#2a2f3e" }} />
               </div>
             </div>
 
-            {/* ── Right: Hero image with hexagon border ────────────── */}
-            <div
-              className="hidden lg:flex items-center justify-center self-stretch"
-              style={{ width: "480px", position: "relative" }}
-            >
-              {/* Blue radial glow behind image */}
-              <div
-                className="absolute inset-0"
-                style={{
-                  background:
-                    "radial-gradient(ellipse at center, rgba(30,144,255,0.22) 0%, rgba(30,144,255,0.08) 45%, transparent 70%)",
-                }}
-              />
+            {/* ── Right column: hero image + hex decoration ──────────── */}
+            <div style={{ position: "relative", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
 
-              {/* Outer hexagon — gold dashed */}
+              {/* Blue hexagon glow */}
               <svg
-                className="absolute"
-                style={{ top: "50%", left: "50%", transform: "translate(-50%,-50%)" }}
-                width="440"
-                height="500"
-                viewBox="0 0 440 500"
-                fill="none"
+                style={{ position: "absolute", zIndex: 1 }}
+                width="440" height="510" viewBox="0 0 440 510" fill="none"
               >
+                <defs>
+                  <filter id="hexglow">
+                    <feGaussianBlur stdDeviation="4" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                </defs>
+                {/* Outer dashed gold */}
                 <polygon
-                  points="220,14 428,127 428,373 220,486 12,373 12,127"
-                  stroke="#F5A623"
+                  points="220,16 428,128 428,382 220,494 12,382 12,128"
+                  fill="none"
+                  stroke="#f5a623"
                   strokeWidth="1.2"
-                  strokeDasharray="10 6"
-                  opacity="0.45"
+                  strokeDasharray="11 7"
+                  strokeOpacity="0.5"
                 />
-              </svg>
-
-              {/* Inner hexagon — blue glowing */}
-              <svg
-                className="absolute"
-                style={{ top: "50%", left: "50%", transform: "translate(-50%,-50%)", filter: "drop-shadow(0 0 10px rgba(30,144,255,0.7))" }}
-                width="380"
-                height="436"
-                viewBox="0 0 380 436"
-                fill="none"
-              >
+                {/* Inner solid blue — glowing */}
                 <polygon
-                  points="190,12 370,110 370,326 190,424 10,326 10,110"
+                  points="220,42 406,148 406,362 220,468 34,362 34,148"
                   fill="rgba(30,144,255,0.04)"
-                  stroke="rgba(30,144,255,0.85)"
-                  strokeWidth="1.8"
+                  stroke="#1e90ff"
+                  strokeWidth="2"
+                  strokeOpacity="0.9"
+                  filter="url(#hexglow)"
                 />
               </svg>
 
-              {/* Gold sparkle dots */}
+              {/* Gold sparkle particles */}
               {[
-                { top: "14%", right: "6%",  size: 8 },
-                { top: "38%", right: "1%",  size: 5 },
-                { bottom: "22%", right: "7%", size: 6 },
-                { top: "10%",  left: "8%",  size: 4 },
-                { bottom: "18%", left: "5%", size: 5 },
-              ].map((s, i) => (
+                { top: "13%", right: "8%",  s: 8 },
+                { top: "32%", right: "2%",  s: 5 },
+                { top: "60%", right: "5%",  s: 6 },
+                { top: "48%", right: "0%",  s: 3 },
+                { top: "18%", left: "10%",  s: 4 },
+                { top: "72%", left: "8%",   s: 4 },
+              ].map((d, i) => (
                 <div
                   key={i}
-                  className="absolute rounded-full bg-brand-primary"
                   style={{
-                    ...s,
-                    width: s.size,
-                    height: s.size,
-                    boxShadow: `0 0 ${s.size * 2}px ${s.size}px rgba(245,166,35,0.55)`,
-                    animation: `pulse ${1.5 + i * 0.4}s ease-in-out infinite alternate`,
+                    position: "absolute", zIndex: 3,
+                    top: d.top, right: "right" in d ? d.right : undefined,
+                    left: "left" in d ? d.left : undefined,
+                    width: d.s, height: d.s,
+                    borderRadius: "50%",
+                    background: "#f5a623",
+                    boxShadow: `0 0 ${d.s * 3}px ${d.s}px rgba(245,166,35,0.65)`,
                   }}
                 />
               ))}
 
-              {/* Product image */}
-              <div className="relative z-10 flex items-center justify-center w-full h-full">
+              {/* Hero image (uploaded from panel) */}
+              <div style={{ position: "relative", zIndex: 2, width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {hero_image_url ? (
                   <Image
                     src={hero_image_url}
-                    alt={hero_image_alt || "Featured collection"}
-                    width={360}
+                    alt={hero_image_alt || "HEXASHOP featured product"}
+                    width={380}
                     height={460}
-                    className="object-contain"
                     style={{
-                      filter:
-                        "drop-shadow(0 0 35px rgba(30,144,255,0.35)) drop-shadow(0 20px 50px rgba(0,0,0,0.65))",
-                      maxHeight: "68vh",
+                      objectFit: "contain",
+                      maxHeight: "90%",
+                      filter: "drop-shadow(0 0 32px rgba(30,144,255,0.4)) drop-shadow(0 24px 48px rgba(0,0,0,0.7))",
                     }}
                     priority
+                    unoptimized={hero_image_url.includes("localhost")}
                   />
                 ) : (
                   /* Placeholder when no hero image uploaded */
-                  <div
-                    className="flex flex-col items-center justify-center gap-4 text-center"
-                    style={{ width: 300, height: 400 }}
-                  >
-                    {/* Hexagon placeholder */}
-                    <svg width="80" height="90" viewBox="0 0 80 90" fill="none">
-                      <polygon
-                        points="40,2 78,22 78,68 40,88 2,68 2,22"
-                        fill="none"
-                        stroke="rgba(30,144,255,0.4)"
-                        strokeWidth="2"
-                      />
-                      <text x="40" y="52" textAnchor="middle" fill="rgba(245,166,35,0.5)" fontSize="28" fontWeight="800">H</text>
+                  <div style={{ textAlign: "center" }}>
+                    <svg width="100" height="115" viewBox="0 0 100 115" fill="none">
+                      <polygon points="50,4 96,29 96,86 50,111 4,86 4,29" fill="rgba(30,144,255,0.06)" stroke="rgba(30,144,255,0.35)" strokeWidth="2" />
+                      <text x="50" y="68" textAnchor="middle" fill="rgba(245,166,35,0.45)" fontSize="38" fontWeight="900" fontFamily="Inter, sans-serif">H</text>
                     </svg>
-                    <p className="text-sm text-brand-muted font-medium">
+                    <p style={{ color: "rgba(99,102,241,0.7)", fontSize: "0.8rem", marginTop: "0.75rem", fontWeight: 500 }}>
                       Upload hero image<br />
-                      <span className="text-indigo-400 text-xs">Admin → Hero Image</span>
+                      <span style={{ color: "#6b7280", fontSize: "0.7rem" }}>Admin → Hero Image</span>
                     </p>
                   </div>
                 )}
               </div>
-
-              {/* Scroll indicator — absolute inside hero */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 hidden lg:flex flex-col items-center gap-1.5 pointer-events-none opacity-60">
-                <span className="text-[9px] uppercase tracking-[0.22em] text-brand-muted font-semibold">Scroll</span>
-                <div style={{ animation: "bounce 1.6s ease-in-out infinite" }}>
-                  <svg width="16" height="20" viewBox="0 0 16 20" fill="none">
-                    <path d="M8 0 L8 13 M3 8 L8 13 L13 8" stroke="#F5A623" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M3 14 L8 19 L13 14" stroke="#F5A623" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" opacity="0.35"/>
-                  </svg>
-                </div>
-              </div>
             </div>
-
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ── Trust bar ────────────────────────────────────────────────── */}
-      <section className="border-y border-brand-border bg-brand-surface/40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-brand-border">
-            {TRUST_BADGES.map(({ icon: Icon, label, sub }) => (
-              <div key={label} className="flex items-center gap-3 py-4 px-5">
-                <div className="p-2 rounded-xl bg-brand-primary/10 text-brand-primary shrink-0">
-                  <Icon className="h-4 w-4" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold truncate">{label}</p>
-                  <p className="text-xs text-brand-muted truncate">{sub}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Featured Products ─────────────────────────────────────────── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-wider">
-            Featured Products
-          </h2>
-          <Link
-            href="/shop?is_featured=true"
-            className="btn-secondary text-xs px-4 py-2 rounded-lg flex items-center gap-1 uppercase tracking-wide font-bold"
-          >
-            View All <ChevronRight className="h-3.5 w-3.5" />
-          </Link>
-        </div>
-
-        {featuredProducts.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-            {featuredProducts.slice(0, 4).map((p, i) => (
-              <ProductCard key={p.id} product={p} priority={i < 4} />
-            ))}
-          </div>
-        ) : (
-          <ProductGridSkeleton count={4} />
-        )}
-      </section>
-
-      {/* ── 🔥 Most Viral Products ────────────────────────────────────── */}
-      {viralProducts.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500" />
-              </span>
-              <Flame className="h-4 w-4 text-orange-500 fill-orange-500" />
-              <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-wider">
-                Most Viral
+        {/* ── FEATURED PRODUCTS ─────────────────────────────────────── */}
+        <section
+          style={{
+            flexShrink: 0,
+            padding: "0 2.5rem 1.25rem",
+            background: "#0b0f14",
+          }}
+        >
+          <div style={{ maxWidth: 1280, margin: "0 auto" }}>
+            {/* Section header */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.875rem" }}>
+              <h2 style={{
+                color: "#fff",
+                fontWeight: 800,
+                fontSize: "1rem",
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                margin: 0,
+              }}>
+                Featured Products
               </h2>
+              <Link
+                href="/shop?is_featured=true"
+                style={{
+                  border: "1.5px solid rgba(255,255,255,0.22)",
+                  color: "#fff",
+                  fontWeight: 700,
+                  fontSize: "0.72rem",
+                  letterSpacing: "0.07em",
+                  padding: "0.4rem 1.1rem",
+                  borderRadius: "0.4rem",
+                  textDecoration: "none",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                VIEW ALL
+              </Link>
             </div>
-            <Link
-              href="/shop?ordering=-sold_count"
-              className="btn-secondary text-xs px-4 py-2 rounded-lg flex items-center gap-1 uppercase tracking-wide font-bold"
-            >
-              View All <ChevronRight className="h-3.5 w-3.5" />
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-            {viralProducts.slice(0, 4).map((p, i) => (
-              <ProductCard key={p.id} product={p} priority={i < 2} />
-            ))}
+
+            {/* 4-column product grid */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem" }}>
+              {featured.slice(0, 4).map((p, i) => (
+                <FeaturedCard key={p.id} product={p} priority={i < 4} />
+              ))}
+              {/* Skeleton placeholders if no products yet */}
+              {featured.length === 0 &&
+                [1, 2, 3, 4].map((i) => (
+                  <div
+                    key={i}
+                    style={{
+                      background: "#141929",
+                      borderRadius: "1rem",
+                      aspectRatio: "4/3",
+                      animation: "pulse 1.5s ease-in-out infinite",
+                    }}
+                  />
+                ))}
+            </div>
           </div>
         </section>
-      )}
-
-      {/* ── Promo Banners ─────────────────────────────────────────────── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {[
-            { label: "New Season", title: "Men's Collection", desc: "Fresh styles just dropped", href: "/shop?category=mens", accent: "text-brand-secondary", gradient: "from-indigo-900/60 to-brand-dark" },
-            { label: "Up to 40% OFF", title: "Sale", desc: "Limited time deals", href: "/shop?on_sale=true", accent: "text-brand-primary", gradient: "from-amber-900/50 to-brand-dark" },
-          ].map(({ label, title, desc, href, accent, gradient }) => (
-            <Link
-              key={title}
-              href={href}
-              className={`group relative overflow-hidden rounded-2xl border border-brand-border bg-gradient-to-br ${gradient} h-36 flex items-center px-8 hover:border-white/10 transition-colors`}
-            >
-              <div>
-                <span className={`text-xs font-bold uppercase tracking-widest ${accent}`}>{label}</span>
-                <h3 className="text-2xl font-black text-white mt-1 group-hover:translate-x-1 transition-transform duration-200">{title}</h3>
-                <p className="text-xs text-brand-muted mt-1">{desc}</p>
-              </div>
-              <ChevronRight className="absolute right-6 top-1/2 -translate-y-1/2 h-5 w-5 text-white/20 group-hover:text-white/60 group-hover:translate-x-1 transition-all duration-200" />
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* ── New Arrivals ──────────────────────────────────────────────── */}
-      {newArrivals.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-brand-secondary" />
-              <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-wider">New Arrivals</h2>
-            </div>
-            <Link
-              href="/shop?ordering=-created_at"
-              className="btn-secondary text-xs px-4 py-2 rounded-lg flex items-center gap-1 uppercase tracking-wide font-bold"
-            >
-              View All <ChevronRight className="h-3.5 w-3.5" />
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-            {newArrivals.map((p, i) => (
-              <ProductCard key={p.id} product={p} priority={i < 2} />
-            ))}
-          </div>
-        </section>
-      )}
+      </div>
     </>
   );
 }
