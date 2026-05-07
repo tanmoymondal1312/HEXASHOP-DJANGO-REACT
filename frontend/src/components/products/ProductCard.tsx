@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useState } from "react";
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import type { Product } from "@/types";
@@ -11,9 +10,6 @@ import { useWishlist } from "@/hooks/useWishlist";
 import { useAuthStore } from "@/store/authStore";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
-
-const BLUR =
-  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iIzExMTgyNyIvPjwvc3ZnPg==";
 
 interface ProductCardProps {
   product: Product;
@@ -28,7 +24,6 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
   const { isInWishlist, toggle } = useWishlist();
   const { isAuthenticated } = useAuthStore();
 
-  // Resolve URL — handles both absolute (from fixed backend) and relative (fallback)
   const rawUrl = product.primary_image ?? product.images?.[0]?.image ?? null;
   const imageUrl = resolveImageUrl(rawUrl);
 
@@ -38,11 +33,8 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
-    // Use first_variant from list serializer (lightweight, no full variants array needed)
     const fv = product.first_variant;
     if (!fv) {
-      // No variant info at all — go to product page to pick one
       window.location.href = `/products/${product.slug}`;
       return;
     }
@@ -70,66 +62,75 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
       href={`/products/${product.slug}`}
       className="group block bg-brand-surface border border-brand-border rounded-2xl overflow-hidden hover:border-brand-primary/30 transition-all duration-300 hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
     >
-      {/* ── Image area ───────────────────────────────────────────────── */}
-      <div className="relative aspect-square overflow-hidden bg-brand-dark">
+      {/* ── Image area ──────────────────────────────────────────────── */}
+      <div className="relative aspect-square overflow-hidden" style={{ background: "#0d1117" }}>
+
         {imageUrl && !imgError ? (
-          /* Use unoptimized for localhost (dev) — bypasses the Next.js image proxy
-             which can't always reach Django on :8000 from inside the optimizer. */
-          <Image
+          /*
+           * Use a plain <img> tag — not next/image.
+           * next/image's <Image fill unoptimized> can still throw onError for
+           * localhost images in certain Next.js versions because the component
+           * wraps the img in a span with position:absolute that requires an
+           * explicit-sized parent, and the optimiser pipeline still probes the
+           * URL server-side even when unoptimized=true.
+           *
+           * A native <img> has zero middleware in the way: the browser fetches
+           * directly from http://localhost:8000/media/... and it just works.
+           */
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
             src={imageUrl}
             alt={product.name}
-            fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1280px) 25vw, 20vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-            priority={priority}
-            unoptimized={imageUrl.includes("localhost") || imageUrl.startsWith("/media")}
+            loading={priority ? "eager" : "lazy"}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             onError={() => setImgError(true)}
           />
         ) : (
-          /* Placeholder when no image */
-          <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-brand-surface to-brand-dark">
-            <svg className="w-12 h-12 text-brand-border" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1}
+          /* Placeholder */
+          <div className="w-full h-full flex flex-col items-center justify-center gap-2"
+            style={{ background: "linear-gradient(135deg,#1a1f2e,#0d1117)" }}>
+            <svg className="w-10 h-10" fill="none" stroke="#374151" strokeWidth={1} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round"
                 d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-            <span className="text-xs text-brand-muted">No image</span>
+            <span className="text-xs" style={{ color: "#4b5563" }}>No image</span>
           </div>
         )}
 
-        {/* Top badges */}
-        <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
-          {hasDiscount && (
-            <span className="text-[10px] font-bold bg-red-500 text-white px-2 py-0.5 rounded-lg leading-none">
-              -{product.discount_percentage}%
-            </span>
-          )}
-          {product.is_featured && !hasDiscount && (
-            <span className="text-[10px] font-bold bg-brand-primary text-black px-2 py-0.5 rounded-lg leading-none">
-              Featured
-            </span>
-          )}
-        </div>
+        {/* Discount badge */}
+        {hasDiscount && (
+          <span className="absolute top-2.5 left-2.5 text-[10px] font-bold bg-red-500 text-white px-2 py-0.5 rounded-lg leading-none">
+            -{product.discount_percentage}%
+          </span>
+        )}
 
-        {/* Wishlist button */}
+        {/* Featured badge */}
+        {product.is_featured && !hasDiscount && (
+          <span className="absolute top-2.5 left-2.5 text-[10px] font-bold bg-brand-primary text-black px-2 py-0.5 rounded-lg leading-none">
+            Featured
+          </span>
+        )}
+
+        {/* Wishlist */}
         <button
           onClick={handleWishlist}
           className={cn(
             "absolute top-2.5 right-2.5 p-1.5 rounded-xl backdrop-blur-sm transition-all duration-200",
             isWished
               ? "bg-brand-primary/20 text-brand-primary shadow-[0_0_12px_rgba(245,166,35,0.3)]"
-              : "bg-black/40 text-white/70 hover:text-brand-primary hover:bg-black/60"
+              : "bg-black/50 text-white/70 hover:text-brand-primary hover:bg-black/70"
           )}
           aria-label={isWished ? "Remove from wishlist" : "Add to wishlist"}
         >
           <Heart className={cn("h-4 w-4", isWished && "fill-brand-primary")} />
         </button>
 
-        {/* Quick add overlay — slides up on hover */}
+        {/* Quick add overlay */}
         <div className="absolute bottom-0 left-0 right-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
           <button
             onClick={handleAddToCart}
             disabled={addingToCart}
-            className="w-full bg-brand-primary text-black text-xs font-bold py-3 hover:bg-yellow-400 transition-colors disabled:opacity-70 flex items-center justify-center gap-1.5"
+            className="w-full bg-brand-primary text-black text-xs font-bold py-2.5 hover:bg-yellow-400 transition-colors disabled:opacity-70 flex items-center justify-center gap-1.5"
           >
             <ShoppingCart className="h-3.5 w-3.5" />
             {addingToCart ? "Adding…" : "Quick Add"}
@@ -137,19 +138,15 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         </div>
       </div>
 
-      {/* ── Info ─────────────────────────────────────────────────────── */}
+      {/* ── Info ────────────────────────────────────────────────────── */}
       <div className="p-3">
-        {/* Category */}
         <p className="text-[11px] text-brand-muted uppercase tracking-wider mb-1 truncate">
           {product.category_name}
         </p>
-
-        {/* Product name */}
         <h3 className="text-sm font-semibold text-white line-clamp-2 leading-snug group-hover:text-brand-primary transition-colors mb-2">
           {product.name}
         </h3>
 
-        {/* Rating */}
         {parseFloat(product.avg_rating) > 0 && (
           <div className="flex items-center gap-1 mb-2">
             <div className="flex">
@@ -169,7 +166,6 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           </div>
         )}
 
-        {/* Price row */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-baseline gap-1.5 min-w-0">
             <span className="text-base font-bold text-brand-primary">
