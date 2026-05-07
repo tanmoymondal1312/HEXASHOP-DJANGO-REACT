@@ -1,11 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronRight, Flame, Heart, Star, TrendingUp } from "lucide-react";
+import { ChevronRight, Flame, Heart, Star } from "lucide-react";
 import { productsApi, siteApi } from "@/lib/api";
-import { ProductCard } from "@/components/products/ProductCard";
 import { WebsiteJsonLd } from "@/components/seo/JsonLd";
 import { resolveImageUrl } from "@/lib/utils";
-import type { Product, PaginatedResponse } from "@/types";
+import type { Product } from "@/types";
 
 // ─── Data fetchers ────────────────────────────────────────────────────────────
 
@@ -36,9 +35,9 @@ async function getFeatured(): Promise<Product[]> {
   }
 }
 
-// ─── Transparent inline card (viewport section — no card bg) ─────────────────
+// ─── Transparent inline card (no card bg, blends into dark bg) ───────────────
 
-function ViralCard({ product, priority }: { product: Product; priority?: boolean }) {
+function InlineCard({ product, priority }: { product: Product; priority?: boolean }) {
   const src = resolveImageUrl(product.primary_image ?? null);
   const price = parseFloat(product.base_price).toFixed(2);
   const rating = Math.min(5, Math.round(parseFloat(product.avg_rating)));
@@ -49,8 +48,8 @@ function ViralCard({ product, priority }: { product: Product; priority?: boolean
       className="viral-card"
       style={{ display: "block", textDecoration: "none" }}
     >
-      {/* Image — rounded, no card box */}
-      <div style={{ position: "relative", aspectRatio: "3/4", borderRadius: "0.75rem", overflow: "hidden", background: "#0d1117" }}>
+      {/* Image — landscape 4/3, rounded, no card box */}
+      <div style={{ position: "relative", aspectRatio: "4/3", borderRadius: "0.625rem", overflow: "hidden", background: "#0d1117" }}>
         {src ? (
           <Image
             src={src} alt={product.name} fill sizes="220px"
@@ -77,19 +76,19 @@ function ViralCard({ product, priority }: { product: Product; priority?: boolean
         </span>
       </div>
 
-      {/* Text — floats on dark bg, NO card box */}
-      <div style={{ padding: "7px 2px 0" }}>
-        <p style={{ color: "#fff", fontWeight: 600, fontSize: "0.75rem", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+      {/* Text — floats directly on dark bg, no card box */}
+      <div style={{ padding: "5px 1px 0" }}>
+        <p style={{ color: "#e5e7eb", fontWeight: 600, fontSize: "0.72rem", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           {product.name}
         </p>
-        <p style={{ color: "#f5a623", fontWeight: 700, fontSize: "0.78rem", margin: "2px 0 3px" }}>
+        <p style={{ color: "#f5a623", fontWeight: 700, fontSize: "0.72rem", margin: "1px 0 3px" }}>
           ${price}
         </p>
         <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
           {[1, 2, 3, 4, 5].map((s) => (
-            <Star key={s} style={{ width: 10, height: 10, color: s <= rating ? "#facc15" : "#2a2f3e", fill: s <= rating ? "#facc15" : "none" }} />
+            <Star key={s} style={{ width: 9, height: 9, color: s <= rating ? "#facc15" : "#2a2f3e", fill: s <= rating ? "#facc15" : "none" }} />
           ))}
-          <span style={{ color: "#6b7280", fontSize: "0.6rem", marginLeft: 2 }}>({product.review_count})</span>
+          <span style={{ color: "#6b7280", fontSize: "0.58rem", marginLeft: 2 }}>({product.review_count})</span>
         </div>
       </div>
     </Link>
@@ -217,7 +216,7 @@ export default async function HomePage() {
               {/* 5 transparent cards — no background box */}
               <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:"0.85rem" }}>
                 {viral.slice(0, 5).map((p, i) => (
-                  <ViralCard key={p.id} product={p} priority={i < 5} />
+                  <InlineCard key={p.id} product={p} priority={i < 5} />
                 ))}
                 {viral.length === 0 && [1,2,3,4,5].map(i => (
                   <div key={i} style={{ aspectRatio:"3/4", borderRadius:"0.75rem", background:"#141929", opacity:0.4 }} />
@@ -228,41 +227,36 @@ export default async function HomePage() {
         </div>
 
         {/* ═══════════════════════════════════════════════════════════
-            SCROLL SECTION: Featured Products — multi-row grid
+            SCROLL SECTION: Featured Products — transparent multi-row grid
         ════════════════════════════════════════════════════════════ */}
-        <section style={{ padding:"2.5rem 2.5rem 4rem" }}>
-          <div style={{ maxWidth:1280, margin:"0 auto" }}>
+        <section style={{ padding: "2rem 2.5rem 4rem" }}>
+          <div style={{ maxWidth: 1280, margin: "0 auto" }}>
 
             {/* Header */}
-            <div className="flex items-center justify-between mb-7">
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.25rem" }}>
               <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <Star className="h-4 w-4 text-brand-primary fill-brand-primary" />
-                  <span className="text-xs font-bold text-brand-primary uppercase tracking-widest">
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.3rem" }}>
+                  <Star style={{ width: 14, height: 14, color: "#f5a623", fill: "#f5a623" }} />
+                  <span style={{ fontSize: "0.68rem", fontWeight: 700, color: "#f5a623", textTransform: "uppercase", letterSpacing: "0.12em" }}>
                     Handpicked for you
                   </span>
                 </div>
-                <h2 className="text-2xl font-bold text-white">Featured Products</h2>
+                <h2 style={{ color: "#fff", fontWeight: 800, fontSize: "1.4rem", margin: 0 }}>Featured Products</h2>
               </div>
-              <Link href="/shop?is_featured=true" className="btn-secondary text-xs px-4 py-2 rounded-lg flex items-center gap-1 uppercase tracking-wide font-bold">
-                View All <ChevronRight className="h-3.5 w-3.5" />
+              <Link href="/shop?is_featured=true" style={{ border: "1.5px solid rgba(255,255,255,0.2)", color: "#fff", fontWeight: 700, fontSize: "0.68rem", letterSpacing: "0.07em", padding: "0.38rem 1rem", borderRadius: "0.4rem", textDecoration: "none", display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                View All <ChevronRight style={{ width: 12, height: 12 }} />
               </Link>
             </div>
 
-            {/* Multi-row product grid using the full ProductCard component */}
-            {featured.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                {featured.map((p, i) => (
-                  <ProductCard key={p.id} product={p} priority={i < 5} />
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                {[1,2,3,4,5,6,7,8,9,10].map(i => (
-                  <div key={i} className="bg-brand-surface rounded-2xl aspect-square animate-pulse" />
-                ))}
-              </div>
-            )}
+            {/* Multi-row transparent grid — same style as viral, no card boxes */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "1.25rem" }}>
+              {featured.length > 0
+                ? featured.map((p, i) => <InlineCard key={p.id} product={p} priority={i < 5} />)
+                : [1,2,3,4,5,6,7,8,9,10].map(i => (
+                    <div key={i} style={{ aspectRatio: "4/3", borderRadius: "0.625rem", background: "#141929", opacity: 0.4 }} />
+                  ))
+              }
+            </div>
           </div>
         </section>
 
