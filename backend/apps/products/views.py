@@ -163,7 +163,8 @@ class ProductViewSet(ReadOnlyModelViewSet):
             .select_related("category", "brand")
             .prefetch_related(
                 Prefetch("images", queryset=ProductImage.objects.order_by("sort_order"))
-            )[:8]
+            )
+            .order_by("-sold_count")[:8]
         )
         ctx = {"request": request}
         data = ProductListSerializer(products, many=True, context=ctx).data
