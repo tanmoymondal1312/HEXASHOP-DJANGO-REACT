@@ -37,16 +37,14 @@ function FeaturedCard({ product, priority }: { product: Product; priority?: bool
   return (
     <Link
       href={`/products/${product.slug}`}
+      className="featured-card"
       style={{
         display: "block",
         background: "#141929",
         borderRadius: "1rem",
         overflow: "hidden",
         textDecoration: "none",
-        transition: "transform 0.2s",
       }}
-      onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-3px)")}
-      onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
     >
       {/* Image */}
       <div style={{ position: "relative", aspectRatio: "4/3", background: "#0d1117", overflow: "hidden" }}>
@@ -68,7 +66,8 @@ function FeaturedCard({ product, priority }: { product: Product; priority?: bool
           </div>
         )}
         {/* Heart */}
-        <button
+        {/* Heart icon — Link click navigates to product; no JS handler needed here */}
+        <span
           style={{
             position: "absolute", top: 10, right: 10,
             width: 32, height: 32, borderRadius: "50%",
@@ -76,12 +75,10 @@ function FeaturedCard({ product, priority }: { product: Product; priority?: bool
             background: "rgba(0,0,0,0.4)",
             backdropFilter: "blur(4px)",
             display: "flex", alignItems: "center", justifyContent: "center",
-            cursor: "pointer",
           }}
-          onClick={(e) => e.preventDefault()}
         >
           <Heart style={{ width: 15, height: 15, color: "#fff" }} />
-        </button>
+        </span>
       </div>
 
       {/* Info */}
@@ -121,6 +118,14 @@ export default async function HomePage() {
   return (
     <>
       <WebsiteJsonLd />
+
+      {/* Hover styles — pure CSS, no JS event handlers needed in server component */}
+      <style>{`
+        .featured-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .featured-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.5); }
+        .featured-card:hover img { transform: scale(1.05); }
+        .featured-card img { transition: transform 0.3s ease; }
+      `}</style>
 
       {/*
         Outer container: fills exactly the viewport below the sticky navbar.
