@@ -255,32 +255,80 @@ export default async function ShopPage({ searchParams }: Props) {
           </p>
         </header>
 
-        {/* ── Mobile search bar (auto-open, hidden on lg where sidebar handles it) ── */}
-        <form action="/shop" method="get" className="lg:hidden mb-4" role="search">
-          {/* Preserve current filters when searching */}
+        {/* ── Search bar — mobile & tablet (hidden on desktop where sidebar shows) ── */}
+        <style dangerouslySetInnerHTML={{ __html: `
+          .shop-search-wrap {
+            padding: 1.5px; border-radius: 9999px;
+            background: linear-gradient(120deg, rgba(245,166,35,0.65) 0%, rgba(30,144,255,0.65) 100%);
+            box-shadow: 0 0 14px rgba(245,166,35,0.12), 0 0 28px rgba(30,144,255,0.08);
+            transition: all 0.3s ease; margin-bottom: 1rem;
+          }
+          .shop-search-wrap:focus-within {
+            background: linear-gradient(120deg, #f5a623 0%, #1e90ff 100%);
+            box-shadow: 0 0 24px rgba(245,166,35,0.3), 0 0 48px rgba(30,144,255,0.18);
+          }
+          .shop-search-inner {
+            display: flex; align-items: center;
+            background: #111520; border-radius: 9999px; overflow: hidden;
+          }
+          .shop-search-icon {
+            margin-left: 16px; flex-shrink: 0;
+            color: rgba(245,166,35,0.7); transition: color 0.2s;
+          }
+          .shop-search-wrap:focus-within .shop-search-icon { color: #f5a623; }
+          .shop-search-input {
+            flex: 1; background: transparent;
+            padding: 0.8rem 0.75rem; font-size: 0.9rem;
+            color: #fff; outline: none; border: none; min-width: 0;
+          }
+          .shop-search-input::placeholder { color: #5a6480; }
+          .shop-search-input::-webkit-search-decoration,
+          .shop-search-input::-webkit-search-cancel-button { display: none; }
+          .shop-search-btn {
+            margin: 4px; flex-shrink: 0;
+            background: linear-gradient(135deg, #f5a623 0%, #f59e0b 100%);
+            color: #000; font-weight: 800; font-size: 0.78rem;
+            padding: 0.5rem 1.2rem; border-radius: 9999px;
+            border: none; cursor: pointer;
+            display: flex; align-items: center; gap: 6px;
+            letter-spacing: 0.04em; white-space: nowrap;
+            transition: opacity 0.15s, transform 0.15s;
+          }
+          .shop-search-btn:hover { opacity:0.88; transform:scale(0.98); }
+        ` }} />
+
+        <form action="/shop" method="get" className="lg:hidden shop-search-wrap" role="search">
+          {/* Preserve active filters */}
           {searchParams.category && <input type="hidden" name="category" value={searchParams.category} />}
           {searchParams.ordering  && <input type="hidden" name="ordering"  value={searchParams.ordering}  />}
           {searchParams.on_sale   && <input type="hidden" name="on_sale"   value={searchParams.on_sale}   />}
           {searchParams.in_stock  && <input type="hidden" name="in_stock"  value={searchParams.in_stock}  />}
 
-          <div className="flex items-center bg-brand-surface border border-brand-border rounded-xl overflow-hidden focus-within:border-brand-primary transition-colors">
+          <div className="shop-search-inner">
+            {/* Gold search icon */}
+            <svg className="shop-search-icon" width="17" height="17" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.35-4.35"/>
+            </svg>
+
             <input
               type="search"
               name="q"
               defaultValue={searchParams.q || ""}
-              placeholder="Search products, categories…"
+              placeholder={searchParams.q ? `"${searchParams.q}"` : "Search products, brands, categories…"}
               autoFocus
-              className="flex-1 bg-transparent px-4 py-3 text-sm text-white placeholder-brand-muted focus:outline-none"
+              className="shop-search-input"
               aria-label="Search products"
             />
-            <button
-              type="submit"
-              aria-label="Submit search"
-              className="px-4 py-3 text-brand-primary hover:text-yellow-400 transition-colors"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
-                <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+
+            <button type="submit" aria-label="Submit search" className="shop-search-btn">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.35-4.35"/>
               </svg>
+              Search
             </button>
           </div>
         </form>

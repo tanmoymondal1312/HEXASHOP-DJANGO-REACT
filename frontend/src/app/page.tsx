@@ -172,6 +172,49 @@ export default async function HomePage() {
         }
         @media (min-width:1024px) { .hx-btn-outline { font-size:0.78rem; padding:0.6rem 1.25rem; } }
 
+        /* ─ Hero search bar (mobile / tablet) ──────────────────────────── */
+        .hx-search-wrap {
+          /* Gradient border via wrapper padding technique */
+          padding: 1.5px;
+          border-radius: 9999px;
+          background: linear-gradient(120deg, rgba(245,166,35,0.65) 0%, rgba(30,144,255,0.65) 100%);
+          box-shadow: 0 0 14px rgba(245,166,35,0.12), 0 0 28px rgba(30,144,255,0.08);
+          transition: all 0.3s ease;
+          margin-bottom: 0.875rem;
+        }
+        .hx-search-wrap:focus-within {
+          background: linear-gradient(120deg, #f5a623 0%, #1e90ff 100%);
+          box-shadow: 0 0 22px rgba(245,166,35,0.28), 0 0 44px rgba(30,144,255,0.18);
+        }
+        .hx-search-inner {
+          display: flex; align-items: center;
+          background: #111520; border-radius: 9999px; overflow: hidden;
+        }
+        .hx-search-icon {
+          margin-left: 14px; flex-shrink: 0;
+          color: rgba(245,166,35,0.7); transition: color 0.2s;
+        }
+        .hx-search-wrap:focus-within .hx-search-icon { color: #f5a623; }
+        .hx-search-input {
+          flex: 1; background: transparent;
+          padding: 0.7rem 0.65rem; font-size: 0.85rem;
+          color: #fff; outline: none; border: none; min-width: 0;
+        }
+        .hx-search-input::placeholder { color: #5a6480; }
+        .hx-search-input::-webkit-search-decoration,
+        .hx-search-input::-webkit-search-cancel-button { display: none; }
+        .hx-search-btn {
+          margin: 3px; flex-shrink: 0;
+          background: linear-gradient(135deg, #f5a623 0%, #f59e0b 100%);
+          color: #000; font-weight: 800; font-size: 0.72rem;
+          padding: 0.45rem 1.05rem; border-radius: 9999px;
+          border: none; cursor: pointer;
+          display: flex; align-items: center; gap: 5px;
+          letter-spacing: 0.04em; white-space: nowrap;
+          transition: opacity 0.15s, transform 0.15s;
+        }
+        .hx-search-btn:hover { opacity: 0.88; transform: scale(0.98); }
+
         /* ─ Slider dots ─ */
         .hx-dots { display:flex; align-items:center; gap:0.35rem; }
 
@@ -318,42 +361,32 @@ export default async function HomePage() {
                   <Link href="/shop?is_featured=true" className="hx-btn-outline">EXPLORE COLLECTION</Link>
                 </div>
 
-                {/* Mobile-only search bar (hidden on md+, where header search is accessible) */}
-                <form
-                  action="/shop"
-                  method="get"
-                  className="md:hidden"
-                  style={{ marginBottom:"0.875rem" }}
-                >
-                  <div style={{
-                    display:"flex", alignItems:"center",
-                    background:"rgba(255,255,255,0.05)",
-                    border:"1px solid rgba(255,255,255,0.12)",
-                    borderRadius:"0.5rem", overflow:"hidden",
-                  }}>
+                {/* ── Hero search bar — mobile only ────────────────── */}
+                <form action="/shop" method="get" className="md:hidden hx-search-wrap" role="search">
+                  <div className="hx-search-inner">
+                    {/* Gold search icon */}
+                    <svg className="hx-search-icon" width="15" height="15" viewBox="0 0 24 24"
+                      fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                      <circle cx="11" cy="11" r="8"/>
+                      <path d="m21 21-4.35-4.35"/>
+                    </svg>
+
                     <input
                       type="text"
                       name="q"
                       placeholder="Search products, categories…"
                       autoComplete="off"
-                      style={{
-                        flex:1, background:"transparent",
-                        padding:"0.55rem 0.75rem",
-                        fontSize:"0.8rem", color:"#fff",
-                        outline:"none", border:"none",
-                      }}
+                      aria-label="Search HEXASHOP"
+                      className="hx-search-input"
                     />
-                    <button
-                      type="submit"
-                      aria-label="Search"
-                      style={{
-                        padding:"0.55rem 0.75rem",
-                        background:"transparent", border:"none",
-                        cursor:"pointer", color:"#f5a623",
-                        display:"flex", alignItems:"center",
-                      }}
-                    >
-                      <Search style={{ width:15, height:15 }} />
+
+                    <button type="submit" aria-label="Search" className="hx-search-btn">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" strokeWidth="2.8" strokeLinecap="round">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.35-4.35"/>
+                      </svg>
+                      Search
                     </button>
                   </div>
                 </form>
