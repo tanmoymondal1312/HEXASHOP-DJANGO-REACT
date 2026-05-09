@@ -23,6 +23,15 @@ from .forms import (
 )
 
 
+# ── Cache invalidation ────────────────────────────────────────────────────────
+
+def _bust_cache(product=None):
+    keys = ["featured_products", "viral_products", "category_tree"]
+    if product:
+        keys.append(f"product_detail:{product.slug}")
+    cache.delete_many(keys)
+
+
 # ── Variant image helper ──────────────────────────────────────────────────────
 
 def _save_variant_images(request, var_formset, product):
@@ -248,6 +257,7 @@ def product_add(request):
             var_formset.instance = product
             var_formset.save()
             _save_variant_images(request, var_formset, product)
+            _bust_cache(product)
             qs = urlencode({"msg": "added", "name": product.name})
             return redirect(f"/panel/products/?{qs}")
 
@@ -270,6 +280,7 @@ def product_edit(request, pk):
             saved = form.save()
             var_formset.save()
             _save_variant_images(request, var_formset, product)
+            _bust_cache(saved)
             qs = urlencode({"msg": "updated", "name": saved.name})
             return redirect(f"/panel/products/?{qs}")
 
@@ -283,6 +294,7 @@ def product_edit(request, pk):
 def product_delete(request, pk):
     product = get_object_or_404(Product, pk=pk)
     if request.method == "POST":
+        _bust_cache(product)
         product.delete()
         return redirect("/panel/products/?msg=deleted")
     return render(
@@ -303,6 +315,7 @@ def category_add(request):
     form = CategoryForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         form.save()
+        _bust_cache()
         return redirect("admin_panel:category_list")
     return render(
         request, "admin_panel/categories/form.html", {"form": form, "action": "Add"}
@@ -315,6 +328,7 @@ def category_edit(request, pk):
     form = CategoryForm(request.POST or None, instance=category)
     if request.method == "POST" and form.is_valid():
         form.save()
+        _bust_cache()
         return redirect("admin_panel:category_list")
     return render(
         request,
@@ -327,6 +341,7 @@ def category_edit(request, pk):
 def category_delete(request, pk):
     category = get_object_or_404(Category, pk=pk)
     if request.method == "POST":
+        _bust_cache()
         category.delete()
         return redirect("admin_panel:category_list")
     return render(

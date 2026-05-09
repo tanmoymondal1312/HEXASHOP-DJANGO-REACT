@@ -7,11 +7,14 @@ from .models import Brand, Category, Product, ProductImage, ProductVariant, Revi
 
 
 def _bust_product_cache(product=None):
-    """Clear all product-related cache keys."""
     keys = ["featured_products", "viral_products", "category_tree"]
     if product:
         keys.append(f"product_detail:{product.slug}")
     cache.delete_many(keys)
+
+
+def _bust_category_cache():
+    cache.delete_many(["category_tree", "featured_products", "viral_products"])
 
 
 class ProductImageInline(admin.TabularInline):
@@ -60,6 +63,18 @@ class CategoryAdmin(admin.ModelAdmin):
         return format_html("<b>{}</b>", obj._product_count)
     product_count.short_description = "Products"
     product_count.admin_order_field = "_product_count"
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        _bust_category_cache()
+
+    def delete_model(self, request, obj):
+        super().delete_model(request, obj)
+        _bust_category_cache()
+
+    def delete_queryset(self, request, queryset):
+        super().delete_queryset(request, queryset)
+        _bust_category_cache()
 
 
 @admin.register(Brand)
