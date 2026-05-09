@@ -245,6 +245,7 @@ export function Header() {
                     placeholder="Search products, categories…"
                     autoComplete="off"
                     aria-label="Search"
+                    className="focus:outline-none focus:ring-0 focus:border-none"
                     style={{
                       flex: 1,
                       background: "transparent",
@@ -252,8 +253,12 @@ export function Header() {
                       fontSize: "0.8rem",
                       color: "#fff",
                       outline: "none",
+                      outlineWidth: 0,
+                      boxShadow: "none",
                       border: "none",
                       minWidth: 0,
+                      WebkitAppearance: "none",
+                      appearance: "none" as const,
                     }}
                   />
 
