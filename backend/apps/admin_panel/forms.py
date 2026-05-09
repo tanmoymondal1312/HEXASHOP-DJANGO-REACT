@@ -149,9 +149,19 @@ ProductImageFormSet = inlineformset_factory(
 
 class ProductVariantForm(forms.ModelForm):
     """
-    Exposes the attributes JSONField as separate size + color inputs
-    so store managers never have to write raw JSON.
+    Exposes the attributes JSONField as separate size + color inputs,
+    and adds a per-variant image upload (stored as a ProductImage).
     """
+
+    variant_image = forms.ImageField(
+        required=False,
+        label="Photo",
+        widget=forms.FileInput(attrs={
+            "accept": "image/*",
+            "class": "variant-img-input",
+            "style": "display:none;",
+        }),
+    )
 
     size = forms.ChoiceField(
         choices=ALL_SIZES,

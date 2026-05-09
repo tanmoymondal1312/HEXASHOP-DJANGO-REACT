@@ -13,15 +13,55 @@ from django.utils import timezone
 
 from apps.accounts.models import User
 from apps.cart.models import CartItem
-from apps.products.models import Category, Product
+from apps.products.models import Category, Product, ProductImage
 from apps.store_settings.models import SiteSettings
 
 from django.core.cache import cache
 
 from .forms import (
-    AnnouncementForm, CategoryForm, ProductForm,
-    ProductImageFormSet, ProductVariantFormSet,
+    AnnouncementForm, CategoryForm, ProductForm, ProductVariantFormSet,
 )
+
+
+# ── Variant image helper ──────────────────────────────────────────────────────
+
+def _save_variant_images(request, var_formset, product):
+    """
+    After the variant formset is saved, iterate forms and:
+    • Create a ProductImage for any uploaded variant_image file
+    • Link it to the variant via variant.image FK
+    • Mark the primary variant's image as is_primary=True
+    """
+    primary_prefix = request.POST.get("primary_variant", "")
+
+    for vf in var_formset.forms:
+        cd = vf.cleaned_data
+        if not cd or cd.get("DELETE", False) or not vf.instance.pk:
+            continue
+
+        img_file  = cd.get("variant_image")
+        is_primary = (vf.prefix == primary_prefix)
+
+        if img_file:
+            # Un-mark all existing primary images first if this one is primary
+            if is_primary:
+                ProductImage.objects.filter(product=product).update(is_primary=False)
+
+            pi = ProductImage.objects.create(
+                product=product,
+                image=img_file,
+                alt_text=vf.instance.name or vf.instance.sku,
+                is_primary=is_primary,
+                sort_order=0,
+            )
+            vf.instance.image = pi
+            vf.instance.save(update_fields=["image"])
+
+        elif is_primary and vf.instance.image:
+            # No new file but this variant is chosen as Primary
+            ProductImage.objects.filter(product=product).update(is_primary=False)
+            vf.instance.image.is_primary = True
+            vf.instance.image.save(update_fields=["is_primary"])
 from .models import PageView
 
 # ── Auth helper ───────────────────────────────────────────────────────────────
@@ -197,49 +237,44 @@ def product_list(request):
 
 @staff_required
 def product_add(request):
-    form          = ProductForm(request.POST or None)
-    image_formset = ProductImageFormSet(request.POST or None, request.FILES or None, prefix="images")
-    var_formset   = ProductVariantFormSet(request.POST or None, prefix="variants")
+    form        = ProductForm(request.POST or None)
+    var_formset = ProductVariantFormSet(request.POST or None, request.FILES or None, prefix="variants")
 
     if request.method == "POST":
         form_ok = form.is_valid()
-        imgs_ok = image_formset.is_valid()
         vars_ok = var_formset.is_valid()
-        if form_ok and imgs_ok and vars_ok:
+        if form_ok and vars_ok:
             product = form.save()
-            image_formset.instance = product
-            image_formset.save()
             var_formset.instance = product
             var_formset.save()
+            _save_variant_images(request, var_formset, product)
             qs = urlencode({"msg": "added", "name": product.name})
             return redirect(f"/panel/products/?{qs}")
 
     return render(request, "admin_panel/products/form.html", {
-        "form": form, "image_formset": image_formset, "var_formset": var_formset,
+        "form": form, "var_formset": var_formset,
         "action": "Add", "submitted": request.method == "POST",
     })
 
 
 @staff_required
 def product_edit(request, pk):
-    product       = get_object_or_404(Product, pk=pk)
-    form          = ProductForm(request.POST or None, instance=product)
-    image_formset = ProductImageFormSet(request.POST or None, request.FILES or None, instance=product, prefix="images")
-    var_formset   = ProductVariantFormSet(request.POST or None, instance=product, prefix="variants")
+    product     = get_object_or_404(Product, pk=pk)
+    form        = ProductForm(request.POST or None, instance=product)
+    var_formset = ProductVariantFormSet(request.POST or None, request.FILES or None, instance=product, prefix="variants")
 
     if request.method == "POST":
         form_ok = form.is_valid()
-        imgs_ok = image_formset.is_valid()
         vars_ok = var_formset.is_valid()
-        if form_ok and imgs_ok and vars_ok:
+        if form_ok and vars_ok:
             saved = form.save()
-            image_formset.save()
             var_formset.save()
+            _save_variant_images(request, var_formset, product)
             qs = urlencode({"msg": "updated", "name": saved.name})
             return redirect(f"/panel/products/?{qs}")
 
     return render(request, "admin_panel/products/form.html", {
-        "form": form, "image_formset": image_formset, "var_formset": var_formset,
+        "form": form, "var_formset": var_formset,
         "action": "Edit", "product": product, "submitted": request.method == "POST",
     })
 

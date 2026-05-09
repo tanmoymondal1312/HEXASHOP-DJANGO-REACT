@@ -3,17 +3,17 @@
 {% block heading %}{{ action }} Product{% endblock %}
 
 {% block content %}
-<div style="max-width:960px;">
+<div style="max-width:980px;">
 
   <!-- Breadcrumb -->
   <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.72rem;color:var(--text3);margin-bottom:1.25rem;">
-    <a href="{% url 'admin_panel:product_list' %}" style="color:var(--text3);text-decoration:none;hover:color:var(--text2);">Products</a>
+    <a href="{% url 'admin_panel:product_list' %}" style="color:var(--text3);text-decoration:none;">Products</a>
     <span>›</span>
     <span style="color:var(--text2);">{{ action }}</span>
   </div>
 
   <!-- Error summary -->
-  {% if submitted and form.errors or submitted and image_formset.non_form_errors or submitted and var_formset.non_form_errors %}
+  {% if submitted and form.errors or submitted and var_formset.non_form_errors %}
   <div class="alert alert-error">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px;">
       <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
@@ -23,7 +23,6 @@
       <ul style="margin:0.35rem 0 0 1rem;padding:0;font-size:0.75rem;">
         {% for field in form %}{% if field.errors %}<li><b>{{ field.label }}:</b> {{ field.errors.0 }}</li>{% endif %}{% endfor %}
         {% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}
-        {% for e in image_formset.non_form_errors %}<li>Images: {{ e }}</li>{% endfor %}
         {% for e in var_formset.non_form_errors %}<li>Variants: {{ e }}</li>{% endfor %}
         {% for vf in var_formset %}{% for field in vf %}{% if field.errors %}<li>Variant – {{ field.label }}: {{ field.errors.0 }}</li>{% endif %}{% endfor %}{% endfor %}
       </ul>
@@ -31,7 +30,6 @@
   </div>
   {% endif %}
 
-  <!-- No categories warning -->
   {% if not form.category.field.queryset.exists %}
   <div class="alert alert-warning">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px;">
@@ -44,7 +42,7 @@
   <form method="post" enctype="multipart/form-data" id="product-form">
     {% csrf_token %}
 
-    <!-- ── 1. Basic Info ──────────────────────────────────────────────── -->
+    <!-- ══ 1. Basic Info ══════════════════════════════════════════════ -->
     <div class="panel-card">
       <div class="panel-card-header">
         <span class="card-accent" style="background:var(--accent);"></span>
@@ -74,9 +72,7 @@
             <select name="category" class="form-select" required>
               <option value="">— Select category —</option>
               {% for cat in form.category.field.queryset %}
-              <option value="{{ cat.pk }}" {% if form.category.value|stringformat:"s" == cat.pk|stringformat:"s" %}selected{% endif %}>
-                {{ cat.full_path }}
-              </option>
+              <option value="{{ cat.pk }}" {% if form.category.value|stringformat:"s" == cat.pk|stringformat:"s" %}selected{% endif %}>{{ cat.full_path }}</option>
               {% endfor %}
             </select>
             {% if form.category.errors %}<p class="field-error">{{ form.category.errors.0 }}</p>{% endif %}
@@ -94,15 +90,17 @@
       </div>
     </div>
 
-    <!-- ── 2. Pricing & Status ────────────────────────────────────────── -->
+    <!-- ══ 2. Pricing & Status ════════════════════════════════════════ -->
     <div class="panel-card">
       <div class="panel-card-header">
         <span class="card-accent" style="background:var(--green);"></span>
-        <span class="card-title">Pricing & Status</span>
+        <span class="card-title">Pricing &amp; Status</span>
         <span class="card-desc">Only Active products appear on the store</span>
       </div>
       <div class="panel-card-body">
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:0.875rem;align-items:end;">
+        <!-- align-items:start so all labels sit at the SAME top edge -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1.2fr auto;gap:0.875rem;align-items:start;">
+
           <div>
             <label class="field-label">Selling Price *</label>
             <div style="position:relative;">
@@ -112,6 +110,7 @@
                      class="form-input" style="padding-left:1.5rem;" placeholder="0.00" required />
             </div>
           </div>
+
           <div>
             <label class="field-label">Compare Price</label>
             <div style="position:relative;">
@@ -121,16 +120,17 @@
                      class="form-input" style="padding-left:1.5rem;" placeholder="0.00" />
             </div>
           </div>
+
           <div>
-            <label class="field-label">Cost Price</label>
+            <label class="field-label">Cost Price <span style="color:var(--text3);font-weight:400;font-size:0.65rem;">(internal)</span></label>
             <div style="position:relative;">
               <span style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);color:var(--text3);font-size:0.82rem;user-select:none;">$</span>
               <input type="number" name="cost_price" step="0.01" min="0"
                      value="{{ form.cost_price.value|default:'' }}"
                      class="form-input" style="padding-left:1.5rem;" placeholder="0.00" />
             </div>
-            <p class="field-hint">Internal — not shown publicly</p>
           </div>
+
           <div>
             <label class="field-label">Status</label>
             <select name="status" class="form-select">
@@ -144,8 +144,9 @@
               {% endfor %}
             </select>
           </div>
-          <div style="padding-bottom:0.1rem;">
-            <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;user-select:none;">
+
+          <div style="padding-top:1.5rem;">
+            <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;user-select:none;white-space:nowrap;">
               <input type="checkbox" name="is_featured" {% if form.is_featured.value %}checked{% endif %}
                      style="width:1rem;height:1rem;accent-color:var(--accent);cursor:pointer;" />
               <span style="font-size:0.8rem;color:var(--text);font-weight:500;">Featured</span>
@@ -155,170 +156,217 @@
       </div>
     </div>
 
-    <!-- ── 3. Product Images ──────────────────────────────────────────── -->
-    <div class="panel-card">
-      <div class="panel-card-header">
-        <span class="card-accent" style="background:#8b5cf6;"></span>
-        <span class="card-title">Product Images</span>
-        <span class="card-desc">PNG, JPG, WEBP · max 10 MB each</span>
-      </div>
-      <div class="panel-card-body">
-        {{ image_formset.management_form }}
-        {% if image_formset.non_form_errors %}
-        <div class="alert alert-error" style="margin-bottom:0.875rem;">{% for e in image_formset.non_form_errors %}{{ e }}{% endfor %}</div>
-        {% endif %}
-
-        <!-- Existing images -->
-        <div id="existing-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:0.75rem;margin-bottom:1rem;">
-          {% for img_form in image_formset %}
-          {% if img_form.instance.pk %}
-          <div style="position:relative;">
-            {{ img_form.id }}{{ img_form.sort_order }}
-            <div style="aspect-ratio:1;border-radius:0.625rem;overflow:hidden;border:1px solid var(--border);background:var(--bg);position:relative;">
-              {% if img_form.instance.image %}
-              <img src="{{ img_form.instance.image.url }}" style="width:100%;height:100%;object-fit:cover;" />
-              {% endif %}
-              {% if img_form.instance.is_primary %}
-              <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(99,102,241,0.85);color:#fff;font-size:8px;text-align:center;padding:2px;font-weight:700;">PRIMARY</div>
-              {% endif %}
-            </div>
-            <div style="display:flex;justify-content:space-between;margin-top:0.375rem;padding:0 2px;">
-              <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:10px;color:var(--accent);">{{ img_form.is_primary }}<span>Primary</span></label>
-              <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:10px;color:#f87171;">{{ img_form.DELETE }}<span>Delete</span></label>
-            </div>
-          </div>
-          {% endif %}{% endfor %}
-        </div>
-
-        <!-- Upload slots -->
-        {% if action == 'Edit' and product.images.exists %}
-        <p style="font-size:0.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;margin-bottom:0.625rem;">Add More</p>
-        {% endif %}
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;">
-          {% for img_form in image_formset %}
-          {% if not img_form.instance.pk %}
-          <div>
-            {{ img_form.id }}{{ img_form.sort_order }}
-            <label class="img-upload-label" id="lbl-{{ forloop.counter0 }}">
-              <div id="ph-{{ forloop.counter0 }}" style="pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:0.5rem;">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--border2)" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-                <span style="font-size:0.72rem;color:var(--text3);">Upload image</span>
-              </div>
-              <img id="pv-{{ forloop.counter0 }}" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:0.75rem;" />
-              <input type="file" name="{{ img_form.image.html_name }}" accept="image/*"
-                     style="position:absolute;width:1px;height:1px;opacity:0;"
-                     data-lbl="lbl-{{ forloop.counter0 }}"
-                     data-ph="ph-{{ forloop.counter0 }}"
-                     data-pv="pv-{{ forloop.counter0 }}"
-                     class="img-file-input" />
-            </label>
-            <div style="margin-top:0.4rem;">
-              <input type="text" name="{{ img_form.alt_text.html_name }}"
-                     value="{{ img_form.alt_text.value|default:'' }}"
-                     class="form-input" style="font-size:0.72rem;" placeholder="Alt text (optional)" />
-            </div>
-          </div>
-          {% endif %}{% endfor %}
-        </div>
-      </div>
-    </div>
-
-    <!-- ── 4. Variants (Sizes & Colors) ──────────────────────────────── -->
+    <!-- ══ 3. Variants — Sizes, Colors & Images ═══════════════════════ -->
     <div class="panel-card">
       <div class="panel-card-header">
         <span class="card-accent" style="background:var(--gold);"></span>
-        <span class="card-title">Variants — Sizes &amp; Colors</span>
-        <span class="card-desc">Each variant = one size/color combo with its own stock &amp; price</span>
+        <span class="card-title">Variants — Sizes, Colors &amp; Images</span>
+        <span class="card-desc">Each variant = one combination with its own photo</span>
       </div>
       <div class="panel-card-body">
         {{ var_formset.management_form }}
 
-        {% if var_formset.non_form_errors %}
-        <div class="alert alert-error" style="margin-bottom:0.875rem;">{% for e in var_formset.non_form_errors %}{{ e }}{% endfor %}</div>
-        {% endif %}
-
-        <!-- Column headers -->
-        <div class="variant-grid" style="padding:0 0 0.5rem;border-bottom:1px solid var(--border);margin-bottom:0.625rem;">
-          <span style="font-size:0.65rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">Size</span>
-          <span style="font-size:0.65rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">Color</span>
-          <span style="font-size:0.65rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">SKU *</span>
-          <span style="font-size:0.65rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">Price ($)</span>
-          <span style="font-size:0.65rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">Stock *</span>
-          <span style="font-size:0.65rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">Active</span>
-          <span></span>
-        </div>
-
-        <div id="variant-rows">
+        <!-- Variant list -->
+        <div id="variant-rows" style="display:flex;flex-direction:column;gap:0.875rem;">
           {% for vf in var_formset %}
-          <div class="variant-row">
+          <div class="variant-card" data-prefix="{{ vf.prefix }}" style="background:var(--bg);border:1px solid var(--border);border-radius:0.75rem;padding:1rem;">
             {{ vf.id }}
 
-            {# ── Main row: size / color / SKU / price / stock / active / delete ─ #}
-            <div class="variant-grid">
+            <div style="display:grid;grid-template-columns:88px 1fr;gap:1rem;">
 
-              {# Size — Django renders the Select widget with correct selected option #}
-              <div>{{ vf.size }}</div>
+              <!-- Left: image upload + Primary radio -->
+              <div style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;">
 
-              {# Color — TextInput with class="form-input" from widgets dict #}
-              <div>{{ vf.color }}</div>
-
-              {# SKU #}
-              <div>
-                {{ vf.sku }}
-                {% if vf.sku.errors %}
-                  <p class="field-error" style="font-size:0.65rem;">{{ vf.sku.errors.0 }}</p>
-                {% endif %}
-              </div>
-
-              {# Price override — blank = use base price #}
-              <div>{{ vf.price }}</div>
-
-              {# Stock #}
-              <div>
-                {{ vf.stock }}
-                {% if vf.stock.errors %}
-                  <p class="field-error" style="font-size:0.65rem;">{{ vf.stock.errors.0 }}</p>
-                {% endif %}
-              </div>
-
-              {# Active checkbox #}
-              <div style="display:flex;align-items:center;min-height:38px;">
-                <label style="display:flex;align-items:center;gap:5px;cursor:pointer;">
-                  {{ vf.is_active }}
-                  <span style="font-size:0.72rem;color:var(--text2);">On</span>
+                <!-- Image preview / upload zone -->
+                <label class="variant-img-label" style="width:80px;height:80px;border-radius:0.625rem;border:1.5px dashed var(--border2);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;position:relative;transition:border-color 0.15s;">
+                  {% if vf.instance.pk and vf.instance.image %}
+                  <img src="{{ vf.instance.image.image.url }}" class="variant-img-preview"
+                       style="width:100%;height:100%;object-fit:cover;border-radius:0.5rem;" />
+                  {% else %}
+                  <div class="variant-img-placeholder" style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--border2)" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <span style="font-size:0.58rem;color:var(--text3);">Photo</span>
+                  </div>
+                  <img src="" class="variant-img-preview" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:0.5rem;" />
+                  {% endif %}
+                  <input type="file" name="{{ vf.prefix }}-variant_image" accept="image/*"
+                         class="variant-img-input"
+                         style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;" />
                 </label>
+
+                <!-- Primary radio -->
+                <label style="display:flex;align-items:center;gap:4px;cursor:pointer;user-select:none;font-size:0.68rem;color:var(--text2);">
+                  <input type="radio" name="primary_variant" value="{{ vf.prefix }}"
+                         {% if vf.instance.pk and vf.instance.image and vf.instance.image.is_primary %}checked{% endif %}
+                         style="accent-color:var(--gold);cursor:pointer;" />
+                  Primary
+                </label>
+
               </div>
 
-              {# Delete — only shown for existing variants #}
-              <div style="display:flex;align-items:center;min-height:38px;">
-                {% if vf.instance.pk %}
-                <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:0.72rem;color:#f87171;">
-                  {{ vf.DELETE }}
-                  <span>Del</span>
-                </label>
-                {% endif %}
+              <!-- Right: fields -->
+              <div style="display:flex;flex-direction:column;gap:0.625rem;">
+
+                <!-- Row 1: Size / Color / SKU -->
+                <div style="display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:0.625rem;">
+                  <div>
+                    <label class="field-label">Size</label>
+                    {{ vf.size }}
+                  </div>
+                  <div>
+                    <label class="field-label">Color</label>
+                    {{ vf.color }}
+                  </div>
+                  <div>
+                    <label class="field-label">SKU *</label>
+                    {{ vf.sku }}
+                    {% if vf.sku.errors %}<p class="field-error" style="font-size:0.65rem;">{{ vf.sku.errors.0 }}</p>{% endif %}
+                  </div>
+                </div>
+
+                <!-- Row 2: Price / Stock / Active / Delete -->
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto auto;gap:0.625rem;align-items:end;">
+                  <div>
+                    <label class="field-label">Price <span style="font-weight:400;color:var(--text3);">(blank=base)</span></label>
+                    {{ vf.price }}
+                  </div>
+                  <div>
+                    <label class="field-label">Stock</label>
+                    {{ vf.stock }}
+                    {% if vf.stock.errors %}<p class="field-error" style="font-size:0.65rem;">{{ vf.stock.errors.0 }}</p>{% endif %}
+                  </div>
+                  <div>
+                    <label class="field-label">Low Stock Alert</label>
+                    {{ vf.low_stock_threshold }}
+                  </div>
+                  <div style="padding-bottom:0.1rem;">
+                    <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:0.72rem;color:var(--text2);white-space:nowrap;">
+                      {{ vf.is_active }}
+                      <span>Active</span>
+                    </label>
+                  </div>
+                  <div style="padding-bottom:0.1rem;">
+                    {% if vf.instance.pk %}
+                    <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:0.72rem;color:#f87171;white-space:nowrap;">
+                      {{ vf.DELETE }}
+                      <span>Delete</span>
+                    </label>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <!-- Row 3: Display name -->
+                <div>
+                  <label class="field-label">Display Name <span style="font-weight:400;color:var(--text3);">(auto from size+color if blank)</span></label>
+                  {{ vf.name }}
+                </div>
+
               </div>
             </div>
-
-            {# ── Secondary row: display name + low-stock threshold ─────────── #}
-            <div style="display:grid;grid-template-columns:2fr 1fr;gap:0.625rem;margin-top:0.5rem;">
-              <div>{{ vf.name }}</div>
-              <div>{{ vf.low_stock_threshold }}</div>
-            </div>
-
           </div>
           {% endfor %}
         </div>
 
-        <p style="font-size:0.72rem;color:var(--text3);margin-top:0.75rem;">
-          💡 Leave <em>Price</em> blank to use the base product price. SKU must be globally unique.
+        <!-- Add New Variant button -->
+        <button type="button" id="add-variant-btn"
+                onclick="addVariant()"
+                style="margin-top:0.875rem;display:flex;align-items:center;gap:0.5rem;
+                       background:transparent;border:1.5px dashed var(--border2);color:var(--text2);
+                       padding:0.6rem 1.25rem;border-radius:0.625rem;font-size:0.8rem;font-weight:600;
+                       cursor:pointer;transition:all 0.15s;width:100%;justify-content:center;"
+                onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)';"
+                onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text2)';">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+          </svg>
+          Add New Variant
+        </button>
+
+        <p style="font-size:0.7rem;color:var(--text3);margin-top:0.75rem;">
+          💡 Upload a photo for each variant. Mark one as <strong>Primary</strong> — that image appears in product listings.
         </p>
+
       </div>
     </div>
 
-    <!-- ── 5. Description ────────────────────────────────────────────── -->
+    <!-- Empty variant template for JavaScript cloning -->
+    <template id="empty-variant-tpl">
+      <div class="variant-card" data-prefix="variants-__prefix__"
+           style="background:var(--bg);border:1px solid var(--border);border-radius:0.75rem;padding:1rem;">
+        <input type="hidden" name="variants-__prefix__-id" value="">
+        <div style="display:grid;grid-template-columns:88px 1fr;gap:1rem;">
+          <!-- Image column -->
+          <div style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;">
+            <label class="variant-img-label"
+                   style="width:80px;height:80px;border-radius:0.625rem;border:1.5px dashed var(--border2);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;position:relative;transition:border-color 0.15s;">
+              <div class="variant-img-placeholder" style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--border2)" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span style="font-size:0.58rem;color:var(--text3);">Photo</span>
+              </div>
+              <img src="" class="variant-img-preview" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:0.5rem;" />
+              <input type="file" name="variants-__prefix__-variant_image" accept="image/*"
+                     class="variant-img-input"
+                     style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;" />
+            </label>
+            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;user-select:none;font-size:0.68rem;color:var(--text2);">
+              <input type="radio" name="primary_variant" value="variants-__prefix__"
+                     style="accent-color:var(--gold);cursor:pointer;" />
+              Primary
+            </label>
+          </div>
+          <!-- Fields column -->
+          <div style="display:flex;flex-direction:column;gap:0.625rem;">
+            <!-- Row 1 -->
+            <div style="display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:0.625rem;">
+              <div>
+                <label class="field-label">Size</label>
+                {{ var_formset.empty_form.size }}
+              </div>
+              <div>
+                <label class="field-label">Color</label>
+                {{ var_formset.empty_form.color }}
+              </div>
+              <div>
+                <label class="field-label">SKU *</label>
+                <input type="text" name="variants-__prefix__-sku" class="form-input" placeholder="e.g. PROD-M-BLK" />
+              </div>
+            </div>
+            <!-- Row 2 -->
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:0.625rem;align-items:end;">
+              <div>
+                <label class="field-label">Price</label>
+                <input type="number" name="variants-__prefix__-price" class="form-input" step="0.01" placeholder="Blank=base" />
+              </div>
+              <div>
+                <label class="field-label">Stock</label>
+                <input type="number" name="variants-__prefix__-stock" class="form-input" min="0" value="0" />
+              </div>
+              <div>
+                <label class="field-label">Low Stock Alert</label>
+                <input type="number" name="variants-__prefix__-low_stock_threshold" class="form-input" min="1" value="5" style="font-size:0.72rem;" />
+              </div>
+              <div style="padding-bottom:0.1rem;">
+                <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:0.72rem;color:var(--text2);white-space:nowrap;">
+                  <input type="checkbox" name="variants-__prefix__-is_active" checked style="width:1rem;height:1rem;accent-color:var(--accent);cursor:pointer;" />
+                  <span>Active</span>
+                </label>
+              </div>
+            </div>
+            <!-- Row 3 -->
+            <div>
+              <label class="field-label">Display Name <span style="font-weight:400;color:var(--text3);">(auto from size+color)</span></label>
+              <input type="text" name="variants-__prefix__-name" class="form-input" placeholder="Auto-generated if blank" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- ══ 4. Description ════════════════════════════════════════════ -->
     <div class="panel-card">
       <div class="panel-card-header">
         <span class="card-accent" style="background:#f59e0b;"></span>
@@ -327,30 +375,26 @@
       <div class="panel-card-body">
         <div style="margin-bottom:0.875rem;">
           <label class="field-label">Short Description</label>
-          <input type="text" name="short_description"
-                 value="{{ form.short_description.value|default:'' }}"
+          <input type="text" name="short_description" value="{{ form.short_description.value|default:'' }}"
                  class="form-input" placeholder="Brief summary shown in product listings" />
         </div>
         <div>
           <label class="field-label">Full Description</label>
-          <textarea name="description" rows="5" class="form-input"
-                    placeholder="Detailed product description…">{{ form.description.value|default:'' }}</textarea>
+          <textarea name="description" rows="5" class="form-input" placeholder="Detailed product description…">{{ form.description.value|default:'' }}</textarea>
         </div>
       </div>
     </div>
 
-    <!-- ── 6. SEO ─────────────────────────────────────────────────────── -->
+    <!-- ══ 5. SEO ═════════════════════════════════════════════════════ -->
     <div class="panel-card">
       <div class="panel-card-header">
         <span class="card-accent" style="background:#06b6d4;"></span>
         <span class="card-title">SEO</span>
-        <span class="card-desc">Improves search engine ranking</span>
       </div>
       <div class="panel-card-body">
         <div style="margin-bottom:0.875rem;">
           <label class="field-label">Meta Title <span style="color:var(--text3);font-weight:400;">(max 70 chars)</span></label>
-          <input type="text" name="meta_title"
-                 value="{{ form.meta_title.value|default:'' }}"
+          <input type="text" name="meta_title" value="{{ form.meta_title.value|default:'' }}"
                  class="form-input" placeholder="Leave blank to use product name" maxlength="70" />
         </div>
         <div>
@@ -371,6 +415,7 @@
       </button>
       <a href="{% url 'admin_panel:product_list' %}" class="btn-secondary">Cancel</a>
     </div>
+
   </form>
 </div>
 {% endblock %}
@@ -387,34 +432,55 @@
     slugEl.value = nameEl.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   });
 
-  // ── Image preview ─────────────────────────────────────────────────────
-  document.querySelectorAll('.img-file-input').forEach(input => {
-    input.addEventListener('change', function() {
+  // ── Variant image preview ─────────────────────────────────────────────
+  function attachImgPreview(card) {
+    const input = card.querySelector('.variant-img-input');
+    if (!input) return;
+    input.addEventListener('change', function () {
       const file = this.files[0];
       if (!file) return;
-      const pv  = document.getElementById(this.dataset.pv);
-      const ph  = document.getElementById(this.dataset.ph);
-      const lbl = document.getElementById(this.dataset.lbl);
-      new FileReader().onload = e => {
-        pv.src = e.target.result;
-        pv.style.display = 'block';
-        if (ph) ph.style.display = 'none';
-        if (lbl) lbl.classList.add('has-preview');
+      const label       = card.querySelector('.variant-img-label');
+      const preview     = card.querySelector('.variant-img-preview');
+      const placeholder = card.querySelector('.variant-img-placeholder');
+      const reader = new FileReader();
+      reader.onload = e => {
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        if (placeholder) placeholder.style.display = 'none';
+        if (label) { label.style.border = '1.5px solid var(--accent)'; }
       };
-      const r = new FileReader(); r.onload = e => {
-        pv.src = e.target.result; pv.style.display = 'block';
-        if (ph) ph.style.display = 'none';
-        if (lbl) lbl.classList.add('has-preview');
-      };
-      r.readAsDataURL(file);
+      reader.readAsDataURL(file);
     });
-  });
+  }
 
-  // ── Style Django-injected checkboxes (is_primary, DELETE) ─────────────
-  document.querySelectorAll('#existing-grid input[type="checkbox"]').forEach(cb => {
-    cb.style.cursor  = 'pointer';
-    cb.style.accentColor = cb.name.includes('DELETE') ? '#ef4444' : 'var(--accent)';
-    cb.style.width = '0.875rem'; cb.style.height = '0.875rem';
-  });
+  // Attach to all existing variant cards
+  document.querySelectorAll('.variant-card').forEach(attachImgPreview);
+
+  // ── Add New Variant ───────────────────────────────────────────────────
+  let variantCount = {{ var_formset.total_form_count }};
+
+  function addVariant() {
+    const totalInput = document.getElementById('id_variants-TOTAL_FORMS');
+    const maxForms   = parseInt(document.getElementById('id_variants-MAX_NUM_FORMS').value) || 20;
+
+    if (variantCount >= maxForms) {
+      alert('Maximum ' + maxForms + ' variants allowed.');
+      return;
+    }
+
+    // Clone template, replace __prefix__ with current count
+    const tpl  = document.getElementById('empty-variant-tpl');
+    const html = tpl.innerHTML.replace(/__prefix__/g, variantCount);
+
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = html;
+    const newCard = wrapper.firstElementChild;
+
+    document.getElementById('variant-rows').appendChild(newCard);
+    attachImgPreview(newCard);
+
+    variantCount++;
+    totalInput.value = variantCount;
+  }
 </script>
 {% endblock %}
