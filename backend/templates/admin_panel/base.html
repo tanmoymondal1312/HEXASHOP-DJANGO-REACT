@@ -3,289 +3,443 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}Admin{% endblock %} · HEXASHOP</title>
+  <title>{% block title %}Dashboard{% endblock %} · HEXASHOP Admin</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            surface: '#0f1117',
-            card:    '#1a1d27',
-            border:  '#2a2d3a',
-            accent:  '#6366f1',
-          }
-        }
-      }
-    }
-  </script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    *, *::before, *::after { box-sizing: border-box; font-family: 'Inter', sans-serif; }
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    /* ── Form controls ─────────────────────────────────────────────────────── */
+  <style>
+    /* ── Base ──────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { font-family: 'Inter', sans-serif; background: #070b12; color: #e5e7eb; margin: 0; }
+
+    /* ── CSS variables ─────────────────────────────────────────────────── */
+    :root {
+      --bg:       #070b12;
+      --surface:  #0f1520;
+      --card:     #141c2e;
+      --card2:    #1a2340;
+      --border:   #1f2d45;
+      --border2:  #263450;
+      --text:     #e5e7eb;
+      --text2:    #8b9ab5;
+      --text3:    #4d607e;
+      --accent:   #6366f1;
+      --accent2:  rgba(99,102,241,0.15);
+      --gold:     #f5a623;
+      --gold2:    rgba(245,166,35,0.15);
+      --blue:     #1e90ff;
+      --green:    #10b981;
+      --red:      #ef4444;
+      --sidebar-w: 230px;
+    }
+
+    /* ── Layout ─────────────────────────────────────────────────────────── */
+    .layout { display: flex; min-height: 100vh; }
+
+    /* ── Sidebar ─────────────────────────────────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-w); flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
+    }
+    .sidebar-logo {
+      padding: 1.25rem 1.25rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-logo a { text-decoration: none; display: flex; align-items: center; gap: 0.625rem; }
+    .logo-hex { width: 34px; height: 34px; }
+    .logo-text { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.02em; }
+    .logo-text span { color: var(--blue); }
+
+    .sidebar-section { padding: 1rem 0.875rem 0; }
+    .sidebar-label {
+      font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--text3); padding: 0 0.375rem;
+      margin-bottom: 0.375rem;
+    }
+    .sidebar-nav { list-style: none; margin: 0 0 0.5rem; padding: 0; }
+    .sidebar-nav li + li { margin-top: 1px; }
+
+    .nav-link {
+      display: flex; align-items: center; gap: 0.625rem;
+      padding: 0.55rem 0.75rem; border-radius: 0.625rem;
+      font-size: 0.82rem; font-weight: 500; color: var(--text2);
+      text-decoration: none; transition: all 0.15s;
+    }
+    .nav-link:hover { background: var(--card); color: var(--text); }
+    .nav-link.active {
+      background: var(--accent2); color: var(--accent);
+      border: 1px solid rgba(99,102,241,0.2);
+    }
+    .nav-icon {
+      width: 30px; height: 30px; border-radius: 0.5rem;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.04); flex-shrink: 0;
+    }
+    .nav-link.active .nav-icon { background: var(--accent2); }
+    .nav-icon svg { width: 14px; height: 14px; }
+
+    .sidebar-footer {
+      margin-top: auto; padding: 1rem; border-top: 1px solid var(--border);
+    }
+    .sidebar-user {
+      display: flex; align-items: center; gap: 0.625rem;
+      padding: 0.625rem; border-radius: 0.625rem;
+      background: var(--card); margin-bottom: 0.5rem;
+    }
+    .user-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--blue));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .user-email { font-size: 0.72rem; color: var(--text2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .btn-logout {
+      display: flex; align-items: center; justify-content: center; gap: 0.375rem;
+      width: 100%; padding: 0.5rem; border-radius: 0.5rem;
+      background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.18);
+      color: #f87171; font-size: 0.75rem; font-weight: 600;
+      text-decoration: none; transition: background 0.15s;
+    }
+    .btn-logout:hover { background: rgba(239,68,68,0.16); }
+
+    /* ── Main ────────────────────────────────────────────────────────────── */
+    .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+    .topbar {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 0 2rem; height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 20;
+    }
+    .page-title { font-size: 0.9rem; font-weight: 700; color: var(--text); }
+
+    .topbar-right { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: var(--text2); }
+    .badge-staff {
+      padding: 0.2rem 0.6rem; border-radius: 999px;
+      background: var(--accent2); color: var(--accent);
+      font-size: 0.65rem; font-weight: 700; border: 1px solid rgba(99,102,241,0.2);
+    }
+
+    .page-content { flex: 1; padding: 1.75rem 2rem; }
+
+    /* ── Form controls ───────────────────────────────────────────────────── */
+    label.field-label {
+      display: block; font-size: 0.72rem; font-weight: 600;
+      color: var(--text2); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.05em;
+    }
     .form-input,
     .form-input[type="text"],
     .form-input[type="number"],
     .form-input[type="email"],
     .form-input[type="url"],
     textarea.form-input {
-      display: block;
-      width: 100%;
-      background-color: #0f1117;
-      border: 1px solid #2a2d3a;
-      color: #e5e7eb;
-      border-radius: 0.5rem;
-      padding: 0.6rem 1rem;
-      font-size: 0.875rem;
-      line-height: 1.5;
-      outline: none;
-      transition: border-color 0.15s, box-shadow 0.15s;
-      resize: vertical;
+      display: block; width: 100%;
+      background: var(--bg); border: 1px solid var(--border);
+      color: var(--text); border-radius: 0.5rem;
+      padding: 0.6rem 0.875rem; font-size: 0.82rem; line-height: 1.5;
+      outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+      resize: vertical; font-family: 'Inter', sans-serif;
     }
-    .form-input::placeholder { color: #4b5563; }
+    .form-input::placeholder { color: var(--text3); }
     .form-input:focus {
-      border-color: #6366f1;
+      border-color: var(--accent);
       box-shadow: 0 0 0 3px rgba(99,102,241,0.18);
     }
-
     .form-select {
-      display: block;
-      width: 100%;
-      background-color: #0f1117;
-      border: 1px solid #2a2d3a;
-      color: #e5e7eb;
-      border-radius: 0.5rem;
-      padding: 0.6rem 1rem;
-      font-size: 0.875rem;
-      line-height: 1.5;
-      outline: none;
-      cursor: pointer;
+      display: block; width: 100%;
+      background: var(--bg); border: 1px solid var(--border);
+      color: var(--text); border-radius: 0.5rem;
+      padding: 0.6rem 2rem 0.6rem 0.875rem; font-size: 0.82rem; line-height: 1.5;
+      outline: none; cursor: pointer;
       transition: border-color 0.15s, box-shadow 0.15s;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 0.75rem center;
-      background-size: 1.25rem;
-      padding-right: 2.5rem;
+      -webkit-appearance: none; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%238b9ab5' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 0.625rem center; background-size: 1.1rem;
+      font-family: 'Inter', sans-serif;
     }
-    .form-select option { background-color: #1a1d27; color: #e5e7eb; }
-    .form-select:focus {
-      border-color: #6366f1;
-      box-shadow: 0 0 0 3px rgba(99,102,241,0.18);
-    }
+    .form-select option { background: var(--card); color: var(--text); }
+    .form-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,102,241,0.18); }
 
-    /* ── Buttons ───────────────────────────────────────────────────────────── */
-    .btn-primary {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      background-color: #6366f1;
-      color: #fff;
-      font-weight: 600;
-      padding: 0.6rem 1.25rem;
-      border-radius: 0.5rem;
-      font-size: 0.875rem;
-      border: none;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background-color 0.15s;
+    .field-hint { font-size: 0.68rem; color: var(--text3); margin-top: 0.3rem; }
+    .field-error { font-size: 0.72rem; color: #f87171; margin-top: 0.3rem; }
+
+    /* ── Cards ───────────────────────────────────────────────────────────── */
+    .panel-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 0.875rem; overflow: hidden; margin-bottom: 1rem;
     }
-    .btn-primary:hover { background-color: #4f46e5; }
+    .panel-card-header {
+      display: flex; align-items: center; gap: 0.625rem;
+      padding: 0.875rem 1.25rem; border-bottom: 1px solid var(--border);
+    }
+    .card-accent { width: 4px; height: 18px; border-radius: 2px; flex-shrink: 0; }
+    .card-title { font-size: 0.82rem; font-weight: 700; color: var(--text); }
+    .card-desc { font-size: 0.7rem; color: var(--text2); margin-left: auto; }
+    .panel-card-body { padding: 1.25rem; }
+
+    /* ── Buttons ─────────────────────────────────────────────────────────── */
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 0.425rem;
+      background: linear-gradient(135deg, var(--accent) 0%, #4f46e5 100%);
+      color: #fff; font-weight: 700; padding: 0.6rem 1.25rem;
+      border-radius: 0.5rem; font-size: 0.8rem; border: none;
+      cursor: pointer; text-decoration: none;
+      transition: opacity 0.15s, transform 0.1s;
+      box-shadow: 0 2px 12px rgba(99,102,241,0.35);
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary:active { transform: scale(0.98); }
+
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 0.425rem;
+      background: var(--card2); color: var(--text2); font-weight: 600;
+      padding: 0.6rem 1.25rem; border-radius: 0.5rem; font-size: 0.8rem;
+      border: 1px solid var(--border2); cursor: pointer; text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+    }
+    .btn-secondary:hover { background: var(--card); color: var(--text); }
 
     .btn-danger {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      background-color: #dc2626;
-      color: #fff;
-      font-weight: 600;
-      padding: 0.6rem 1.25rem;
-      border-radius: 0.5rem;
-      font-size: 0.875rem;
-      border: none;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background-color 0.15s;
+      display: inline-flex; align-items: center; gap: 0.425rem;
+      background: rgba(239,68,68,0.1); color: #f87171; font-weight: 600;
+      padding: 0.6rem 1.25rem; border-radius: 0.5rem; font-size: 0.8rem;
+      border: 1px solid rgba(239,68,68,0.2); cursor: pointer; text-decoration: none;
+      transition: background 0.15s;
     }
-    .btn-danger:hover { background-color: #b91c1c; }
+    .btn-danger:hover { background: rgba(239,68,68,0.2); }
 
-    .btn-ghost {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      background-color: transparent;
-      color: #9ca3af;
-      font-weight: 500;
-      padding: 0.6rem 1.25rem;
-      border-radius: 0.5rem;
-      font-size: 0.875rem;
-      border: 1px solid #2a2d3a;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background-color 0.15s, color 0.15s;
+    .btn-sm {
+      padding: 0.32rem 0.75rem; font-size: 0.72rem; border-radius: 0.375rem;
     }
-    .btn-ghost:hover { background-color: rgba(255,255,255,0.05); color: #fff; }
 
-    .btn-sm-danger {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-      background-color: rgba(220,38,38,0.12);
-      color: #f87171;
-      font-weight: 500;
-      padding: 0.3rem 0.6rem;
-      border-radius: 0.375rem;
-      font-size: 0.75rem;
-      border: 1px solid rgba(220,38,38,0.25);
-      cursor: pointer;
-      transition: background-color 0.15s;
+    /* ── Badges ──────────────────────────────────────────────────────────── */
+    .badge {
+      display: inline-flex; align-items: center;
+      padding: 0.18rem 0.6rem; border-radius: 999px;
+      font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
     }
-    .btn-sm-danger:hover { background-color: rgba(220,38,38,0.22); }
+    .badge-green  { background: rgba(16,185,129,0.12); color: #34d399; border: 1px solid rgba(16,185,129,0.2); }
+    .badge-yellow { background: rgba(245,158,11,0.12); color: #fbbf24;  border: 1px solid rgba(245,158,11,0.2); }
+    .badge-red    { background: rgba(239,68,68,0.12);  color: #f87171;  border: 1px solid rgba(239,68,68,0.2); }
+    .badge-gray   { background: rgba(107,114,128,0.12);color: #9ca3af;  border: 1px solid rgba(107,114,128,0.2); }
 
-    /* ── Image upload slot ─────────────────────────────────────────────────── */
+    /* ── Table ───────────────────────────────────────────────────────────── */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th {
+      font-size: 0.67rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.07em; color: var(--text3);
+      padding: 0.75rem 1rem; text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .data-table td {
+      padding: 0.875rem 1rem; font-size: 0.8rem; color: var(--text2);
+      border-bottom: 1px solid rgba(31,45,69,0.5);
+      vertical-align: middle;
+    }
+    .data-table tr:hover td { background: rgba(255,255,255,0.015); }
+    .data-table tr:last-child td { border-bottom: none; }
+
+    /* ── Stats cards ─────────────────────────────────────────────────────── */
+    .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 0.875rem; padding: 1.1rem 1.25rem;
+    }
+    .stat-icon {
+      width: 38px; height: 38px; border-radius: 0.625rem;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 0.875rem;
+    }
+    .stat-value { font-size: 1.6rem; font-weight: 800; color: var(--text); line-height: 1; }
+    .stat-label { font-size: 0.7rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 0.25rem; }
+
+    /* ── Image upload ────────────────────────────────────────────────────── */
     .img-upload-label {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      min-height: 7rem;
-      cursor: pointer;
-      border-radius: 0.75rem;
-      border: 2px dashed #2a2d3a;
-      background-color: #0f1117;
-      transition: border-color 0.15s;
-      padding: 1rem;
-      text-align: center;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 0.5rem; min-height: 7rem;
+      cursor: pointer; border-radius: 0.75rem;
+      border: 1.5px dashed var(--border2); background: var(--bg);
+      transition: border-color 0.15s; padding: 1rem; text-align: center;
+      position: relative;
     }
-    .img-upload-label:hover { border-color: rgba(99,102,241,0.5); }
+    .img-upload-label:hover { border-color: var(--accent); }
     .img-upload-label.has-preview {
-      border-style: solid;
-      border-color: #6366f1;
-      padding: 0;
-      overflow: hidden;
+      border-style: solid; border-color: var(--accent);
+      padding: 0; overflow: hidden;
     }
 
-    /* ── Scrollbar ─────────────────────────────────────────────────────────── */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #0f1117; }
-    ::-webkit-scrollbar-thumb { background: #2a2d3a; border-radius: 3px; }
+    /* ── Variants table ──────────────────────────────────────────────────── */
+    .variant-row {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 0.625rem; padding: 0.875rem 1rem;
+      margin-bottom: 0.625rem; position: relative;
+    }
+    .variant-row:hover { border-color: var(--border2); }
+    .variant-grid { display: grid; grid-template-columns: 1fr 1fr 1.5fr 0.8fr 0.8fr 0.8fr auto; gap: 0.625rem; align-items: end; }
+
+    /* ── Scrollbar ───────────────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+    /* ── Alert ───────────────────────────────────────────────────────────── */
+    .alert {
+      display: flex; align-items: flex-start; gap: 0.75rem;
+      padding: 0.875rem 1.1rem; border-radius: 0.625rem;
+      font-size: 0.8rem; margin-bottom: 1rem;
+    }
+    .alert-success { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); color: #34d399; }
+    .alert-error   { background: rgba(239,68,68,0.08);  border: 1px solid rgba(239,68,68,0.25);  color: #f87171; }
+    .alert-warning { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); color: #fbbf24; }
+
+    /* ── Section divider ─────────────────────────────────────────────────── */
+    .section-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .section-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+    .section-grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem; }
   </style>
 </head>
-<body class="bg-[#0f1117] text-gray-200 min-h-screen flex">
 
-  <!-- ── Sidebar ───────────────────────────────────────────────────────────── -->
-  <aside class="w-60 bg-[#1a1d27] border-r border-[#2a2d3a] fixed top-0 left-0 h-full flex flex-col z-40">
+<body>
+<div class="layout">
 
-    <!-- Logo -->
-    <div class="px-6 py-5 border-b border-[#2a2d3a]">
-      <span class="text-lg font-bold tracking-tight">
-        <span class="text-white">HEXA</span><span class="text-indigo-400">SHOP</span>
-      </span>
-      <p class="text-[11px] text-gray-500 mt-0.5 uppercase tracking-widest">Admin Panel</p>
+  <!-- ── SIDEBAR ─────────────────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <a href="{% url 'admin_panel:dashboard' %}">
+        <svg class="logo-hex" viewBox="0 0 34 38" fill="none">
+          <polygon points="17,1 33,10 33,28 17,37 1,28 1,10" fill="none" stroke="#f5a623" stroke-width="1.8"/>
+          <polygon points="17,6 28,12.5 28,25.5 17,32 6,25.5 6,12.5" fill="rgba(245,166,35,0.08)" stroke="rgba(245,166,35,0.35)" stroke-width="1"/>
+          <text x="17" y="23" text-anchor="middle" fill="#f5a623" font-size="13" font-weight="800" font-family="Inter">H</text>
+        </svg>
+        <span class="logo-text">HEXA<span>SHOP</span></span>
+      </a>
     </div>
 
-    <!-- Nav -->
-    <nav class="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+    {% with url_name=request.resolver_match.url_name %}
 
-      {% with url_name=request.resolver_match.url_name %}
+    <!-- Main nav -->
+    <div class="sidebar-section">
+      <p class="sidebar-label">Main</p>
+      <ul class="sidebar-nav">
+        <li>
+          <a href="{% url 'admin_panel:dashboard' %}" class="nav-link {% if url_name == 'dashboard' %}active{% endif %}">
+            <span class="nav-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+              </svg>
+            </span>
+            Dashboard
+          </a>
+        </li>
+      </ul>
+    </div>
 
-      <a href="{% url 'admin_panel:dashboard' %}"
-         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition
-                {% if url_name == 'dashboard' %}bg-indigo-600 text-white{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %}">
-        <svg class="w-4.5 h-4.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-        </svg>
-        Dashboard
-      </a>
+    <!-- Catalog -->
+    <div class="sidebar-section">
+      <p class="sidebar-label">Catalog</p>
+      <ul class="sidebar-nav">
+        <li>
+          <a href="{% url 'admin_panel:product_list' %}" class="nav-link {% if 'product' in url_name %}active{% endif %}">
+            <span class="nav-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+              </svg>
+            </span>
+            Products
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'admin_panel:category_list' %}" class="nav-link {% if 'category' in url_name %}active{% endif %}">
+            <span class="nav-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+              </svg>
+            </span>
+            Categories
+          </a>
+        </li>
+      </ul>
+    </div>
 
-      <a href="{% url 'admin_panel:product_list' %}"
-         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition
-                {% if 'product' in url_name %}bg-indigo-600 text-white{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %}">
-        <svg class="w-4.5 h-4.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-        </svg>
-        Products
-      </a>
+    <!-- Store -->
+    <div class="sidebar-section">
+      <p class="sidebar-label">Store</p>
+      <ul class="sidebar-nav">
+        <li>
+          <a href="{% url 'admin_panel:announcement' %}" class="nav-link {% if url_name == 'announcement' %}active{% endif %}">
+            <span class="nav-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+              </svg>
+            </span>
+            Announcement Bar
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'admin_panel:hero_image' %}" class="nav-link {% if url_name == 'hero_image' %}active{% endif %}">
+            <span class="nav-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+            </span>
+            Hero Image
+          </a>
+        </li>
+      </ul>
+    </div>
 
-      <a href="{% url 'admin_panel:category_list' %}"
-         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition
-                {% if 'category' in url_name %}bg-indigo-600 text-white{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %}">
-        <svg class="w-4.5 h-4.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-        </svg>
-        Categories
-      </a>
+    {% endwith %}
 
-      <div class="pt-3 pb-1 px-3">
-        <p class="text-[10px] uppercase tracking-widest text-gray-600 font-semibold">Store</p>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar">{{ request.user.email|first|upper }}</div>
+        <div style="min-width:0;">
+          <div style="font-size:0.75rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+            {{ request.user.get_full_name|default:request.user.username }}
+          </div>
+          <div class="user-email">{{ request.user.email }}</div>
+        </div>
       </div>
-
-      <a href="{% url 'admin_panel:announcement' %}"
-         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition
-                {% if url_name == 'announcement' %}bg-indigo-600 text-white{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %}">
-        <svg class="w-4.5 h-4.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+      <a href="{% url 'admin_panel:logout' %}" class="btn-logout">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
         </svg>
-        Announcement Bar
-      </a>
-
-      <a href="{% url 'admin_panel:hero_image' %}"
-         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition
-                {% if url_name == 'hero_image' %}bg-indigo-600 text-white{% else %}text-gray-400 hover:bg-white/5 hover:text-white{% endif %}">
-        <svg class="w-4.5 h-4.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-        </svg>
-        Hero Image
-      </a>
-
-      {% endwith %}
-    </nav>
-
-    <!-- Bottom -->
-    <div class="px-3 py-4 border-t border-[#2a2d3a] space-y-0.5">
-      <a href="http://localhost:3000" target="_blank"
-         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:bg-white/5 hover:text-white transition">
-        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-        </svg>
-        View Store
-      </a>
-      <a href="{% url 'admin_panel:logout' %}"
-         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition">
-        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-        </svg>
-        Logout
+        Sign Out
       </a>
     </div>
   </aside>
 
-  <!-- ── Main content ────────────────────────────────────────────────────── -->
-  <div class="ml-60 flex-1 min-h-screen flex flex-col">
+  <!-- ── MAIN ──────────────────────────────────────────────────────────── -->
+  <div class="main">
 
-    <!-- Top bar -->
-    <header class="sticky top-0 z-30 bg-[#0f1117]/80 backdrop-blur border-b border-[#2a2d3a] px-8 py-4 flex items-center justify-between">
-      <h1 class="text-base font-semibold text-white">{% block heading %}Dashboard{% endblock %}</h1>
-      <div class="flex items-center gap-3">
-        <span class="text-xs text-gray-500">Logged in as</span>
-        <span class="text-xs font-medium text-indigo-400">{{ request.user.email }}</span>
+    <!-- Topbar -->
+    <div class="topbar">
+      <h1 class="page-title">{% block heading %}Dashboard{% endblock %}</h1>
+      <div class="topbar-right">
+        <a href="{{ request.scheme }}://localhost:3000" target="_blank"
+           style="font-size:0.72rem;color:var(--text2);text-decoration:none;display:flex;align-items:center;gap:4px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+          </svg>
+          View Store
+        </a>
+        <span class="badge-staff">Staff</span>
       </div>
-    </header>
+    </div>
 
-    <main class="flex-1 p-8">
+    <!-- Page content -->
+    <div class="page-content">
       {% block content %}{% endblock %}
-    </main>
+    </div>
   </div>
 
-  {% block scripts %}{% endblock %}
+</div>
+
+{% block scripts %}{% endblock %}
 </body>
 </html>

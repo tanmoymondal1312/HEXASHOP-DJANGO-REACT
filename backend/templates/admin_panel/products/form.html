@@ -3,390 +3,428 @@
 {% block heading %}{{ action }} Product{% endblock %}
 
 {% block content %}
-<div class="max-w-3xl">
+<div style="max-width:960px;">
 
   <!-- Breadcrumb -->
-  <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.75rem;color:#6b7280;margin-bottom:1.5rem;">
-    <a href="{% url 'admin_panel:product_list' %}" style="color:#6b7280;text-decoration:none;" onmouseover="this.style.color='#e5e7eb'" onmouseout="this.style.color='#6b7280'">Products</a>
+  <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.72rem;color:var(--text3);margin-bottom:1.25rem;">
+    <a href="{% url 'admin_panel:product_list' %}" style="color:var(--text3);text-decoration:none;hover:color:var(--text2);">Products</a>
     <span>›</span>
-    <span style="color:#9ca3af;">{{ action }}</span>
+    <span style="color:var(--text2);">{{ action }}</span>
   </div>
 
-  <!-- ── Error summary (shown after failed submit) ───────────────────────── -->
-  {% if submitted and form.errors or submitted and image_formset.non_form_errors %}
-  <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);
-              color:#f87171;border-radius:0.75rem;padding:1rem 1.25rem;margin-bottom:1.25rem;">
-    <p style="font-weight:600;font-size:0.875rem;margin-bottom:0.5rem;">
-      ⚠ Please fix the errors below before saving.
-    </p>
-    <ul style="font-size:0.8125rem;list-style:disc;padding-left:1.25rem;line-height:1.8;">
-      {% for field in form %}
-        {% if field.errors %}
-        <li><strong>{{ field.label }}:</strong> {{ field.errors.0 }}</li>
-        {% endif %}
-      {% endfor %}
-      {% for e in form.non_field_errors %}
-      <li>{{ e }}</li>
-      {% endfor %}
-      {% for e in image_formset.non_form_errors %}
-      <li>Images: {{ e }}</li>
-      {% endfor %}
-      {% for img_form in image_formset %}
-        {% for field in img_form %}
-          {% if field.errors %}
-          <li>Image {{ forloop.parentloop.counter }} – {{ field.label }}: {{ field.errors.0 }}</li>
-          {% endif %}
-        {% endfor %}
-      {% endfor %}
-    </ul>
+  <!-- Error summary -->
+  {% if submitted and form.errors or submitted and image_formset.non_form_errors or submitted and var_formset.non_form_errors %}
+  <div class="alert alert-error">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px;">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+    </svg>
+    <div>
+      <strong>Fix the errors below before saving:</strong>
+      <ul style="margin:0.35rem 0 0 1rem;padding:0;font-size:0.75rem;">
+        {% for field in form %}{% if field.errors %}<li><b>{{ field.label }}:</b> {{ field.errors.0 }}</li>{% endif %}{% endfor %}
+        {% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}
+        {% for e in image_formset.non_form_errors %}<li>Images: {{ e }}</li>{% endfor %}
+        {% for e in var_formset.non_form_errors %}<li>Variants: {{ e }}</li>{% endfor %}
+        {% for vf in var_formset %}{% for field in vf %}{% if field.errors %}<li>Variant – {{ field.label }}: {{ field.errors.0 }}</li>{% endif %}{% endfor %}{% endfor %}
+      </ul>
+    </div>
   </div>
   {% endif %}
 
   <!-- No categories warning -->
-  {% if not form.category.field.queryset %}
-  <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);
-              color:#fbbf24;border-radius:0.75rem;padding:0.875rem 1.25rem;margin-bottom:1.25rem;
-              font-size:0.875rem;">
-    ⚠ No categories exist yet.
-    <a href="{% url 'admin_panel:category_add' %}" style="color:#818cf8;font-weight:600;margin-left:0.25rem;">
-      Add a category first →
-    </a>
+  {% if not form.category.field.queryset.exists %}
+  <div class="alert alert-warning">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px;">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+    </svg>
+    No categories yet. <a href="{% url 'admin_panel:category_add' %}" style="color:var(--accent);margin-left:4px;">Add a category first →</a>
   </div>
   {% endif %}
 
   <form method="post" enctype="multipart/form-data" id="product-form">
     {% csrf_token %}
 
-    <!-- ── Basic Info ───────────────────────────────────────────────────── -->
-    <div style="background:#1a1d27;border:1px solid #2a2d3a;border-radius:0.75rem;overflow:hidden;margin-bottom:1rem;">
-      <div style="padding:1rem 1.25rem;border-bottom:1px solid #2a2d3a;display:flex;align-items:center;gap:0.5rem;">
-        <span style="width:4px;height:1rem;background:#6366f1;border-radius:2px;display:inline-block;"></span>
-        <h3 style="font-size:0.875rem;font-weight:600;color:#fff;margin:0;">Basic Information</h3>
+    <!-- ── 1. Basic Info ──────────────────────────────────────────────── -->
+    <div class="panel-card">
+      <div class="panel-card-header">
+        <span class="card-accent" style="background:var(--accent);"></span>
+        <span class="card-title">Basic Information</span>
       </div>
-      <div style="padding:1.25rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-
-        <div style="grid-column:1/-1;">
-          <label style="display:block;font-size:0.75rem;font-weight:500;color:#9ca3af;margin-bottom:0.375rem;">
-            Product name <span style="color:#f87171;">*</span>
-          </label>
-          <input type="text" name="name" id="id_name"
-                 value="{{ form.name.value|default:'' }}"
-                 class="form-input" placeholder="e.g. Classic White Sneakers" required />
-          {% if form.name.errors %}
-          <p style="font-size:0.75rem;color:#f87171;margin-top:0.25rem;">{{ form.name.errors.0 }}</p>
-          {% endif %}
+      <div class="panel-card-body">
+        <div class="section-grid-2" style="margin-bottom:0.875rem;">
+          <div style="grid-column:1/-1;">
+            <label class="field-label">Product Name *</label>
+            <input type="text" name="name" id="id_name" value="{{ form.name.value|default:'' }}"
+                   class="form-input" placeholder="e.g. Classic White Sneakers" required />
+            {% if form.name.errors %}<p class="field-error">{{ form.name.errors.0 }}</p>{% endif %}
+          </div>
+          <div>
+            <label class="field-label">Slug</label>
+            <input type="text" name="slug" id="id_slug" value="{{ form.slug.value|default:'' }}"
+                   class="form-input" placeholder="auto-filled from name" />
+          </div>
+          <div>
+            <label class="field-label">SKU *</label>
+            <input type="text" name="sku" value="{{ form.sku.value|default:'' }}"
+                   class="form-input" placeholder="e.g. SNK-WHT-001" required />
+            {% if form.sku.errors %}<p class="field-error">{{ form.sku.errors.0 }}</p>{% endif %}
+          </div>
+          <div>
+            <label class="field-label">Category *</label>
+            <select name="category" class="form-select" required>
+              <option value="">— Select category —</option>
+              {% for cat in form.category.field.queryset %}
+              <option value="{{ cat.pk }}" {% if form.category.value|stringformat:"s" == cat.pk|stringformat:"s" %}selected{% endif %}>
+                {{ cat.full_path }}
+              </option>
+              {% endfor %}
+            </select>
+            {% if form.category.errors %}<p class="field-error">{{ form.category.errors.0 }}</p>{% endif %}
+          </div>
+          <div>
+            <label class="field-label">Brand</label>
+            <select name="brand" class="form-select">
+              <option value="">— No brand —</option>
+              {% for b in form.brand.field.queryset %}
+              <option value="{{ b.pk }}" {% if form.brand.value|stringformat:"s" == b.pk|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
-
-        <div>
-          <label style="display:block;font-size:0.75rem;font-weight:500;color:#9ca3af;margin-bottom:0.375rem;">Slug</label>
-          <input type="text" name="slug" id="id_slug"
-                 value="{{ form.slug.value|default:'' }}"
-                 class="form-input" placeholder="auto-filled from name" />
-        </div>
-
-        <div>
-          <label style="display:block;font-size:0.75rem;font-weight:500;color:#9ca3af;margin-bottom:0.375rem;">
-            SKU <span style="color:#f87171;">*</span>
-          </label>
-          <input type="text" name="sku"
-                 value="{{ form.sku.value|default:'' }}"
-                 class="form-input" placeholder="e.g. SNK-WHT-001" required />
-          {% if form.sku.errors %}
-          <p style="font-size:0.75rem;color:#f87171;margin-top:0.25rem;">{{ form.sku.errors.0 }}</p>
-          {% endif %}
-        </div>
-
-        <div>
-          <label style="display:block;font-size:0.75rem;font-weight:500;color:#9ca3af;margin-bottom:0.375rem;">
-            Category <span style="color:#f87171;">*</span>
-          </label>
-          <select name="category" class="form-select" required>
-            <option value="">— Select category —</option>
-            {% for cat in form.category.field.queryset %}
-            <option value="{{ cat.pk }}"
-              {% if form.category.value|stringformat:"s" == cat.pk|stringformat:"s" %}selected{% endif %}>
-              {{ cat.full_path }}
-            </option>
-            {% endfor %}
-          </select>
-          {% if form.category.errors %}
-          <p style="font-size:0.75rem;color:#f87171;margin-top:0.25rem;">{{ form.category.errors.0 }}</p>
-          {% endif %}
-        </div>
-
-        <div>
-          <label style="display:block;font-size:0.75rem;font-weight:500;color:#9ca3af;margin-bottom:0.375rem;">Brand</label>
-          <select name="brand" class="form-select">
-            <option value="">— No brand —</option>
-            {% for b in form.brand.field.queryset %}
-            <option value="{{ b.pk }}"
-              {% if form.brand.value|stringformat:"s" == b.pk|stringformat:"s" %}selected{% endif %}>
-              {{ b.name }}
-            </option>
-            {% endfor %}
-          </select>
-        </div>
-
       </div>
     </div>
 
-    <!-- ── Pricing & Status ─────────────────────────────────────────────── -->
-    <div style="background:#1a1d27;border:1px solid #2a2d3a;border-radius:0.75rem;overflow:hidden;margin-bottom:1rem;">
-      <div style="padding:1rem 1.25rem;border-bottom:1px solid #2a2d3a;display:flex;align-items:center;gap:0.5rem;">
-        <span style="width:4px;height:1rem;background:#10b981;border-radius:2px;display:inline-block;"></span>
-        <h3 style="font-size:0.875rem;font-weight:600;color:#fff;margin:0;">Pricing & Status</h3>
+    <!-- ── 2. Pricing & Status ────────────────────────────────────────── -->
+    <div class="panel-card">
+      <div class="panel-card-header">
+        <span class="card-accent" style="background:var(--green);"></span>
+        <span class="card-title">Pricing & Status</span>
+        <span class="card-desc">Only Active products appear on the store</span>
       </div>
-      <div style="padding:1.25rem;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1rem;">
-
-        <div>
-          <label style="display:block;font-size:0.75rem;font-weight:500;color:#9ca3af;margin-bottom:0.375rem;">
-            Price <span style="color:#f87171;">*</span>
-          </label>
-          <div style="position:relative;">
-            <span style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);color:#6b7280;font-size:0.875rem;user-select:none;">$</span>
-            <input type="number" name="base_price" step="0.01" min="0"
-                   value="{{ form.base_price.value|default:'' }}"
-                   class="form-input" style="padding-left:1.75rem;" placeholder="0.00" required />
-          </div>
-          {% if form.base_price.errors %}
-          <p style="font-size:0.75rem;color:#f87171;margin-top:0.25rem;">{{ form.base_price.errors.0 }}</p>
-          {% endif %}
-        </div>
-
-        <div>
-          <label style="display:block;font-size:0.75rem;font-weight:500;color:#9ca3af;margin-bottom:0.375rem;">Compare price</label>
-          <div style="position:relative;">
-            <span style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);color:#6b7280;font-size:0.875rem;user-select:none;">$</span>
-            <input type="number" name="compare_at_price" step="0.01" min="0"
-                   value="{{ form.compare_at_price.value|default:'' }}"
-                   class="form-input" style="padding-left:1.75rem;" placeholder="0.00" />
-          </div>
-        </div>
-
-        <div>
-          <label style="display:block;font-size:0.75rem;font-weight:500;color:#9ca3af;margin-bottom:0.375rem;">
-            Status
-            <span style="color:#6b7280;font-weight:400;"> — Active = visible on store</span>
-          </label>
-          <select name="status" class="form-select">
-            {% for val, label in form.status.field.choices %}
-            <option value="{{ val }}"
-              {% if form.status.value == val %}selected
-              {% elif not form.status.value and val == 'active' %}selected
-              {% endif %}>
-              {{ label }}{% if val == 'draft' %} (hidden){% endif %}
-            </option>
-            {% endfor %}
-          </select>
-        </div>
-
-        <div style="display:flex;align-items:flex-end;padding-bottom:0.125rem;">
-          <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;user-select:none;">
-            <input type="checkbox" name="is_featured"
-                   {% if form.is_featured.value %}checked{% endif %}
-                   style="width:1rem;height:1rem;accent-color:#6366f1;cursor:pointer;" />
-            <span style="font-size:0.875rem;color:#d1d5db;font-weight:500;">Featured</span>
-          </label>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- ── Product Images ──────────────────────────────────────────────── -->
-    <div style="background:#1a1d27;border:1px solid #2a2d3a;border-radius:0.75rem;overflow:hidden;margin-bottom:1rem;">
-      <div style="padding:1rem 1.25rem;border-bottom:1px solid #2a2d3a;display:flex;align-items:center;justify-content:space-between;">
-        <div style="display:flex;align-items:center;gap:0.5rem;">
-          <span style="width:4px;height:1rem;background:#8b5cf6;border-radius:2px;display:inline-block;"></span>
-          <h3 style="font-size:0.875rem;font-weight:600;color:#fff;margin:0;">Product Images</h3>
-        </div>
-        <span style="font-size:0.75rem;color:#6b7280;">Optional — PNG, JPG, WEBP · max 10 MB</span>
-      </div>
-      <div style="padding:1.25rem;">
-
-        {{ image_formset.management_form }}
-
-        <!-- Existing images (edit mode) -->
-        {% for img_form in image_formset %}
-        {% if img_form.instance.pk %}
-        {% if forloop.first %}
-        <div style="margin-bottom:1rem;">
-          <p style="font-size:0.7rem;color:#6b7280;text-transform:uppercase;letter-spacing:0.08em;font-weight:600;margin-bottom:0.625rem;">Current Images</p>
-          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0.75rem;" id="existing-grid">
-        {% endif %}
-
-            <div>
-              {{ img_form.id }}
-              {{ img_form.sort_order }}
-              <div style="aspect-ratio:1;border-radius:0.625rem;overflow:hidden;border:1px solid #2a2d3a;background:#0f1117;position:relative;">
-                {% if img_form.instance.image %}
-                <img src="{{ img_form.instance.image.url }}" style="width:100%;height:100%;object-fit:cover;" />
-                {% endif %}
-                {% if img_form.instance.is_primary %}
-                <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(99,102,241,0.85);
-                            color:#fff;font-size:8px;text-align:center;padding:3px;font-weight:700;letter-spacing:0.05em;">
-                  PRIMARY
-                </div>
-                {% endif %}
-              </div>
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:0.375rem;padding:0 0.125rem;">
-                <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:10px;color:#818cf8;">
-                  {{ img_form.is_primary }}
-                  <span>Primary</span>
-                </label>
-                <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:10px;color:#f87171;">
-                  {{ img_form.DELETE }}
-                  <span>Delete</span>
-                </label>
-              </div>
+      <div class="panel-card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:0.875rem;align-items:end;">
+          <div>
+            <label class="field-label">Selling Price *</label>
+            <div style="position:relative;">
+              <span style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);color:var(--text3);font-size:0.82rem;user-select:none;">$</span>
+              <input type="number" name="base_price" step="0.01" min="0"
+                     value="{{ form.base_price.value|default:'' }}"
+                     class="form-input" style="padding-left:1.5rem;" placeholder="0.00" required />
             </div>
-
-        {% if forloop.last %}
+          </div>
+          <div>
+            <label class="field-label">Compare Price</label>
+            <div style="position:relative;">
+              <span style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);color:var(--text3);font-size:0.82rem;user-select:none;">$</span>
+              <input type="number" name="compare_at_price" step="0.01" min="0"
+                     value="{{ form.compare_at_price.value|default:'' }}"
+                     class="form-input" style="padding-left:1.5rem;" placeholder="0.00" />
+            </div>
+          </div>
+          <div>
+            <label class="field-label">Cost Price</label>
+            <div style="position:relative;">
+              <span style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);color:var(--text3);font-size:0.82rem;user-select:none;">$</span>
+              <input type="number" name="cost_price" step="0.01" min="0"
+                     value="{{ form.cost_price.value|default:'' }}"
+                     class="form-input" style="padding-left:1.5rem;" placeholder="0.00" />
+            </div>
+            <p class="field-hint">Internal — not shown publicly</p>
+          </div>
+          <div>
+            <label class="field-label">Status</label>
+            <select name="status" class="form-select">
+              {% for val, label in form.status.field.choices %}
+              <option value="{{ val }}"
+                {% if form.status.value == val %}selected
+                {% elif not form.status.value and val == 'active' %}selected
+                {% endif %}>
+                {{ label }}{% if val == 'draft' %} — Hidden{% endif %}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div style="padding-bottom:0.1rem;">
+            <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;user-select:none;">
+              <input type="checkbox" name="is_featured" {% if form.is_featured.value %}checked{% endif %}
+                     style="width:1rem;height:1rem;accent-color:var(--accent);cursor:pointer;" />
+              <span style="font-size:0.8rem;color:var(--text);font-weight:500;">Featured</span>
+            </label>
           </div>
         </div>
-        {% endif %}
-        {% endif %}
-        {% endfor %}
+      </div>
+    </div>
 
-        <!-- Upload slots for new images -->
-        <div>
+    <!-- ── 3. Product Images ──────────────────────────────────────────── -->
+    <div class="panel-card">
+      <div class="panel-card-header">
+        <span class="card-accent" style="background:#8b5cf6;"></span>
+        <span class="card-title">Product Images</span>
+        <span class="card-desc">PNG, JPG, WEBP · max 10 MB each</span>
+      </div>
+      <div class="panel-card-body">
+        {{ image_formset.management_form }}
+        {% if image_formset.non_form_errors %}
+        <div class="alert alert-error" style="margin-bottom:0.875rem;">{% for e in image_formset.non_form_errors %}{{ e }}{% endfor %}</div>
+        {% endif %}
+
+        <!-- Existing images -->
+        <div id="existing-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:0.75rem;margin-bottom:1rem;">
+          {% for img_form in image_formset %}
+          {% if img_form.instance.pk %}
+          <div style="position:relative;">
+            {{ img_form.id }}{{ img_form.sort_order }}
+            <div style="aspect-ratio:1;border-radius:0.625rem;overflow:hidden;border:1px solid var(--border);background:var(--bg);position:relative;">
+              {% if img_form.instance.image %}
+              <img src="{{ img_form.instance.image.url }}" style="width:100%;height:100%;object-fit:cover;" />
+              {% endif %}
+              {% if img_form.instance.is_primary %}
+              <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(99,102,241,0.85);color:#fff;font-size:8px;text-align:center;padding:2px;font-weight:700;">PRIMARY</div>
+              {% endif %}
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:0.375rem;padding:0 2px;">
+              <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:10px;color:var(--accent);">{{ img_form.is_primary }}<span>Primary</span></label>
+              <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:10px;color:#f87171;">{{ img_form.DELETE }}<span>Delete</span></label>
+            </div>
+          </div>
+          {% endif %}{% endfor %}
+        </div>
+
+        <!-- Upload slots -->
+        {% if action == 'Edit' and product.images.exists %}
+        <p style="font-size:0.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;margin-bottom:0.625rem;">Add More</p>
+        {% endif %}
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;">
           {% for img_form in image_formset %}
           {% if not img_form.instance.pk %}
-          {% if forloop.first %}
-          <p style="font-size:0.7rem;color:#6b7280;text-transform:uppercase;letter-spacing:0.08em;font-weight:600;margin-bottom:0.625rem;">
-            {% if action == 'Edit' %}Add More Images{% else %}Upload Images{% endif %}
-          </p>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;">
-          {% endif %}
-
           <div>
-            {{ img_form.id }}
-            {{ img_form.sort_order }}  {# hidden input, value=0 by default #}
-
+            {{ img_form.id }}{{ img_form.sort_order }}
             <label class="img-upload-label" id="lbl-{{ forloop.counter0 }}">
-              <div id="ph-{{ forloop.counter0 }}"
-                   style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;pointer-events:none;">
-                <svg style="width:2rem;height:2rem;color:#374151;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              <div id="ph-{{ forloop.counter0 }}" style="pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:0.5rem;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--border2)" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
-                <span style="font-size:0.75rem;color:#6b7280;font-weight:500;">Click to upload</span>
+                <span style="font-size:0.72rem;color:var(--text3);">Upload image</span>
               </div>
-              <img id="pv-{{ forloop.counter0 }}"
-                   style="display:none;width:100%;height:100%;object-fit:cover;border-radius:0.75rem;" />
-              <input type="file"
-                     name="{{ img_form.image.html_name }}"
-                     accept="image/*"
+              <img id="pv-{{ forloop.counter0 }}" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:0.75rem;" />
+              <input type="file" name="{{ img_form.image.html_name }}" accept="image/*"
                      style="position:absolute;width:1px;height:1px;opacity:0;"
                      data-lbl="lbl-{{ forloop.counter0 }}"
                      data-ph="ph-{{ forloop.counter0 }}"
                      data-pv="pv-{{ forloop.counter0 }}"
                      class="img-file-input" />
             </label>
-
-            <div style="margin-top:0.5rem;">
-              <input type="text"
-                     name="{{ img_form.alt_text.html_name }}"
+            <div style="margin-top:0.4rem;">
+              <input type="text" name="{{ img_form.alt_text.html_name }}"
                      value="{{ img_form.alt_text.value|default:'' }}"
-                     class="form-input"
-                     style="font-size:0.75rem;"
-                     placeholder="Alt text (optional)" />
+                     class="form-input" style="font-size:0.72rem;" placeholder="Alt text (optional)" />
             </div>
-
-            {% if forloop.first %}
-            <!-- Set as primary checkbox — only on the first upload slot -->
-            <div style="margin-top:0.375rem;display:flex;align-items:center;gap:0.375rem;">
-              <input type="checkbox"
-                     name="{{ img_form.is_primary.html_name }}"
-                     style="accent-color:#6366f1;width:0.875rem;height:0.875rem;cursor:pointer;" />
-              <span style="font-size:0.7rem;color:#9ca3af;cursor:pointer;">Set as primary</span>
-            </div>
-            {% endif %}
           </div>
-
-          {% if forloop.last %}
-          </div>
-          {% endif %}
-          {% endif %}
-          {% endfor %}
+          {% endif %}{% endfor %}
         </div>
-
       </div>
     </div>
 
-    <!-- ── Description ──────────────────────────────────────────────────── -->
-    <div style="background:#1a1d27;border:1px solid #2a2d3a;border-radius:0.75rem;overflow:hidden;margin-bottom:1rem;">
-      <div style="padding:1rem 1.25rem;border-bottom:1px solid #2a2d3a;display:flex;align-items:center;gap:0.5rem;">
-        <span style="width:4px;height:1rem;background:#f59e0b;border-radius:2px;display:inline-block;"></span>
-        <h3 style="font-size:0.875rem;font-weight:600;color:#fff;margin:0;">Description</h3>
+    <!-- ── 4. Variants (Sizes & Colors) ──────────────────────────────── -->
+    <div class="panel-card">
+      <div class="panel-card-header">
+        <span class="card-accent" style="background:var(--gold);"></span>
+        <span class="card-title">Variants — Sizes &amp; Colors</span>
+        <span class="card-desc">Each variant = one size/color combo with its own stock &amp; price</span>
       </div>
-      <div style="padding:1.25rem;display:flex;flex-direction:column;gap:1rem;">
-        <div>
-          <label style="display:block;font-size:0.75rem;font-weight:500;color:#9ca3af;margin-bottom:0.375rem;">Short description</label>
+      <div class="panel-card-body">
+        {{ var_formset.management_form }}
+
+        {% if var_formset.non_form_errors %}
+        <div class="alert alert-error" style="margin-bottom:0.875rem;">{% for e in var_formset.non_form_errors %}{{ e }}{% endfor %}</div>
+        {% endif %}
+
+        <!-- Column headers -->
+        <div class="variant-grid" style="padding:0 0 0.5rem;border-bottom:1px solid var(--border);margin-bottom:0.625rem;">
+          <span style="font-size:0.65rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">Size</span>
+          <span style="font-size:0.65rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">Color</span>
+          <span style="font-size:0.65rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">SKU *</span>
+          <span style="font-size:0.65rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">Price ($)</span>
+          <span style="font-size:0.65rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">Stock *</span>
+          <span style="font-size:0.65rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">Active</span>
+          <span></span>
+        </div>
+
+        <div id="variant-rows">
+          {% for vf in var_formset %}
+          <div class="variant-row {% if vf.instance.pk %}existing-variant{% endif %}">
+            {{ vf.id }}
+            <div class="variant-grid">
+              <!-- Size -->
+              <div>
+                <select name="{{ vf.size.html_name }}" class="form-select">
+                  {% for val, label in vf.fields.size.choices %}
+                  <option value="{{ val }}" {% if vf.size.value == val or vf.initial.size == val %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <!-- Color -->
+              <div>
+                <input type="text" name="{{ vf.color.html_name }}"
+                       value="{{ vf.color.value|default:vf.initial.color|default:'' }}"
+                       class="form-input" placeholder="Black, Red…" />
+              </div>
+              <!-- SKU -->
+              <div>
+                <input type="text" name="{{ vf.sku.html_name }}"
+                       value="{{ vf.sku.value|default:'' }}"
+                       class="form-input" placeholder="e.g. PROD-M-BLK" {% if not vf.instance.pk %}{% endif %} />
+                {% if vf.sku.errors %}<p class="field-error" style="font-size:0.65rem;">{{ vf.sku.errors.0 }}</p>{% endif %}
+              </div>
+              <!-- Price override -->
+              <div>
+                <input type="number" name="{{ vf.price.html_name }}"
+                       value="{{ vf.price.value|default:'' }}"
+                       class="form-input" step="0.01" placeholder="Base price" />
+              </div>
+              <!-- Stock -->
+              <div>
+                <input type="number" name="{{ vf.stock.html_name }}"
+                       value="{{ vf.stock.value|default:'0' }}"
+                       class="form-input" min="0" />
+                {% if vf.stock.errors %}<p class="field-error" style="font-size:0.65rem;">{{ vf.stock.errors.0 }}</p>{% endif %}
+              </div>
+              <!-- Active -->
+              <div style="display:flex;align-items:center;height:38px;">
+                <input type="checkbox" name="{{ vf.is_active.html_name }}"
+                       {% if vf.is_active.value != False %}checked{% endif %}
+                       style="width:1rem;height:1rem;accent-color:var(--accent);cursor:pointer;" />
+              </div>
+              <!-- Delete -->
+              <div style="display:flex;align-items:center;height:38px;gap:0.375rem;">
+                {% if vf.instance.pk %}
+                <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:0.72rem;color:#f87171;">
+                  {{ vf.DELETE }} <span>Del</span>
+                </label>
+                {% endif %}
+              </div>
+            </div>
+            <!-- Name + low stock threshold (collapsed) -->
+            <div style="display:grid;grid-template-columns:2fr 1fr;gap:0.625rem;margin-top:0.5rem;">
+              <div>
+                <input type="text" name="{{ vf.name.html_name }}"
+                       value="{{ vf.name.value|default:'' }}"
+                       class="form-input" style="font-size:0.72rem;"
+                       placeholder="Display name (auto-generated if blank)" />
+              </div>
+              <div>
+                <input type="number" name="{{ vf.low_stock_threshold.html_name }}"
+                       value="{{ vf.low_stock_threshold.value|default:'5' }}"
+                       class="form-input" style="font-size:0.72rem;" placeholder="Low stock alert at" />
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <p style="font-size:0.72rem;color:var(--text3);margin-top:0.75rem;">
+          💡 Leave <em>Price</em> blank to use the base product price. SKU must be globally unique.
+        </p>
+      </div>
+    </div>
+
+    <!-- ── 5. Description ────────────────────────────────────────────── -->
+    <div class="panel-card">
+      <div class="panel-card-header">
+        <span class="card-accent" style="background:#f59e0b;"></span>
+        <span class="card-title">Description</span>
+      </div>
+      <div class="panel-card-body">
+        <div style="margin-bottom:0.875rem;">
+          <label class="field-label">Short Description</label>
           <input type="text" name="short_description"
                  value="{{ form.short_description.value|default:'' }}"
-                 class="form-input" placeholder="Brief summary shown in listings" />
+                 class="form-input" placeholder="Brief summary shown in product listings" />
         </div>
         <div>
-          <label style="display:block;font-size:0.75rem;font-weight:500;color:#9ca3af;margin-bottom:0.375rem;">Full description</label>
+          <label class="field-label">Full Description</label>
           <textarea name="description" rows="5" class="form-input"
                     placeholder="Detailed product description…">{{ form.description.value|default:'' }}</textarea>
         </div>
       </div>
     </div>
 
-    <!-- ── Actions ──────────────────────────────────────────────────────── -->
-    <div style="display:flex;align-items:center;gap:0.75rem;">
+    <!-- ── 6. SEO ─────────────────────────────────────────────────────── -->
+    <div class="panel-card">
+      <div class="panel-card-header">
+        <span class="card-accent" style="background:#06b6d4;"></span>
+        <span class="card-title">SEO</span>
+        <span class="card-desc">Improves search engine ranking</span>
+      </div>
+      <div class="panel-card-body">
+        <div style="margin-bottom:0.875rem;">
+          <label class="field-label">Meta Title <span style="color:var(--text3);font-weight:400;">(max 70 chars)</span></label>
+          <input type="text" name="meta_title"
+                 value="{{ form.meta_title.value|default:'' }}"
+                 class="form-input" placeholder="Leave blank to use product name" maxlength="70" />
+        </div>
+        <div>
+          <label class="field-label">Meta Description <span style="color:var(--text3);font-weight:400;">(max 160 chars)</span></label>
+          <textarea name="meta_description" rows="2" class="form-input"
+                    placeholder="Leave blank to use short description" maxlength="160">{{ form.meta_description.value|default:'' }}</textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div style="display:flex;align-items:center;gap:0.75rem;padding-top:0.25rem;">
       <button type="submit" class="btn-primary">
-        <svg style="width:1rem;height:1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
         </svg>
         {{ action }} Product
       </button>
-      <a href="{% url 'admin_panel:product_list' %}" class="btn-ghost">Cancel</a>
+      <a href="{% url 'admin_panel:product_list' %}" class="btn-secondary">Cancel</a>
     </div>
-
   </form>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-  // ── Auto-fill slug ──────────────────────────────────────────────────────────
+  // ── Auto-fill slug ────────────────────────────────────────────────────
   const nameEl = document.getElementById('id_name');
   const slugEl = document.getElementById('id_slug');
-  let userEditedSlug = (slugEl.value || '').length > 0;
-  slugEl.addEventListener('input', () => { userEditedSlug = true; });
+  let userEdited = (slugEl.value || '').length > 0;
+  slugEl.addEventListener('input', () => { userEdited = true; });
   nameEl.addEventListener('input', () => {
-    if (userEditedSlug) return;
-    slugEl.value = nameEl.value.toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    if (userEdited) return;
+    slugEl.value = nameEl.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   });
 
-  // ── Image preview on file select ────────────────────────────────────────────
+  // ── Image preview ─────────────────────────────────────────────────────
   document.querySelectorAll('.img-file-input').forEach(input => {
-    input.addEventListener('change', function () {
+    input.addEventListener('change', function() {
       const file = this.files[0];
       if (!file) return;
-      const lbl = document.getElementById(this.dataset.lbl);
-      const ph  = document.getElementById(this.dataset.ph);
       const pv  = document.getElementById(this.dataset.pv);
-      const reader = new FileReader();
-      reader.onload = e => {
+      const ph  = document.getElementById(this.dataset.ph);
+      const lbl = document.getElementById(this.dataset.lbl);
+      new FileReader().onload = e => {
         pv.src = e.target.result;
         pv.style.display = 'block';
-        ph.style.display = 'none';
-        lbl.classList.add('has-preview');
+        if (ph) ph.style.display = 'none';
+        if (lbl) lbl.classList.add('has-preview');
       };
-      reader.readAsDataURL(file);
+      const r = new FileReader(); r.onload = e => {
+        pv.src = e.target.result; pv.style.display = 'block';
+        if (ph) ph.style.display = 'none';
+        if (lbl) lbl.classList.add('has-preview');
+      };
+      r.readAsDataURL(file);
     });
   });
 
-  // ── Style Django-injected checkboxes ────────────────────────────────────────
+  // ── Style Django-injected checkboxes (is_primary, DELETE) ─────────────
   document.querySelectorAll('#existing-grid input[type="checkbox"]').forEach(cb => {
-    cb.style.cursor = 'pointer';
-    cb.style.accentColor = cb.name.includes('DELETE') ? '#ef4444' : '#6366f1';
-    cb.style.width = '0.875rem';
-    cb.style.height = '0.875rem';
+    cb.style.cursor  = 'pointer';
+    cb.style.accentColor = cb.name.includes('DELETE') ? '#ef4444' : 'var(--accent)';
+    cb.style.width = '0.875rem'; cb.style.height = '0.875rem';
   });
 </script>
 {% endblock %}

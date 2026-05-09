@@ -18,7 +18,10 @@ from apps.store_settings.models import SiteSettings
 
 from django.core.cache import cache
 
-from .forms import AnnouncementForm, CategoryForm, ProductForm, ProductImageFormSet
+from .forms import (
+    AnnouncementForm, CategoryForm, ProductForm,
+    ProductImageFormSet, ProductVariantFormSet,
+)
 from .models import PageView
 
 # ── Auth helper ───────────────────────────────────────────────────────────────
@@ -194,60 +197,51 @@ def product_list(request):
 
 @staff_required
 def product_add(request):
-    form = ProductForm(request.POST or None)
-    image_formset = ProductImageFormSet(
-        request.POST or None,
-        request.FILES or None,
-        prefix="images",
-    )
+    form          = ProductForm(request.POST or None)
+    image_formset = ProductImageFormSet(request.POST or None, request.FILES or None, prefix="images")
+    var_formset   = ProductVariantFormSet(request.POST or None, prefix="variants")
+
     if request.method == "POST":
-        # Evaluate both separately so errors are fully populated on failure.
         form_ok = form.is_valid()
         imgs_ok = image_formset.is_valid()
-        if form_ok and imgs_ok:
+        vars_ok = var_formset.is_valid()
+        if form_ok and imgs_ok and vars_ok:
             product = form.save()
             image_formset.instance = product
             image_formset.save()
+            var_formset.instance = product
+            var_formset.save()
             qs = urlencode({"msg": "added", "name": product.name})
             return redirect(f"/panel/products/?{qs}")
 
     return render(request, "admin_panel/products/form.html", {
-        "form": form,
-        "image_formset": image_formset,
-        "action": "Add",
-        "submitted": request.method == "POST",
+        "form": form, "image_formset": image_formset, "var_formset": var_formset,
+        "action": "Add", "submitted": request.method == "POST",
     })
 
 
 @staff_required
 def product_edit(request, pk):
-    product = get_object_or_404(Product, pk=pk)
-    form = ProductForm(request.POST or None, instance=product)
-    image_formset = ProductImageFormSet(
-        request.POST or None,
-        request.FILES or None,
-        instance=product,
-        prefix="images",
-    )
+    product       = get_object_or_404(Product, pk=pk)
+    form          = ProductForm(request.POST or None, instance=product)
+    image_formset = ProductImageFormSet(request.POST or None, request.FILES or None, instance=product, prefix="images")
+    var_formset   = ProductVariantFormSet(request.POST or None, instance=product, prefix="variants")
+
     if request.method == "POST":
         form_ok = form.is_valid()
         imgs_ok = image_formset.is_valid()
-        if form_ok and imgs_ok:
-            saved_product = form.save()
+        vars_ok = var_formset.is_valid()
+        if form_ok and imgs_ok and vars_ok:
+            saved = form.save()
             image_formset.save()
-            qs = urlencode({"msg": "updated", "name": saved_product.name})
+            var_formset.save()
+            qs = urlencode({"msg": "updated", "name": saved.name})
             return redirect(f"/panel/products/?{qs}")
-    return render(
-        request,
-        "admin_panel/products/form.html",
-        {
-            "form": form,
-            "image_formset": image_formset,
-            "action": "Edit",
-            "product": product,
-            "submitted": request.method == "POST",
-        },
-    )
+
+    return render(request, "admin_panel/products/form.html", {
+        "form": form, "image_formset": image_formset, "var_formset": var_formset,
+        "action": "Edit", "product": product, "submitted": request.method == "POST",
+    })
 
 
 @staff_required
