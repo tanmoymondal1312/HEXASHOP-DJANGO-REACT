@@ -279,11 +279,18 @@ export default async function ShopPage({ searchParams }: Props) {
           .shop-search-input {
             flex: 1; background: transparent;
             padding: 0.8rem 0.75rem; font-size: 0.9rem;
-            color: #fff; outline: none; border: none; min-width: 0;
+            color: #fff; border: none; min-width: 0;
+            outline: none !important; box-shadow: none !important;
+            -webkit-appearance: none; appearance: none;
+          }
+          .shop-search-input:focus {
+            outline: none !important; box-shadow: none !important; border: none !important;
           }
           .shop-search-input::placeholder { color: #5a6480; }
           .shop-search-input::-webkit-search-decoration,
-          .shop-search-input::-webkit-search-cancel-button { display: none; }
+          .shop-search-input::-webkit-search-cancel-button,
+          .shop-search-input::-webkit-search-results-button { display: none; }
+
           .shop-search-btn {
             margin: 4px; flex-shrink: 0;
             background: linear-gradient(135deg, #f5a623 0%, #f59e0b 100%);
@@ -295,6 +302,15 @@ export default async function ShopPage({ searchParams }: Props) {
             transition: opacity 0.15s, transform 0.15s;
           }
           .shop-search-btn:hover { opacity:0.88; transform:scale(0.98); }
+          .shop-search-btn-label { display: inline; }
+
+          /* Very small phones (< 360px) */
+          @media (max-width: 359px) {
+            .shop-search-input { font-size: 0.78rem; padding: 0.7rem 0.5rem; }
+            .shop-search-btn-label { display: none; }
+            .shop-search-btn { padding: 0.48rem 0.6rem; margin: 3px; }
+            .shop-search-icon { margin-left: 10px; }
+          }
         ` }} />
 
         <form action="/shop" method="get" className="lg:hidden shop-search-wrap" role="search">
@@ -328,7 +344,7 @@ export default async function ShopPage({ searchParams }: Props) {
                 <circle cx="11" cy="11" r="8"/>
                 <path d="m21 21-4.35-4.35"/>
               </svg>
-              Search
+              <span className="shop-search-btn-label">Search</span>
             </button>
           </div>
         </form>

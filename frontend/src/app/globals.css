@@ -61,11 +61,17 @@
   }
 }
 
-/* Remove browser default focus rectangle on search inputs in the navbar */
-input[type="search"]:focus {
+/* Kill every browser focus rectangle on ALL search/text inputs site-wide */
+input[type="search"]:focus,
+input[type="text"]:focus,
+input[type="search"]:focus-visible,
+input[type="text"]:focus-visible,
+.hx-search-input:focus,
+.shop-search-input:focus {
   outline: none !important;
   box-shadow: none !important;
   border-color: transparent !important;
+  -webkit-box-shadow: none !important;
 }
 /* Hide the browser's built-in search clear button */
 input[type="search"]::-webkit-search-decoration,

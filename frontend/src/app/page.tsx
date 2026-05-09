@@ -198,11 +198,19 @@ export default async function HomePage() {
         .hx-search-input {
           flex: 1; background: transparent;
           padding: 0.7rem 0.65rem; font-size: 0.85rem;
-          color: #fff; outline: none; border: none; min-width: 0;
+          color: #fff; border: none; min-width: 0;
+          /* Kill every browser focus rectangle */
+          outline: none !important; box-shadow: none !important;
+          -webkit-appearance: none; appearance: none;
+        }
+        .hx-search-input:focus {
+          outline: none !important; box-shadow: none !important; border: none !important;
         }
         .hx-search-input::placeholder { color: #5a6480; }
         .hx-search-input::-webkit-search-decoration,
-        .hx-search-input::-webkit-search-cancel-button { display: none; }
+        .hx-search-input::-webkit-search-cancel-button,
+        .hx-search-input::-webkit-search-results-button { display: none; }
+
         .hx-search-btn {
           margin: 3px; flex-shrink: 0;
           background: linear-gradient(135deg, #f5a623 0%, #f59e0b 100%);
@@ -214,6 +222,17 @@ export default async function HomePage() {
           transition: opacity 0.15s, transform 0.15s;
         }
         .hx-search-btn:hover { opacity: 0.88; transform: scale(0.98); }
+
+        /* ─ Very small phones (< 360px) ─ */
+        @media (max-width: 359px) {
+          .hx-h1 { font-size: 2.1rem; }
+          .hx-search-btn-label { display: none; } /* icon-only button */
+          .hx-search-btn { padding: 0.42rem 0.55rem; }
+          .hx-btn-gold { font-size: 0.62rem; padding: 0.42rem 0.85rem; }
+          .hx-btn-outline { font-size: 0.62rem; padding: 0.42rem 0.65rem; }
+          .hx-viral-grid { grid-template-columns: repeat(2,1fr) !important; gap:0.4rem; }
+          .hx-featured-grid { grid-template-columns: repeat(2,1fr) !important; }
+        }
 
         /* ─ Slider dots ─ */
         .hx-dots { display:flex; align-items:center; gap:0.35rem; }
@@ -386,7 +405,7 @@ export default async function HomePage() {
                         <circle cx="11" cy="11" r="8"/>
                         <path d="m21 21-4.35-4.35"/>
                       </svg>
-                      Search
+                      <span className="hx-search-btn-label">Search</span>
                     </button>
                   </div>
                 </form>
