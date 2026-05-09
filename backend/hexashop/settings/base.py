@@ -12,8 +12,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
 INSTALLED_APPS = [
-    # Jazzmin must come before django.contrib.admin
-    "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -303,8 +301,8 @@ LOGGING = {
 
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
 
-# ─── Jazzmin ─────────────────────────────────────────────────────────────────
-JAZZMIN_SETTINGS = {
+# ─── (Jazzmin removed — using Django's built-in admin UI) ────────────────────
+_JAZZMIN_REMOVED = {
     "site_title": "HEXASHOP Admin",
     "site_header": "HEXASHOP",
     "site_brand": "HEXASHOP",
@@ -393,7 +391,7 @@ JAZZMIN_SETTINGS = {
     "language_chooser": False,
 }
 
-JAZZMIN_UI_TWEAKS = {
+_JAZZMIN_UI_TWEAKS_REMOVED = {
     "navbar_small_text": False,
     "footer_small_text": False,
     "body_small_text": True,
