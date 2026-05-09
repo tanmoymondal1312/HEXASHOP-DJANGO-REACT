@@ -252,72 +252,62 @@
 
         <div id="variant-rows">
           {% for vf in var_formset %}
-          <div class="variant-row {% if vf.instance.pk %}existing-variant{% endif %}">
+          <div class="variant-row">
             {{ vf.id }}
+
+            {# ── Main row: size / color / SKU / price / stock / active / delete ─ #}
             <div class="variant-grid">
-              <!-- Size -->
+
+              {# Size — Django renders the Select widget with correct selected option #}
+              <div>{{ vf.size }}</div>
+
+              {# Color — TextInput with class="form-input" from widgets dict #}
+              <div>{{ vf.color }}</div>
+
+              {# SKU #}
               <div>
-                <select name="{{ vf.size.html_name }}" class="form-select">
-                  {% for val, label in vf.fields.size.choices %}
-                  <option value="{{ val }}" {% if vf.size.value == val or vf.initial.size == val %}selected{% endif %}>{{ label }}</option>
-                  {% endfor %}
-                </select>
+                {{ vf.sku }}
+                {% if vf.sku.errors %}
+                  <p class="field-error" style="font-size:0.65rem;">{{ vf.sku.errors.0 }}</p>
+                {% endif %}
               </div>
-              <!-- Color -->
+
+              {# Price override — blank = use base price #}
+              <div>{{ vf.price }}</div>
+
+              {# Stock #}
               <div>
-                <input type="text" name="{{ vf.color.html_name }}"
-                       value="{{ vf.color.value|default:vf.initial.color|default:'' }}"
-                       class="form-input" placeholder="Black, Red…" />
+                {{ vf.stock }}
+                {% if vf.stock.errors %}
+                  <p class="field-error" style="font-size:0.65rem;">{{ vf.stock.errors.0 }}</p>
+                {% endif %}
               </div>
-              <!-- SKU -->
-              <div>
-                <input type="text" name="{{ vf.sku.html_name }}"
-                       value="{{ vf.sku.value|default:'' }}"
-                       class="form-input" placeholder="e.g. PROD-M-BLK" {% if not vf.instance.pk %}{% endif %} />
-                {% if vf.sku.errors %}<p class="field-error" style="font-size:0.65rem;">{{ vf.sku.errors.0 }}</p>{% endif %}
+
+              {# Active checkbox #}
+              <div style="display:flex;align-items:center;min-height:38px;">
+                <label style="display:flex;align-items:center;gap:5px;cursor:pointer;">
+                  {{ vf.is_active }}
+                  <span style="font-size:0.72rem;color:var(--text2);">On</span>
+                </label>
               </div>
-              <!-- Price override -->
-              <div>
-                <input type="number" name="{{ vf.price.html_name }}"
-                       value="{{ vf.price.value|default:'' }}"
-                       class="form-input" step="0.01" placeholder="Base price" />
-              </div>
-              <!-- Stock -->
-              <div>
-                <input type="number" name="{{ vf.stock.html_name }}"
-                       value="{{ vf.stock.value|default:'0' }}"
-                       class="form-input" min="0" />
-                {% if vf.stock.errors %}<p class="field-error" style="font-size:0.65rem;">{{ vf.stock.errors.0 }}</p>{% endif %}
-              </div>
-              <!-- Active -->
-              <div style="display:flex;align-items:center;height:38px;">
-                <input type="checkbox" name="{{ vf.is_active.html_name }}"
-                       {% if vf.is_active.value != False %}checked{% endif %}
-                       style="width:1rem;height:1rem;accent-color:var(--accent);cursor:pointer;" />
-              </div>
-              <!-- Delete -->
-              <div style="display:flex;align-items:center;height:38px;gap:0.375rem;">
+
+              {# Delete — only shown for existing variants #}
+              <div style="display:flex;align-items:center;min-height:38px;">
                 {% if vf.instance.pk %}
-                <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:0.72rem;color:#f87171;">
-                  {{ vf.DELETE }} <span>Del</span>
+                <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:0.72rem;color:#f87171;">
+                  {{ vf.DELETE }}
+                  <span>Del</span>
                 </label>
                 {% endif %}
               </div>
             </div>
-            <!-- Name + low stock threshold (collapsed) -->
+
+            {# ── Secondary row: display name + low-stock threshold ─────────── #}
             <div style="display:grid;grid-template-columns:2fr 1fr;gap:0.625rem;margin-top:0.5rem;">
-              <div>
-                <input type="text" name="{{ vf.name.html_name }}"
-                       value="{{ vf.name.value|default:'' }}"
-                       class="form-input" style="font-size:0.72rem;"
-                       placeholder="Display name (auto-generated if blank)" />
-              </div>
-              <div>
-                <input type="number" name="{{ vf.low_stock_threshold.html_name }}"
-                       value="{{ vf.low_stock_threshold.value|default:'5' }}"
-                       class="form-input" style="font-size:0.72rem;" placeholder="Low stock alert at" />
-              </div>
+              <div>{{ vf.name }}</div>
+              <div>{{ vf.low_stock_threshold }}</div>
             </div>
+
           </div>
           {% endfor %}
         </div>

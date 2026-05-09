@@ -175,12 +175,13 @@ class ProductVariantForm(forms.ModelForm):
             "is_active",
         ]
         widgets = {
+            "is_active": forms.CheckboxInput(attrs={"style": "width:1rem;height:1rem;accent-color:#6366f1;cursor:pointer;"}),
             "sku":                 fi("e.g. PROD-M-BLK"),
-            "name":                fi("e.g. M / Black (auto-filled)"),
-            "price":               ni("Leave blank = use base price", "0.01"),
+            "name":                fi("Display name (auto-generated if blank)"),
+            "price":               ni("Blank = use base price", "0.01"),
             "compare_at_price":    ni("", "0.01"),
             "stock":               ni("0", "1", {"min": "0"}),
-            "low_stock_threshold": ni("5",  "1", {"min": "1"}),
+            "low_stock_threshold": ni("5",  "1", {"min": "1", "style": "font-size:0.72rem;"}),
         }
 
     def __init__(self, *args, **kwargs):
