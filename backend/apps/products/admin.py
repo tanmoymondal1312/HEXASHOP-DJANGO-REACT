@@ -1,8 +1,17 @@
 from django.contrib import admin
+from django.core.cache import cache
 from django.db.models import Count
 from django.utils.html import format_html
 
 from .models import Brand, Category, Product, ProductImage, ProductVariant, Review
+
+
+def _bust_product_cache(product=None):
+    """Clear all product-related cache keys."""
+    keys = ["featured_products", "viral_products", "category_tree"]
+    if product:
+        keys.append(f"product_detail:{product.slug}")
+    cache.delete_many(keys)
 
 
 class ProductImageInline(admin.TabularInline):
@@ -224,6 +233,20 @@ class ProductAdmin(admin.ModelAdmin):
             .select_related("category", "brand")
             .prefetch_related("images", "variants")
         )
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        _bust_product_cache(obj)
+
+    def delete_model(self, request, obj):
+        _bust_product_cache(obj)
+        super().delete_model(request, obj)
+
+    def delete_queryset(self, request, queryset):
+        # Bulk delete from the action dropdown
+        for obj in queryset:
+            _bust_product_cache(obj)
+        super().delete_queryset(request, queryset)
 
 
 @admin.register(Review)
