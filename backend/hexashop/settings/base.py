@@ -143,6 +143,7 @@ REST_FRAMEWORK = {
         "rest_framework.filters.SearchFilter",
         "rest_framework.filters.OrderingFilter",
     ],
+    "SEARCH_PARAM": "q",
     "DEFAULT_PAGINATION_CLASS": "core.pagination.CursorSetPagination",
     "PAGE_SIZE": 24,
     "DEFAULT_THROTTLE_CLASSES": [

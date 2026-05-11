@@ -1,7 +1,7 @@
 import logging
 
 from django.core.cache import cache
-from django.db.models import Avg, Count, F, Prefetch
+from django.db.models import Avg, Case, Count, F, IntegerField, Prefetch, Q, When
 from rest_framework import filters, generics, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -61,7 +61,7 @@ class CategoryListView(generics.ListAPIView):
 class ProductViewSet(ReadOnlyModelViewSet):
     permission_classes = [permissions.AllowAny]
     filterset_class = ProductFilter
-    search_fields = ["name", "description", "tags", "brand__name", "category__name"]
+    search_fields = ["name", "short_description", "description", "tags", "brand__name", "category__name", "category__parent__name"]
     ordering_fields = ["base_price", "avg_rating", "sold_count", "created_at", "name"]
     ordering = ["-created_at"]
     pagination_class = StandardPageNumberPagination
@@ -237,30 +237,74 @@ class SearchSuggestView(APIView):
     def get(self, request):
         q = request.query_params.get("q", "").strip()
         if len(q) < 2:
-            return Response({"suggestions": [], "products": []})
+            return Response({"suggestions": [], "products": [], "categories": []})
 
         cache_key = f"search_suggest:{q.lower()}"
         cached = cache.get(cache_key)
         if cached is not None:
             return Response(cached)
 
+        words = q.split()
+
+        # Build product Q: each word must hit at least one field (AND between words)
+        product_q = Q()
+        for word in words:
+            product_q &= (
+                Q(name__icontains=word)             |
+                Q(short_description__icontains=word) |
+                Q(tags__icontains=word)              |
+                Q(brand__name__icontains=word)       |
+                Q(category__name__icontains=word)    |
+                Q(category__parent__name__icontains=word)
+            )
+
         products = (
-            Product.objects.filter(name__icontains=q, status=Product.Status.ACTIVE)
-            .select_related("category")
+            Product.objects.filter(product_q, status=Product.Status.ACTIVE)
+            .select_related("category", "brand")
             .prefetch_related(
                 Prefetch("images", queryset=ProductImage.objects.filter(is_primary=True))
-            )[:5]
+            )
+            .annotate(
+                relevance=Case(
+                    When(name__istartswith=q, then=3),
+                    When(name__icontains=q,   then=2),
+                    default=1,
+                    output_field=IntegerField(),
+                )
+            )
+            .order_by("-relevance", "-sold_count")[:6]
         )
 
-        categories = Category.objects.filter(name__icontains=q, is_active=True)[:3]
+        # Category suggestions: match name or parent name
+        cat_q = Q()
+        for word in words:
+            cat_q &= (Q(name__icontains=word) | Q(parent__name__icontains=word))
+        categories = (
+            Category.objects.filter(cat_q, is_active=True)
+            .select_related("parent")
+            .order_by("sort_order")[:4]
+        )
+
+        # Text autocomplete suggestions: top matching product names
+        suggestions = list(
+            Product.objects.filter(product_q, status=Product.Status.ACTIVE)
+            .order_by("-sold_count")
+            .values_list("name", flat=True)[:5]
+        )
 
         data = {
-            "suggestions": list(
-                Category.objects.filter(name__icontains=q, is_active=True)
-                .values_list("name", flat=True)[:5]
-            ),
-            "products": ProductListSerializer(products, many=True, context={"request": request}).data,
-            "categories": [{"name": c.name, "slug": c.slug} for c in categories],
+            "suggestions": suggestions,
+            "products": ProductListSerializer(
+                products, many=True, context={"request": request}
+            ).data,
+            "categories": [
+                {
+                    "name": c.name,
+                    "slug": c.slug,
+                    "parent": c.parent.name if c.parent else None,
+                }
+                for c in categories
+            ],
         }
         cache.set(cache_key, data, SEARCH_SUGGEST_TTL)
         return Response(data)

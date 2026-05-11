@@ -157,7 +157,7 @@ export interface PaginatedResponse<T> {
 export interface SearchSuggestResponse {
   suggestions: string[];
   products: Product[];
-  categories: { name: string; slug: string }[];
+  categories: { name: string; slug: string; parent: string | null }[];
 }
 
 export interface ProductFilters {
