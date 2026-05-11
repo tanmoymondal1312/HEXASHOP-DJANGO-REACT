@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:lan": "NEXT_PUBLIC_API_URL=http://192.168.0.110:8000/api/v1 NEXT_PUBLIC_SITE_URL=http://192.168.0.110:3000 next dev -H 0.0.0.0",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
