@@ -160,7 +160,7 @@ export default async function HomePage() {
     <>
       <WebsiteJsonLd />
 
-      <style>{`
+      <style dangerouslySetInnerHTML={{ __html: `
 
         /* ═══════════════ KEYFRAMES ═══════════════ */
         @keyframes hxFadeUp {
@@ -573,7 +573,7 @@ export default async function HomePage() {
           .hx-featured-grid { grid-template-columns: repeat(2,1fr) !important; }
         }
 
-      `}</style>
+      ` }} />
 
       <div className="hx-wrap">
 
