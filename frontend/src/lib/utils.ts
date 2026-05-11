@@ -52,13 +52,42 @@ export function slugToTitle(slug: string): string {
 export const FREE_SHIPPING_THRESHOLD = 75;
 
 /**
- * Convert relative Django media paths (/media/...) to absolute backend URLs.
- * Returns null when no URL is given (shows placeholder in UI).
+ * Convert Django media URLs to absolute backend URLs using the configured API origin.
+ * Handles three cases:
+ *   1. Relative path  (/media/...)          → prepend configured origin
+ *   2. Absolute URL with wrong host         → swap host to configured origin
+ *      e.g. http://localhost:8000/media/... → http://192.168.0.110:8000/media/...
+ *   3. External CDN URL (cloudinary, etc.)  → return as-is
  */
 export function resolveImageUrl(url: string | null | undefined): string | null {
   if (!url) return null;
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
-  const origin = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1")
-    .replace(/\/api\/v1\/?$/, "");
-  return `${origin}${url}`;
+
+  const configuredOrigin = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1")
+    .replace(/\/api\/v1\/?$/, "")
+    .replace(/\/$/, "");
+
+  // Relative path — just prepend origin
+  if (url.startsWith("/")) {
+    return `${configuredOrigin}${url}`;
+  }
+
+  // Absolute URL — replace origin so LAN IP is used instead of localhost
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    try {
+      const u = new URL(url);
+      // Only rewrite local/backend media URLs, not CDN URLs
+      if (u.pathname.startsWith("/media/")) {
+        const configured = new URL(configuredOrigin);
+        u.hostname = configured.hostname;
+        u.port     = configured.port;
+        u.protocol = configured.protocol;
+        return u.toString();
+      }
+    } catch {
+      // malformed URL — return as-is
+    }
+    return url;
+  }
+
+  return url;
 }

@@ -209,7 +209,8 @@ export default async function HomePage() {
         .hx-dot-active { animation: hxDotPulse 2s ease-in-out infinite; }
 
         /* ═══════════════ WRAPPER ═══════════════ */
-        .hx-wrap { background: #090d12; }
+        *, *::before, *::after { box-sizing: border-box; }
+        .hx-wrap { background: #090d12; overflow-x: hidden; }
 
         /* ═══════════════ HERO ═══════════════ */
         .hx-hero {
@@ -218,9 +219,9 @@ export default async function HomePage() {
         }
 
         .hx-hero-inner {
-          max-width: 1280px; margin: 0 auto;
-          padding: 2.25rem 1.25rem 1.75rem;
-          display: grid; align-items: center;
+          max-width: 1280px; margin: 0 auto; width: 100%;
+          padding: 1.75rem 1rem 1.5rem;
+          display: grid; grid-template-columns: 1fr; align-items: center;
         }
         @media (min-width: 768px) {
           .hx-hero-inner {
@@ -239,7 +240,7 @@ export default async function HomePage() {
 
         /* ─ Hero heading ─ */
         .hx-h1 {
-          font-size: 2.6rem; font-weight: 900;
+          font-size: clamp(1.7rem, 9vw, 2.6rem); font-weight: 900;
           line-height: 1; letter-spacing: -0.02em; margin: 0;
         }
         @media (min-width: 640px)  { .hx-h1 { font-size: 3.2rem; } }
@@ -291,6 +292,7 @@ export default async function HomePage() {
 
         /* ─ Hero search (mobile / tablet) ─ */
         .hx-search-wrap {
+          display: block; width: 100%; box-sizing: border-box;
           padding: 1.5px; border-radius: 9999px;
           background: linear-gradient(120deg, rgba(245,166,35,0.65) 0%, rgba(30,144,255,0.65) 100%);
           box-shadow: 0 0 14px rgba(245,166,35,0.12), 0 0 28px rgba(30,144,255,0.08);
@@ -301,36 +303,43 @@ export default async function HomePage() {
           box-shadow: 0 0 22px rgba(245,166,35,0.3), 0 0 44px rgba(30,144,255,0.2);
         }
         .hx-search-inner {
-          display: flex; align-items: center;
+          display: flex; align-items: center; width: 100%;
           background: #111520; border-radius: 9999px; overflow: hidden;
         }
         .hx-search-icon {
-          margin-left: 14px; flex-shrink: 0;
+          margin-left: 10px; flex-shrink: 0;
           color: rgba(245,166,35,0.7); transition: color 0.2s;
         }
         .hx-search-wrap:focus-within .hx-search-icon { color: #f5a623; }
         .hx-search-input {
-          flex: 1; background: transparent;
-          padding: 0.72rem 0.65rem; font-size: 0.85rem;
-          color: #fff; border: none; min-width: 0;
+          flex: 1 1 0; background: transparent; min-width: 0; width: 0;
+          padding: 0.65rem 0.5rem; font-size: 16px; /* 16px prevents iOS auto-zoom */
+          color: #fff; border: none;
           outline: none !important; box-shadow: none !important;
           -webkit-appearance: none; appearance: none;
         }
         .hx-search-input:focus { outline: none !important; box-shadow: none !important; border: none !important; }
-        .hx-search-input::placeholder { color: #5a6480; }
+        .hx-search-input::placeholder { color: #5a6480; font-size: 0.82rem; }
         .hx-search-input::-webkit-search-decoration,
         .hx-search-input::-webkit-search-cancel-button { display: none; }
+        /* Search button: icon-only on mobile, text on larger screens */
         .hx-search-btn {
           margin: 3px; flex-shrink: 0;
           background: linear-gradient(135deg, #f5a623 0%, #f59e0b 100%);
           color: #000; font-weight: 800; font-size: 0.72rem;
-          padding: 0.48rem 1.05rem; border-radius: 9999px;
+          padding: 0.48rem 0.6rem; border-radius: 9999px;
           border: none; cursor: pointer;
-          display: flex; align-items: center; gap: 5px;
+          display: flex; align-items: center; gap: 4px;
           letter-spacing: 0.04em; white-space: nowrap;
           transition: opacity 0.15s, transform 0.15s;
         }
         .hx-search-btn:hover { opacity: 0.88; transform: scale(0.98); }
+        /* Show "Search" text only on screens wide enough */
+        .hx-search-btn-label { display: none; }
+        @media (min-width: 400px) {
+          .hx-search-btn { padding: 0.48rem 1rem; }
+          .hx-search-btn-label { display: inline; }
+        }
 
         /* ─ Slider dots ─ */
         .hx-dots { display: flex; align-items: center; gap: 0.35rem; }
@@ -399,13 +408,13 @@ export default async function HomePage() {
         }
         @media (min-width: 1024px) { .hx-viral { padding: 2.25rem 2.5rem 2.75rem; } }
 
-        /* Viral grid: 3 → 4 → 5 cols */
+        /* Viral grid: 2 (mobile) → 3 (tablet) → 5 (desktop) */
         .hx-viral-grid {
           display: grid;
-          grid-template-columns: repeat(3,1fr);
+          grid-template-columns: repeat(2,1fr);
           gap: 0.65rem;
         }
-        @media (min-width: 500px)  { .hx-viral-grid { grid-template-columns: repeat(4,1fr); gap: 0.8rem; } }
+        @media (min-width: 640px)  { .hx-viral-grid { grid-template-columns: repeat(3,1fr); gap: 0.8rem; } }
         @media (min-width: 1024px) { .hx-viral-grid { grid-template-columns: repeat(5,1fr); gap: 1.1rem; } }
 
         /* Viral card */
@@ -562,15 +571,10 @@ export default async function HomePage() {
           box-shadow: 0 6px 24px rgba(245,166,35,0.2);
         }
 
-        /* ─ Very small phones (< 360px) ─ */
+        /* ─ Tiny screens — everything scales via clamp/vw, just tune buttons ─ */
         @media (max-width: 359px) {
-          .hx-h1 { font-size: 2.1rem; }
-          .hx-search-btn-label { display: none; }
-          .hx-search-btn { padding: 0.42rem 0.55rem; }
-          .hx-btn-gold   { font-size: 0.62rem; padding: 0.42rem 0.85rem; }
-          .hx-btn-outline{ font-size: 0.62rem; padding: 0.42rem 0.65rem; }
-          .hx-viral-grid    { grid-template-columns: repeat(2,1fr) !important; }
-          .hx-featured-grid { grid-template-columns: repeat(2,1fr) !important; }
+          .hx-btn-gold    { font-size: 0.6rem; padding: 0.4rem 0.75rem; }
+          .hx-btn-outline { font-size: 0.6rem; padding: 0.4rem 0.6rem; }
         }
 
       ` }} />
