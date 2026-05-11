@@ -6,6 +6,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { Toaster } from "react-hot-toast";
+import TopLoader from "@/components/ui/TopLoader";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 
@@ -47,6 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className="dark">
       <body className={`${inter.className} bg-brand-dark text-white antialiased`}>
         <Providers>
+          <TopLoader />
           <Header />
           <main>{children}</main>
           <Footer />

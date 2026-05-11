@@ -408,13 +408,13 @@ export default async function HomePage() {
         }
         @media (min-width: 1024px) { .hx-viral { padding: 2.25rem 2.5rem 2.75rem; } }
 
-        /* Viral grid: 2 (mobile) → 3 (tablet) → 5 (desktop) */
+        /* Viral grid: 3 (mobile) → 4 (tablet) → 5 (desktop) */
         .hx-viral-grid {
           display: grid;
-          grid-template-columns: repeat(2,1fr);
-          gap: 0.65rem;
+          grid-template-columns: repeat(3,1fr);
+          gap: 0.55rem;
         }
-        @media (min-width: 640px)  { .hx-viral-grid { grid-template-columns: repeat(3,1fr); gap: 0.8rem; } }
+        @media (min-width: 640px)  { .hx-viral-grid { grid-template-columns: repeat(4,1fr); gap: 0.8rem; } }
         @media (min-width: 1024px) { .hx-viral-grid { grid-template-columns: repeat(5,1fr); gap: 1.1rem; } }
 
         /* Viral card */
