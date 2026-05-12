@@ -3,6 +3,7 @@ from django.urls import path
 from . import views
 
 app_name = "admin_panel"
+#Main Stream URL of Admin Pannel
 
 urlpatterns = [
     path("login/", views.panel_login, name="login"),
