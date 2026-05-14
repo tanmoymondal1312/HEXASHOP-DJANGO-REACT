@@ -577,6 +577,22 @@ export default async function HomePage() {
           .hx-btn-outline { font-size: 0.6rem; padding: 0.4rem 0.6rem; }
         }
 
+        /* ─ Full viewport hero — tablet & desktop only ─
+           Hero fills 100% of visible screen so products are below the fold.
+           Mobile is untouched (single column, auto height). */
+        @media (min-width: 768px) {
+          .hx-hero {
+            min-height: calc(100vh  - 64px);  /* fallback */
+            min-height: calc(100dvh - 64px);  /* accounts for mobile browser chrome */
+            display: flex;
+            flex-direction: column;
+          }
+          .hx-hero-inner {
+            flex: 1;
+            min-height: unset;
+          }
+        }
+
       ` }} />
 
       <div className="hx-wrap">
