@@ -767,63 +767,55 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* Right: hero image — floats freely in the background, no frame */}
-            <div className="hx-hero-img-col hx-anim-img hidden md:block relative self-stretch" style={{ overflow:"hidden" }}>
+          </div>{/* ─ end hx-hero-inner grid ─ */}
 
+          {/* ── Hero image: absolutely positioned in the SECTION, no grid cell box ── */}
+          {hero_image_url && (
+            <div
+              className="hx-anim-img hidden md:block"
+              style={{ position:"absolute", right:0, top:0, bottom:0, width:"50%", zIndex:3, pointerEvents:"none" }}
+            >
               {/* Ambient glow behind figure */}
-              <div style={{ position:"absolute", inset:0, background:"radial-gradient(ellipse at 55% 55%, rgba(30,144,255,0.14) 0%, transparent 62%)", zIndex:1, pointerEvents:"none" }} />
+              <div style={{ position:"absolute", inset:0, background:"radial-gradient(ellipse at 55% 55%, rgba(30,144,255,0.13) 0%, transparent 62%)", pointerEvents:"none" }} />
 
-              {/* Sparkle / bokeh dots */}
+              {/* Bokeh sparkle dots */}
               {sparkles.map((dot, i) => (
                 <div key={i} className="hx-sparkle" style={{
-                  position: "absolute", zIndex: 4,
+                  position:"absolute",
                   top: dot.top, right: dot.right, left: dot.left,
-                  width: dot.s, height: dot.s, borderRadius: "50%",
-                  background: "#f5a623",
-                  boxShadow: `0 0 ${dot.s * 3}px ${dot.s}px rgba(245,166,35,0.65)`,
-                  animationDelay: `${dot.d}ms`,
+                  width: dot.s, height: dot.s, borderRadius:"50%",
+                  background:"#f5a623",
+                  boxShadow:`0 0 ${dot.s*3}px ${dot.s}px rgba(245,166,35,0.65)`,
+                  animationDelay:`${dot.d}ms`,
                 }} />
               ))}
 
-              {/* Image — fills column from bottom, no frame */}
-              {hero_image_url ? (
-                <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"flex-end", justifyContent:"center", zIndex:2 }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={resolveImageUrl(hero_image_url) || hero_image_url}
-                    alt={hero_image_alt || "HEXASHOP"}
-                    loading="eager"
-                    style={{
-                      height: "95%", width: "auto", maxWidth: "105%",
-                      objectFit: "contain", objectPosition: "bottom center",
-                      filter: "drop-shadow(0 0 50px rgba(30,144,255,0.22)) drop-shadow(0 24px 60px rgba(0,0,0,0.65))",
-                    }}
-                  />
-                </div>
-              ) : (
-                <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", zIndex:2 }}>
-                  <div style={{ textAlign:"center" }}>
-                    <svg width="80" height="92" viewBox="0 0 80 92" fill="none">
-                      <polygon points="40,3 77,23 77,69 40,89 3,69 3,23" fill="rgba(30,144,255,0.06)" stroke="rgba(30,144,255,0.3)" strokeWidth="1.5" />
-                      <text x="40" y="56" textAnchor="middle" fill="rgba(245,166,35,0.4)" fontSize="30" fontWeight="900" fontFamily="Inter,sans-serif">H</text>
-                    </svg>
-                    <p style={{ color:"rgba(99,102,241,0.7)", fontSize:"0.72rem", marginTop:"0.5rem" }}>
-                      Upload hero image<br /><span style={{ color:"#6b7280", fontSize:"0.65rem" }}>Admin → Hero Image</span>
-                    </p>
-                  </div>
-                </div>
-              )}
+              {/* The person — anchored to bottom, height fills section */}
+              <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"flex-end", justifyContent:"center" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={resolveImageUrl(hero_image_url) || hero_image_url}
+                  alt={hero_image_alt || "HEXASHOP"}
+                  loading="eager"
+                  style={{
+                    height:"94%", width:"auto", maxWidth:"110%",
+                    objectFit:"contain", objectPosition:"bottom center",
+                    filter:"drop-shadow(0 0 55px rgba(30,144,255,0.2)) drop-shadow(0 28px 65px rgba(0,0,0,0.7))",
+                  }}
+                />
+              </div>
 
-              {/* Left edge — blends into text column */}
-              <div style={{ position:"absolute", top:0, left:0, bottom:0, width:"38%", background:"linear-gradient(to right, #090d12 0%, rgba(9,13,18,0.4) 65%, transparent 100%)", zIndex:5, pointerEvents:"none" }} />
-              {/* Right edge */}
-              <div style={{ position:"absolute", top:0, right:0, bottom:0, width:"8%", background:"linear-gradient(to left, #090d12 0%, transparent 100%)", zIndex:5, pointerEvents:"none" }} />
-              {/* Top edge */}
-              <div style={{ position:"absolute", top:0, left:0, right:0, height:"22%", background:"linear-gradient(to bottom, #090d12 0%, transparent 100%)", zIndex:5, pointerEvents:"none" }} />
-              {/* Bottom edge */}
-              <div style={{ position:"absolute", bottom:0, left:0, right:0, height:"48%", background:"linear-gradient(to bottom, transparent 0%, rgba(9,13,18,0.65) 50%, #090d12 100%)", zIndex:5, pointerEvents:"none" }} />
+              {/* Left fade — blends image into text area with no hard edge */}
+              <div style={{ position:"absolute", top:0, left:0, bottom:0, width:"42%", background:"linear-gradient(to right, #090d12 0%, rgba(9,13,18,0.5) 55%, transparent 100%)", pointerEvents:"none" }} />
+              {/* Right fade */}
+              <div style={{ position:"absolute", top:0, right:0, bottom:0, width:"10%", background:"linear-gradient(to left, #090d12, transparent)", pointerEvents:"none" }} />
+              {/* Top fade */}
+              <div style={{ position:"absolute", top:0, left:0, right:0, height:"20%", background:"linear-gradient(to bottom, #090d12, transparent)", pointerEvents:"none" }} />
+              {/* Bottom fade */}
+              <div style={{ position:"absolute", bottom:0, left:0, right:0, height:"50%", background:"linear-gradient(to bottom, transparent 0%, rgba(9,13,18,0.7) 55%, #090d12 100%)", pointerEvents:"none" }} />
             </div>
-          </div>
+          )}
+
         </section>
 
         {/* ═══ MOST VIRAL ════════════════════════════════════════════════════ */}
