@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ChevronDown, ChevronRight, Flame, Heart, Star } from "lucide-react";
 import { productsApi, siteApi } from "@/lib/api";
@@ -768,41 +767,17 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* Right: hexagon + hero image */}
-            <div className="hx-hero-img-col hx-anim-img hidden md:flex items-center justify-center relative" style={{ overflow:"hidden" }}>
-              {/* Outer rotating rings */}
-              <div className="hx-ring-cw" style={{ position:"absolute", zIndex:0 }}>
-                <svg width="420" height="420" viewBox="0 0 420 420" fill="none">
-                  <circle cx="210" cy="210" r="205" stroke="rgba(245,166,35,0.1)" strokeWidth="1" strokeDasharray="6 18" />
-                </svg>
-              </div>
-              <div className="hx-ring-ccw" style={{ position:"absolute", zIndex:0 }}>
-                <svg width="380" height="380" viewBox="0 0 380 380" fill="none">
-                  <circle cx="190" cy="190" r="185" stroke="rgba(30,144,255,0.08)" strokeWidth="1" strokeDasharray="3 22" />
-                </svg>
-              </div>
+            {/* Right: hero image — floats freely in the background, no frame */}
+            <div className="hx-hero-img-col hx-anim-img hidden md:block relative self-stretch" style={{ overflow:"hidden" }}>
 
-              {/* Hexagon SVG */}
-              <svg style={{ position:"absolute", zIndex:1 }} width="340" height="392" viewBox="0 0 340 392" fill="none">
-                <defs>
-                  <filter id="hg">
-                    <feGaussianBlur stdDeviation="3" result="b" />
-                    <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
-                  </filter>
-                </defs>
-                <polygon points="170,12 330,104 330,288 170,380 10,288 10,104"
-                  fill="none" stroke="#f5a623" strokeWidth="1.2" strokeDasharray="10 6" strokeOpacity="0.5" />
-                <polygon points="170,32 312,116 312,276 170,360 28,276 28,116"
-                  fill="rgba(30,144,255,0.04)" stroke="#1e90ff" strokeWidth="2" strokeOpacity="0.9" filter="url(#hg)" />
-              </svg>
+              {/* Ambient glow behind figure */}
+              <div style={{ position:"absolute", inset:0, background:"radial-gradient(ellipse at 55% 55%, rgba(30,144,255,0.14) 0%, transparent 62%)", zIndex:1, pointerEvents:"none" }} />
 
-              {/* Sparkle dots */}
+              {/* Sparkle / bokeh dots */}
               {sparkles.map((dot, i) => (
                 <div key={i} className="hx-sparkle" style={{
-                  position: "absolute", zIndex: 3,
-                  top: dot.top,
-                  right: dot.right,
-                  left:  dot.left,
+                  position: "absolute", zIndex: 4,
+                  top: dot.top, right: dot.right, left: dot.left,
                   width: dot.s, height: dot.s, borderRadius: "50%",
                   background: "#f5a623",
                   boxShadow: `0 0 ${dot.s * 3}px ${dot.s}px rgba(245,166,35,0.65)`,
@@ -810,18 +785,23 @@ export default async function HomePage() {
                 }} />
               ))}
 
-              {/* Hero image — floating */}
-              <div className="hx-float" style={{ position:"relative", zIndex:2, width:"100%", height:"100%", display:"flex", alignItems:"center", justifyContent:"center" }}>
-                {hero_image_url ? (
-                  <Image
-                    src={hero_image_url}
+              {/* Image — fills column from bottom, no frame */}
+              {hero_image_url ? (
+                <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"flex-end", justifyContent:"center", zIndex:2 }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={resolveImageUrl(hero_image_url) || hero_image_url}
                     alt={hero_image_alt || "HEXASHOP"}
-                    width={300} height={360}
-                    style={{ objectFit:"contain", maxHeight:"88%", filter:"drop-shadow(0 0 28px rgba(30,144,255,0.38)) drop-shadow(0 18px 40px rgba(0,0,0,0.7))" }}
-                    priority
-                    unoptimized={hero_image_url.includes("localhost")}
+                    loading="eager"
+                    style={{
+                      height: "95%", width: "auto", maxWidth: "105%",
+                      objectFit: "contain", objectPosition: "bottom center",
+                      filter: "drop-shadow(0 0 50px rgba(30,144,255,0.22)) drop-shadow(0 24px 60px rgba(0,0,0,0.65))",
+                    }}
                   />
-                ) : (
+                </div>
+              ) : (
+                <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", zIndex:2 }}>
                   <div style={{ textAlign:"center" }}>
                     <svg width="80" height="92" viewBox="0 0 80 92" fill="none">
                       <polygon points="40,3 77,23 77,69 40,89 3,69 3,23" fill="rgba(30,144,255,0.06)" stroke="rgba(30,144,255,0.3)" strokeWidth="1.5" />
@@ -831,10 +811,17 @@ export default async function HomePage() {
                       Upload hero image<br /><span style={{ color:"#6b7280", fontSize:"0.65rem" }}>Admin → Hero Image</span>
                     </p>
                   </div>
-                )}
-              </div>
-              {/* Image column bottom fade — person blends into background */}
-              <div style={{ position:"absolute", bottom:0, left:0, right:0, height:"50%", background:"linear-gradient(to bottom, transparent 0%, rgba(9,13,18,0.55) 55%, #090d12 100%)", zIndex:6, pointerEvents:"none" }} />
+                </div>
+              )}
+
+              {/* Left edge — blends into text column */}
+              <div style={{ position:"absolute", top:0, left:0, bottom:0, width:"38%", background:"linear-gradient(to right, #090d12 0%, rgba(9,13,18,0.4) 65%, transparent 100%)", zIndex:5, pointerEvents:"none" }} />
+              {/* Right edge */}
+              <div style={{ position:"absolute", top:0, right:0, bottom:0, width:"8%", background:"linear-gradient(to left, #090d12 0%, transparent 100%)", zIndex:5, pointerEvents:"none" }} />
+              {/* Top edge */}
+              <div style={{ position:"absolute", top:0, left:0, right:0, height:"22%", background:"linear-gradient(to bottom, #090d12 0%, transparent 100%)", zIndex:5, pointerEvents:"none" }} />
+              {/* Bottom edge */}
+              <div style={{ position:"absolute", bottom:0, left:0, right:0, height:"48%", background:"linear-gradient(to bottom, transparent 0%, rgba(9,13,18,0.65) 50%, #090d12 100%)", zIndex:5, pointerEvents:"none" }} />
             </div>
           </div>
         </section>
