@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight, Flame, Heart, Star } from "lucide-react";
 import { productsApi, siteApi } from "@/lib/api";
@@ -586,6 +587,7 @@ export default async function HomePage() {
           {/* Ambient glows */}
           <div style={{ position:"absolute", inset:0, background:"radial-gradient(ellipse at 76% 44%, rgba(30,144,255,0.18) 0%, transparent 58%)", pointerEvents:"none" }} />
           <div style={{ position:"absolute", bottom:0, right:"20%", width:"28%", height:"50%", background:"radial-gradient(ellipse at center bottom, rgba(245,166,35,0.08) 0%, transparent 65%)", pointerEvents:"none" }} />
+          {/* Strong bottom fade — hero bleeds seamlessly into viral */}
           <div style={{ position:"absolute", bottom:0, left:0, right:0, height:140, background:"linear-gradient(to bottom,transparent 0%,rgba(9,13,18,0.7) 50%,#090d12 100%)", zIndex:10, pointerEvents:"none" }} />
 
           <div className="hx-hero-inner">
@@ -643,7 +645,7 @@ export default async function HomePage() {
             </div>
 
             {/* Right: hexagon + hero image */}
-            <div className="hx-hero-img-col hx-anim-img hidden md:flex items-center justify-center relative">
+            <div className="hx-hero-img-col hx-anim-img hidden md:flex items-center justify-center relative" style={{ overflow:"hidden" }}>
               {/* Hexagon SVG */}
               <svg style={{ position:"absolute", zIndex:1 }} width="340" height="392" viewBox="0 0 340 392" fill="none">
                 <defs>
@@ -662,7 +664,9 @@ export default async function HomePage() {
               {sparkles.map((dot, i) => (
                 <div key={i} className="hx-sparkle" style={{
                   position: "absolute", zIndex: 3,
-                  top: dot.top, right: dot.right, left: dot.left,
+                  top: dot.top,
+                  right: dot.right,
+                  left:  dot.left,
                   width: dot.s, height: dot.s, borderRadius: "50%",
                   background: "#f5a623",
                   boxShadow: `0 0 ${dot.s * 3}px ${dot.s}px rgba(245,166,35,0.65)`,
@@ -670,15 +674,16 @@ export default async function HomePage() {
                 }} />
               ))}
 
-              {/* Hero image */}
+              {/* Hero image — floating */}
               <div className="hx-float" style={{ position:"relative", zIndex:2, width:"100%", height:"100%", display:"flex", alignItems:"center", justifyContent:"center" }}>
                 {hero_image_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={resolveImageUrl(hero_image_url) || hero_image_url}
+                  <Image
+                    src={hero_image_url}
                     alt={hero_image_alt || "HEXASHOP"}
-                    loading="eager"
-                    style={{ objectFit:"contain", maxHeight:"88%", width:"auto", filter:"drop-shadow(0 0 28px rgba(30,144,255,0.38)) drop-shadow(0 18px 40px rgba(0,0,0,0.7))" }}
+                    width={300} height={360}
+                    style={{ objectFit:"contain", maxHeight:"88%", filter:"drop-shadow(0 0 28px rgba(30,144,255,0.38)) drop-shadow(0 18px 40px rgba(0,0,0,0.7))" }}
+                    priority
+                    unoptimized={hero_image_url.includes("localhost")}
                   />
                 ) : (
                   <div style={{ textAlign:"center" }}>
@@ -692,8 +697,7 @@ export default async function HomePage() {
                   </div>
                 )}
               </div>
-
-              {/* Bottom fade */}
+              {/* Image column bottom fade — person blends into background */}
               <div style={{ position:"absolute", bottom:0, left:0, right:0, height:"50%", background:"linear-gradient(to bottom, transparent 0%, rgba(9,13,18,0.55) 55%, #090d12 100%)", zIndex:6, pointerEvents:"none" }} />
             </div>
           </div>
