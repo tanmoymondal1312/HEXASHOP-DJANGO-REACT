@@ -377,8 +377,7 @@ def product_add(request):
         _save_gallery_images(request, product)
         _save_colors_and_variants(request, product)
         _bust_cache(product)
-        qs = urlencode({"msg": "added", "name": product.name})
-        return redirect(f"/panel/products/?{qs}")
+        return redirect(f"/panel/products/{product.pk}/edit/?saved=1")
 
     return render(request, "admin_panel/products/form.html", {
         "form": form,
@@ -403,8 +402,7 @@ def product_edit(request, pk):
         _save_gallery_images(request, saved)
         _save_colors_and_variants(request, saved)
         _bust_cache(saved)
-        qs = urlencode({"msg": "updated", "name": saved.name})
-        return redirect(f"/panel/products/?{qs}")
+        return redirect(f"/panel/products/{saved.pk}/edit/?saved=1")
 
     # Build existing data for the template
     colour_image_ids = set(
@@ -419,7 +417,7 @@ def product_edit(request, pk):
             v.size for v in product.variants.filter(is_active=True) if v.size
         )
     )
-    # stock_matrix[color_pk][size] = variant info
+    # stock_matrix[color_pk_or_empty][size] = {stock, price}
     stock_matrix = {}
     for color in colors:
         stock_matrix[color.pk] = {}
@@ -428,6 +426,16 @@ def product_edit(request, pk):
                 "stock": v.stock,
                 "price": str(v.price) if v.price else "",
             }
+    # No-colour variants use "" as key (matches JS col.id for the "Default" column)
+    no_colour_variants = product.variants.filter(color=None, is_active=True)
+    if no_colour_variants.exists():
+        stock_matrix[""] = {}
+        for v in no_colour_variants:
+            if v.size:
+                stock_matrix[""][v.size] = {
+                    "stock": v.stock,
+                    "price": str(v.price) if v.price else "",
+                }
 
     return render(request, "admin_panel/products/form.html", {
         "form": form,
