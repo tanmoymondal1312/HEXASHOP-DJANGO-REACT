@@ -66,78 +66,97 @@ def _save_colors_and_variants(request, product):
     # ── 2. Parse sizes ─────────────────────────────────────────────────────────
     sizes = [v.strip() for v in request.POST.getlist("sizes") if v.strip()]
 
-    # ── 3. Keep track of which colour PKs we touch (to delete removed ones) ───
+    # ── 3. Nothing to do — user left both sections empty; preserve existing data
+    if not colours_data and not sizes:
+        return
+
     touched_color_pks  = set()
     touched_variant_pks = set()
 
-    for ci, cd in enumerate(colours_data):
-        if not cd["name"]:
-            continue
+    if colours_data:
+        # ── 4a. WITH colours: full colour × size matrix ───────────────────────
+        for ci, cd in enumerate(colours_data):
+            if not cd["name"]:
+                continue
 
-        # Get or create ProductColor
-        if cd["id"]:
-            try:
-                color_obj = ProductColor.objects.get(pk=int(cd["id"]), product=product)
-                color_obj.name     = cd["name"]
-                color_obj.hex_code = cd["hex_code"]
-                color_obj.sort_order = ci
-                color_obj.save()
-            except ProductColor.DoesNotExist:
+            # Get or create ProductColor
+            if cd["id"]:
+                try:
+                    color_obj = ProductColor.objects.get(pk=int(cd["id"]), product=product)
+                    color_obj.name     = cd["name"]
+                    color_obj.hex_code = cd["hex_code"]
+                    color_obj.sort_order = ci
+                    color_obj.save()
+                except ProductColor.DoesNotExist:
+                    color_obj = None
+            else:
                 color_obj = None
-        else:
-            color_obj = None
 
-        if color_obj is None:
-            color_obj = ProductColor.objects.create(
-                product=product,
-                name=cd["name"],
-                hex_code=cd["hex_code"],
-                sort_order=ci,
-            )
+            if color_obj is None:
+                color_obj = ProductColor.objects.create(
+                    product=product,
+                    name=cd["name"],
+                    hex_code=cd["hex_code"],
+                    sort_order=ci,
+                )
 
-        # Handle colour image upload — replace old image so it doesn't linger
-        if cd["image"]:
-            old_image = color_obj.image
-            pi = ProductImage.objects.create(
-                product=product,
-                image=cd["image"],
-                alt_text=f"{product.name} – {cd['name']}",
-                is_primary=False,
-                sort_order=ci,
-            )
-            color_obj.image = pi
-            color_obj.save(update_fields=["image"])
-            # Delete the previous colour image now that a replacement is stored
-            if old_image and old_image.pk != pi.pk:
-                old_image.delete()
+            # Handle colour image — replace old so it doesn't linger
+            if cd["image"]:
+                old_image = color_obj.image
+                pi = ProductImage.objects.create(
+                    product=product,
+                    image=cd["image"],
+                    alt_text=f"{product.name} – {cd['name']}",
+                    is_primary=False,
+                    sort_order=ci,
+                )
+                color_obj.image = pi
+                color_obj.save(update_fields=["image"])
+                if old_image and old_image.pk != pi.pk:
+                    old_image.delete()
 
-        touched_color_pks.add(color_obj.pk)
+            touched_color_pks.add(color_obj.pk)
 
-        # ── 4. Create/update variants for each size ───────────────────────────
+            for si, size in enumerate(sizes):
+                stock = int(request.POST.get(f"stock_{ci}_{si}", 0) or 0)
+                price_raw = request.POST.get(f"price_{ci}_{si}", "").strip()
+                price = price_raw if price_raw else None
+                auto_sku = f"{product.sku}-{re.sub(r'[^A-Z0-9]', '', cd['name'].upper())[:4]}-{size.upper().replace(' ', '')}"
+
+                variant, _ = ProductVariant.objects.get_or_create(
+                    product=product, color=color_obj, size=size,
+                    defaults={"sku": auto_sku},
+                )
+                variant.stock = stock
+                variant.price = price
+                if not variant.sku:
+                    variant.sku = auto_sku
+                variant.is_active = True
+                variant.save()
+                touched_variant_pks.add(variant.pk)
+
+    else:
+        # ── 4b. WITHOUT colours: size-only variants (colour = None) ───────────
+        # The JS matrix sends stock_0_{size_idx} for the single "Default" column.
         for si, size in enumerate(sizes):
-            stock_key = f"stock_{ci}_{si}"
-            price_key = f"price_{ci}_{si}"
-            stock = int(request.POST.get(stock_key, 0) or 0)
-            price_raw = request.POST.get(price_key, "").strip()
+            stock = int(request.POST.get(f"stock_0_{si}", 0) or 0)
+            price_raw = request.POST.get(f"price_0_{si}", "").strip()
             price = price_raw if price_raw else None
-
-            # Build a deterministic SKU
-            auto_sku = f"{product.sku}-{re.sub(r'[^A-Z0-9]', '', cd['name'].upper())[:4]}-{size.upper().replace(' ', '')}"
+            auto_sku = f"{product.sku}-{size.upper().replace(' ', '')}"
 
             variant, _ = ProductVariant.objects.get_or_create(
-                product=product, color=color_obj, size=size,
+                product=product, color=None, size=size,
                 defaults={"sku": auto_sku},
             )
             variant.stock = stock
             variant.price = price
-            # Ensure SKU stays unique if product SKU changed
             if not variant.sku:
                 variant.sku = auto_sku
             variant.is_active = True
             variant.save()
             touched_variant_pks.add(variant.pk)
 
-    # ── 5. Delete colours/variants that were removed by the user ──────────────
+    # ── 5. Delete colours/variants that were removed ───────────────────────────
     ProductVariant.objects.filter(product=product).exclude(pk__in=touched_variant_pks).delete()
     ProductColor.objects.filter(product=product).exclude(pk__in=touched_color_pks).delete()
 
