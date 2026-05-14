@@ -1,5 +1,3 @@
-import socket
-
 from .base import *  # noqa
 
 DEBUG = True
@@ -18,33 +16,19 @@ MEDIA_ROOT = BASE_DIR / "media"  # noqa
 # Use console email in dev (ইমেইল terminal-এ দেখা যাবে)
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-# Detect all local LAN IPs so mobile devices on the same network can connect
-def _lan_origins(ports=(3000,)):
-    origins = set()
-    try:
-        for info in socket.getaddrinfo(socket.gethostname(), None):
-            ip = info[4][0]
-            if not ip.startswith("127.") and ":" not in ip:
-                for port in ports:
-                    origins.add(f"http://{ip}:{port}")
-    except Exception:
-        pass
-    return list(origins)
+# mDNS hostname for LAN access — any device on the same Wi-Fi can reach the site
+_LAN_HOST = "tanmoy-ubuntu-computer.local"
 
-_extra = _lan_origins()
-
-# CORS — allow localhost + any LAN IP on port 3000
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    *_extra,
+    f"http://{_LAN_HOST}:3000",
 ]
 
-# CSRF — same set
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    *_extra,
+    f"http://{_LAN_HOST}:3000",
 ]
 
 # Disable axes in tests to speed them up
