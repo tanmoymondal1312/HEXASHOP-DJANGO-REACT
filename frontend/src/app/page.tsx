@@ -220,21 +220,21 @@ export default async function HomePage() {
 
         .hx-hero-inner {
           max-width: 1280px; margin: 0 auto; width: 100%;
-          padding: 1.75rem 1rem 1.5rem;
+          padding: 1.25rem 1rem 0.75rem;
           display: grid; grid-template-columns: 1fr; align-items: center;
         }
         @media (min-width: 768px) {
           .hx-hero-inner {
             grid-template-columns: 52% 48%;
-            padding: 2.75rem 2rem 2.25rem;
-            min-height: 360px;
+            padding: 1.75rem 2rem 1.25rem;
+            min-height: 300px;
           }
         }
         @media (min-width: 1024px) {
           .hx-hero-inner {
             grid-template-columns: 52% 48%;
-            padding: 3rem 2.5rem 2.5rem;
-            min-height: 440px;
+            padding: 1.75rem 2.5rem 1rem;
+            min-height: 360px;
           }
         }
 
@@ -403,10 +403,10 @@ export default async function HomePage() {
 
         /* ═══════════════ VIRAL ═══════════════ */
         .hx-viral {
-          padding: 1.75rem 1.25rem 2rem;
+          padding: 0.75rem 1.25rem 1.75rem;
           background: linear-gradient(to bottom, #090d12, #0b101a);
         }
-        @media (min-width: 1024px) { .hx-viral { padding: 2.25rem 2.5rem 2.75rem; } }
+        @media (min-width: 1024px) { .hx-viral { padding: 1rem 2.5rem 2.5rem; } }
 
         /* Viral grid: 3 (mobile) → 4 (tablet) → 5 (desktop) */
         .hx-viral-grid {
@@ -587,7 +587,8 @@ export default async function HomePage() {
           {/* Ambient glows */}
           <div style={{ position:"absolute", inset:0, background:"radial-gradient(ellipse at 76% 44%, rgba(30,144,255,0.18) 0%, transparent 58%)", pointerEvents:"none" }} />
           <div style={{ position:"absolute", bottom:0, right:"20%", width:"28%", height:"50%", background:"radial-gradient(ellipse at center bottom, rgba(245,166,35,0.08) 0%, transparent 65%)", pointerEvents:"none" }} />
-          <div style={{ position:"absolute", bottom:0, left:0, right:0, height:64, background:"linear-gradient(to bottom,transparent,#090d12)", zIndex:10, pointerEvents:"none" }} />
+          {/* Strong bottom fade — hero bleeds seamlessly into viral */}
+          <div style={{ position:"absolute", bottom:0, left:0, right:0, height:140, background:"linear-gradient(to bottom,transparent 0%,rgba(9,13,18,0.7) 50%,#090d12 100%)", zIndex:10, pointerEvents:"none" }} />
 
           <div className="hx-hero-inner">
 
@@ -644,7 +645,7 @@ export default async function HomePage() {
             </div>
 
             {/* Right: hexagon + hero image */}
-            <div className="hx-hero-img-col hx-anim-img hidden md:flex items-center justify-center relative">
+            <div className="hx-hero-img-col hx-anim-img hidden md:flex items-center justify-center relative" style={{ overflow:"hidden" }}>
               {/* Hexagon SVG */}
               <svg style={{ position:"absolute", zIndex:1 }} width="340" height="392" viewBox="0 0 340 392" fill="none">
                 <defs>
@@ -696,6 +697,8 @@ export default async function HomePage() {
                   </div>
                 )}
               </div>
+              {/* Image column bottom fade — person blends into background */}
+              <div style={{ position:"absolute", bottom:0, left:0, right:0, height:"50%", background:"linear-gradient(to bottom, transparent 0%, rgba(9,13,18,0.55) 55%, #090d12 100%)", zIndex:6, pointerEvents:"none" }} />
             </div>
           </div>
         </section>
@@ -724,9 +727,6 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
-
-        {/* ─ Section divider ─ */}
-        <div className="hx-divider" />
 
         {/* ═══ FEATURED PRODUCTS ═════════════════════════════════════════════ */}
         <section className="hx-featured">
