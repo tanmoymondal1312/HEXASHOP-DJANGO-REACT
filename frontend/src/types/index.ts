@@ -23,19 +23,30 @@ export interface ProductImage {
   is_primary: boolean;
 }
 
+export interface ProductColor {
+  id: number;
+  name: string;
+  hex_code: string;
+  image_url: string | null;
+  sort_order: number;
+}
+
 export interface ProductVariant {
   id: number;
   sku: string;
-  name: string;
+  color_id: number | null;
+  color_name: string | null;
+  size: string;
   price: string | null;
-  compare_at_price: string | null;
   effective_price: string;
   stock: number;
-  attributes: Record<string, string>;
-  image: ProductImage | null;
   is_active: boolean;
   is_in_stock: boolean;
   is_low_stock: boolean;
+  low_stock_threshold?: number;
+  // legacy
+  attributes?: Record<string, string>;
+  image?: ProductImage | null;
 }
 
 export interface Review {
@@ -67,6 +78,7 @@ export interface Product {
   discount_percentage: number | null;
   primary_image?: string | null;
   images?: ProductImage[];
+  colors?: ProductColor[];
   variants?: ProductVariant[];
   category: Category | { name: string };
   brand?: Brand | null;

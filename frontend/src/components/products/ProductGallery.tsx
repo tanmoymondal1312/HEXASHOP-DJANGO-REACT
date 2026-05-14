@@ -9,12 +9,13 @@ import type { ProductImage } from "@/types";
 interface ProductGalleryProps {
   images: ProductImage[];
   productName: string;
+  colorImageMap?: Record<number, number>; // colorId → imageId
 }
 
 const PLACEHOLDER =
   "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iIzExMTgyNyIvPjwvc3ZnPg==";
 
-export function ProductGallery({ images, productName }: ProductGalleryProps) {
+export function ProductGallery({ images, productName, colorImageMap = {} }: ProductGalleryProps) {
   const [active, setActive] = useState(0);
   const [lightbox, setLightbox] = useState(false);
   const [fade, setFade] = useState(true);
@@ -36,17 +37,30 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
   const prev = useCallback(() => goTo(active - 1), [active, goTo]);
   const next = useCallback(() => goTo(active + 1), [active, goTo]);
 
-  // Listen for variant-image sync from AddToCartSection
+  // Listen for colour selection → switch gallery to colour's image
   useEffect(() => {
-    const handler = (e: Event) => {
+    const colorHandler = (e: Event) => {
+      const colorId = (e as CustomEvent<{ colorId: number }>).detail?.colorId;
+      if (colorId == null) return;
+      const imageId = colorImageMap[colorId];
+      if (imageId == null) return;
+      const idx = images.findIndex((img) => img.id === imageId);
+      if (idx >= 0) goTo(idx);
+    };
+    // Legacy variant-select support
+    const variantHandler = (e: Event) => {
       const imageId = (e as CustomEvent<{ imageId: number | null }>).detail?.imageId;
       if (imageId == null) return;
       const idx = images.findIndex((img) => img.id === imageId);
       if (idx >= 0) goTo(idx);
     };
-    window.addEventListener("hexashop:variant-select", handler);
-    return () => window.removeEventListener("hexashop:variant-select", handler);
-  }, [images, goTo]);
+    window.addEventListener("hexashop:color-select", colorHandler);
+    window.addEventListener("hexashop:variant-select", variantHandler);
+    return () => {
+      window.removeEventListener("hexashop:color-select", colorHandler);
+      window.removeEventListener("hexashop:variant-select", variantHandler);
+    };
+  }, [images, goTo, colorImageMap]);
 
   // Keyboard navigation in lightbox
   useEffect(() => {

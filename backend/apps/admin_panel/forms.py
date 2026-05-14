@@ -2,7 +2,7 @@ from django import forms
 from django.forms import inlineformset_factory
 
 from apps.products.models import (
-    Brand, Category, Product, ProductImage, ProductVariant
+    Brand, Category, Product, ProductColor, ProductImage, ProductVariant
 )
 from apps.store_settings.models import SiteSettings
 
@@ -145,95 +145,14 @@ ProductImageFormSet = inlineformset_factory(
 )
 
 
-# ── Product variant ────────────────────────────────────────────────────────────
+# ── Colour + Size helpers (used in views, not Django formsets) ─────────────────
 
-class ProductVariantForm(forms.ModelForm):
-    """
-    Exposes the attributes JSONField as separate size + color inputs,
-    and adds a per-variant image upload (stored as a ProductImage).
-    """
-
-    variant_image = forms.ImageField(
-        required=False,
-        label="Photo",
-        widget=forms.FileInput(attrs={
-            "accept": "image/*",
-            "class": "variant-img-input",
-            "style": "display:none;",
-        }),
-    )
-
-    size = forms.ChoiceField(
-        choices=ALL_SIZES,
-        required=False,
-        widget=forms.Select(attrs={"class": "form-select"}),
-        label="Size",
-    )
-    color = forms.CharField(
-        required=False,
-        max_length=80,
-        widget=fi("e.g. Black, Red #FF0000"),
-        label="Color",
-    )
-
-    class Meta:
-        model = ProductVariant
-        fields = [
-            "sku", "name",
-            "price", "compare_at_price",
-            "stock", "low_stock_threshold",
-            "is_active",
-        ]
-        widgets = {
-            "is_active": forms.CheckboxInput(attrs={"style": "width:1rem;height:1rem;accent-color:#6366f1;cursor:pointer;"}),
-            "sku":                 fi("e.g. PROD-M-BLK"),
-            "name":                fi("Display name (auto-generated if blank)"),
-            "price":               ni("Blank = use base price", "0.01"),
-            "compare_at_price":    ni("", "0.01"),
-            "stock":               ni("0", "1", {"min": "0"}),
-            "low_stock_threshold": ni("5",  "1", {"min": "1", "style": "font-size:0.72rem;"}),
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        optional = ["price", "compare_at_price", "name", "low_stock_threshold"]
-        for f in optional:
-            self.fields[f].required = False
-
-        # Pre-populate size / color from existing attributes JSON
-        if self.instance.pk and self.instance.attributes:
-            attrs = self.instance.attributes
-            self.fields["size"].initial  = attrs.get("size", "")
-            self.fields["color"].initial = attrs.get("color", "")
-
-    def save(self, commit=True):
-        instance = super().save(commit=False)
-
-        # Re-build the attributes JSON from the separate fields
-        attrs = {}
-        size  = self.cleaned_data.get("size", "").strip()
-        color = self.cleaned_data.get("color", "").strip()
-        if size:
-            attrs["size"]  = size
-        if color:
-            attrs["color"] = color
-        instance.attributes = attrs
-
-        # Auto-generate display name if left blank
-        if not instance.name:
-            parts = [p for p in [size, color] if p]
-            instance.name = " / ".join(parts) or instance.sku
-
-        if commit:
-            instance.save()
-        return instance
-
-
-ProductVariantFormSet = inlineformset_factory(
-    Product, ProductVariant,
-    form=ProductVariantForm,
-    extra=2, can_delete=True, max_num=20,
-)
+COMMON_SIZES = [
+    "XS", "S", "M", "L", "XL", "XXL", "3XL",
+    "4", "5", "6", "7", "8", "9", "10", "11", "12", "13",
+    "28", "30", "32", "34", "36", "38", "40",
+    "One Size", "Free Size",
+]
 
 
 # ── Category ───────────────────────────────────────────────────────────────────

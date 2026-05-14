@@ -13,13 +13,13 @@ from django.utils import timezone
 
 from apps.accounts.models import User
 from apps.cart.models import CartItem
-from apps.products.models import Category, Product, ProductImage
+from apps.products.models import Category, Product, ProductColor, ProductImage, ProductVariant
 from apps.store_settings.models import SiteSettings
 
 from django.core.cache import cache
 
 from .forms import (
-    AnnouncementForm, CategoryForm, ProductForm, ProductVariantFormSet,
+    AnnouncementForm, CategoryForm, ProductForm, COMMON_SIZES,
 )
 
 
@@ -32,46 +32,110 @@ def _bust_cache(product=None):
     cache.delete_many(keys)
 
 
-# ── Variant image helper ──────────────────────────────────────────────────────
+from .models import PageView
 
-def _save_variant_images(request, var_formset, product):
-    """
-    After the variant formset is saved, iterate forms and:
-    • Create a ProductImage for any uploaded variant_image file
-    • Link it to the variant via variant.image FK
-    • Mark the primary variant's image as is_primary=True
-    """
-    primary_prefix = request.POST.get("primary_variant", "")
 
-    for vf in var_formset.forms:
-        cd = vf.cleaned_data
-        if not cd or cd.get("DELETE", False) or not vf.instance.pk:
+# ── Colour + Size variant save helper ─────────────────────────────────────────
+
+def _save_colors_and_variants(request, product):
+    """
+    Parse the custom colour/size/stock POST data and create/update
+    ProductColor + ProductVariant records for the given product.
+
+    POST shape (all repeated with index 0‥N):
+        color_name_0, color_hex_0, color_image_0, color_id_0
+        size_0 … size_K  (repeated size keys)
+        stock_{color_idx}_{size_idx}
+        price_{color_idx}_{size_idx}   (optional override)
+    """
+    import re
+
+    # ── 1. Parse colours ──────────────────────────────────────────────────────
+    colour_idx = 0
+    colours_data = []
+    while f"color_name_{colour_idx}" in request.POST:
+        colours_data.append({
+            "idx":      colour_idx,
+            "id":       request.POST.get(f"color_id_{colour_idx}", "").strip(),
+            "name":     request.POST.get(f"color_name_{colour_idx}", "").strip(),
+            "hex_code": request.POST.get(f"color_hex_{colour_idx}", "").strip(),
+            "image":    request.FILES.get(f"color_image_{colour_idx}"),
+        })
+        colour_idx += 1
+
+    # ── 2. Parse sizes ─────────────────────────────────────────────────────────
+    sizes = [v.strip() for v in request.POST.getlist("sizes") if v.strip()]
+
+    # ── 3. Keep track of which colour PKs we touch (to delete removed ones) ───
+    touched_color_pks  = set()
+    touched_variant_pks = set()
+
+    for ci, cd in enumerate(colours_data):
+        if not cd["name"]:
             continue
 
-        img_file  = cd.get("variant_image")
-        is_primary = (vf.prefix == primary_prefix)
+        # Get or create ProductColor
+        if cd["id"]:
+            try:
+                color_obj = ProductColor.objects.get(pk=int(cd["id"]), product=product)
+                color_obj.name     = cd["name"]
+                color_obj.hex_code = cd["hex_code"]
+                color_obj.sort_order = ci
+                color_obj.save()
+            except ProductColor.DoesNotExist:
+                color_obj = None
+        else:
+            color_obj = None
 
-        if img_file:
-            # Un-mark all existing primary images first if this one is primary
-            if is_primary:
-                ProductImage.objects.filter(product=product).update(is_primary=False)
+        if color_obj is None:
+            color_obj = ProductColor.objects.create(
+                product=product,
+                name=cd["name"],
+                hex_code=cd["hex_code"],
+                sort_order=ci,
+            )
 
+        # Handle colour image upload
+        if cd["image"]:
             pi = ProductImage.objects.create(
                 product=product,
-                image=img_file,
-                alt_text=vf.instance.name or vf.instance.sku,
-                is_primary=is_primary,
-                sort_order=0,
+                image=cd["image"],
+                alt_text=f"{product.name} – {cd['name']}",
+                is_primary=False,
+                sort_order=ci,
             )
-            vf.instance.image = pi
-            vf.instance.save(update_fields=["image"])
+            color_obj.image = pi
+            color_obj.save(update_fields=["image"])
 
-        elif is_primary and vf.instance.image:
-            # No new file but this variant is chosen as Primary
-            ProductImage.objects.filter(product=product).update(is_primary=False)
-            vf.instance.image.is_primary = True
-            vf.instance.image.save(update_fields=["is_primary"])
-from .models import PageView
+        touched_color_pks.add(color_obj.pk)
+
+        # ── 4. Create/update variants for each size ───────────────────────────
+        for si, size in enumerate(sizes):
+            stock_key = f"stock_{ci}_{si}"
+            price_key = f"price_{ci}_{si}"
+            stock = int(request.POST.get(stock_key, 0) or 0)
+            price_raw = request.POST.get(price_key, "").strip()
+            price = price_raw if price_raw else None
+
+            # Build a deterministic SKU
+            auto_sku = f"{product.sku}-{re.sub(r'[^A-Z0-9]', '', cd['name'].upper())[:4]}-{size.upper().replace(' ', '')}"
+
+            variant, _ = ProductVariant.objects.get_or_create(
+                product=product, color=color_obj, size=size,
+                defaults={"sku": auto_sku},
+            )
+            variant.stock = stock
+            variant.price = price
+            # Ensure SKU stays unique if product SKU changed
+            if not variant.sku:
+                variant.sku = auto_sku
+            variant.is_active = True
+            variant.save()
+            touched_variant_pks.add(variant.pk)
+
+    # ── 5. Delete colours/variants that were removed by the user ──────────────
+    ProductVariant.objects.filter(product=product).exclude(pk__in=touched_variant_pks).delete()
+    ProductColor.objects.filter(product=product).exclude(pk__in=touched_color_pks).delete()
 
 # ── Auth helper ───────────────────────────────────────────────────────────────
 
@@ -246,47 +310,64 @@ def product_list(request):
 
 @staff_required
 def product_add(request):
-    form        = ProductForm(request.POST or None)
-    var_formset = ProductVariantFormSet(request.POST or None, request.FILES or None, prefix="variants")
+    form = ProductForm(request.POST or None)
 
-    if request.method == "POST":
-        form_ok = form.is_valid()
-        vars_ok = var_formset.is_valid()
-        if form_ok and vars_ok:
-            product = form.save()
-            var_formset.instance = product
-            var_formset.save()
-            _save_variant_images(request, var_formset, product)
-            _bust_cache(product)
-            qs = urlencode({"msg": "added", "name": product.name})
-            return redirect(f"/panel/products/?{qs}")
+    if request.method == "POST" and form.is_valid():
+        product = form.save()
+        _save_colors_and_variants(request, product)
+        _bust_cache(product)
+        qs = urlencode({"msg": "added", "name": product.name})
+        return redirect(f"/panel/products/?{qs}")
 
     return render(request, "admin_panel/products/form.html", {
-        "form": form, "var_formset": var_formset,
-        "action": "Add", "submitted": request.method == "POST",
+        "form": form,
+        "action": "Add",
+        "common_sizes": COMMON_SIZES,
+        "existing_colors": [],
+        "existing_sizes": [],
+        "stock_matrix": {},
+        "submitted": request.method == "POST",
     })
 
 
 @staff_required
 def product_edit(request, pk):
-    product     = get_object_or_404(Product, pk=pk)
-    form        = ProductForm(request.POST or None, instance=product)
-    var_formset = ProductVariantFormSet(request.POST or None, request.FILES or None, instance=product, prefix="variants")
+    product = get_object_or_404(Product, pk=pk)
+    form    = ProductForm(request.POST or None, instance=product)
 
-    if request.method == "POST":
-        form_ok = form.is_valid()
-        vars_ok = var_formset.is_valid()
-        if form_ok and vars_ok:
-            saved = form.save()
-            var_formset.save()
-            _save_variant_images(request, var_formset, product)
-            _bust_cache(saved)
-            qs = urlencode({"msg": "updated", "name": saved.name})
-            return redirect(f"/panel/products/?{qs}")
+    if request.method == "POST" and form.is_valid():
+        saved = form.save()
+        _save_colors_and_variants(request, saved)
+        _bust_cache(saved)
+        qs = urlencode({"msg": "updated", "name": saved.name})
+        return redirect(f"/panel/products/?{qs}")
+
+    # Build existing data for the template
+    colors = list(product.colors.select_related("image").order_by("sort_order"))
+    sizes  = sorted(
+        set(
+            v.size for v in product.variants.filter(is_active=True) if v.size
+        )
+    )
+    # stock_matrix[color_pk][size] = variant info
+    stock_matrix = {}
+    for color in colors:
+        stock_matrix[color.pk] = {}
+        for v in product.variants.filter(color=color, is_active=True):
+            stock_matrix[color.pk][v.size] = {
+                "stock": v.stock,
+                "price": str(v.price) if v.price else "",
+            }
 
     return render(request, "admin_panel/products/form.html", {
-        "form": form, "var_formset": var_formset,
-        "action": "Edit", "product": product, "submitted": request.method == "POST",
+        "form": form,
+        "action": "Edit",
+        "product": product,
+        "common_sizes": COMMON_SIZES,
+        "existing_colors": colors,
+        "existing_sizes": sizes,
+        "stock_matrix": stock_matrix,
+        "submitted": request.method == "POST",
     })
 
 

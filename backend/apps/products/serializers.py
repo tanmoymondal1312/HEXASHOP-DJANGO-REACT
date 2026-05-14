@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Brand, Category, Product, ProductImage, ProductVariant, Review
+from .models import Brand, Category, Product, ProductColor, ProductImage, ProductVariant, Review
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -30,18 +30,34 @@ class ProductImageSerializer(serializers.ModelSerializer):
         fields = ("id", "image", "alt_text", "sort_order", "is_primary")
 
 
-class ProductVariantSerializer(serializers.ModelSerializer):
-    effective_price = serializers.ReadOnlyField()
-    is_in_stock = serializers.ReadOnlyField()
-    is_low_stock = serializers.ReadOnlyField()
-    image = ProductImageSerializer(read_only=True)
+class ProductColorSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
 
     class Meta:
-        model = ProductVariant
+        model  = ProductColor
+        fields = ("id", "name", "hex_code", "image_url", "sort_order")
+
+    def get_image_url(self, obj) -> str | None:
+        if not (obj.image and obj.image.image):
+            return None
+        url     = obj.image.image.url
+        request = self.context.get("request")
+        return request.build_absolute_uri(url) if request else url
+
+
+class ProductVariantSerializer(serializers.ModelSerializer):
+    effective_price = serializers.ReadOnlyField()
+    is_in_stock     = serializers.ReadOnlyField()
+    is_low_stock    = serializers.ReadOnlyField()
+    color_id        = serializers.IntegerField(source="color.id", read_only=True, default=None)
+    color_name      = serializers.CharField(source="color.name", read_only=True, default=None)
+
+    class Meta:
+        model  = ProductVariant
         fields = (
-            "id", "sku", "name", "price", "compare_at_price",
-            "effective_price", "stock", "attributes",
-            "image", "is_active", "is_in_stock", "is_low_stock",
+            "id", "sku", "color_id", "color_name", "size",
+            "price", "effective_price", "stock",
+            "is_active", "is_in_stock", "is_low_stock",
         )
 
 
@@ -112,19 +128,20 @@ class ProductListSerializer(serializers.ModelSerializer):
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):
-    images = ProductImageSerializer(many=True, read_only=True)
-    variants = ProductVariantSerializer(many=True, read_only=True)
-    category = CategorySerializer(read_only=True)
-    brand = BrandSerializer(read_only=True)
+    images    = ProductImageSerializer(many=True, read_only=True)
+    variants  = ProductVariantSerializer(many=True, read_only=True)
+    colors    = ProductColorSerializer(many=True, read_only=True)
+    category  = CategorySerializer(read_only=True)
+    brand     = BrandSerializer(read_only=True)
     discount_percentage = serializers.ReadOnlyField()
-    reviews = ReviewSerializer(many=True, read_only=True, source="reviews.all")
+    reviews   = ReviewSerializer(many=True, read_only=True, source="reviews.all")
 
     class Meta:
-        model = Product
+        model  = Product
         fields = (
             "id", "name", "slug", "sku", "description", "short_description",
             "base_price", "compare_at_price", "discount_percentage",
-            "category", "brand", "images", "variants", "tags", "attributes",
+            "category", "brand", "images", "colors", "variants", "tags", "attributes",
             "avg_rating", "review_count", "sold_count",
             "meta_title", "meta_description", "reviews", "created_at", "updated_at",
         )

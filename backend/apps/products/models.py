@@ -151,13 +151,42 @@ class ProductImage(TimeStampedModel):
         super().save(*args, **kwargs)
 
 
+class ProductColor(TimeStampedModel):
+    """A named colour option for a product, backed by an optional photo."""
+    product    = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="colors")
+    name       = models.CharField(max_length=60, help_text='e.g. "Sky Blue", "Charcoal"')
+    hex_code   = models.CharField(
+        max_length=7, blank=True, default="",
+        help_text="CSS hex colour e.g. #87CEEB — used as swatch when no image",
+    )
+    image      = models.ForeignKey(
+        "ProductImage", on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="color_display",
+        help_text="Optional colour-specific product photo",
+    )
+    sort_order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        db_table      = "product_colors"
+        ordering      = ["sort_order", "id"]
+        unique_together = ("product", "name")
+
+    def __str__(self):
+        return self.name
+
+
 class ProductVariant(TimeStampedModel):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="variants")
-    sku = models.CharField(max_length=100, unique=True)
-    name = models.CharField(max_length=200)
-    price = models.DecimalField(
+    color   = models.ForeignKey(
+        ProductColor, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="variants",
+    )
+    size    = models.CharField(max_length=20, blank=True, default="")
+    sku     = models.CharField(max_length=100, unique=True)
+    name    = models.CharField(max_length=200, blank=True)
+    price   = models.DecimalField(
         max_digits=10, decimal_places=2, null=True, blank=True,
-        help_text="Override product base price"
+        help_text="Leave blank to use product base price",
     )
     compare_at_price = models.DecimalField(
         max_digits=10, decimal_places=2, null=True, blank=True

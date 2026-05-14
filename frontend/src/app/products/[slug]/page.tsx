@@ -121,7 +121,19 @@ export default async function ProductDetailPage({ params }: PageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 xl:gap-16">
 
           {/* Left: Gallery */}
-          <ProductGallery images={product.images || []} productName={product.name} />
+          <ProductGallery
+            images={product.images || []}
+            productName={product.name}
+            colorImageMap={Object.fromEntries(
+              (product.colors ?? [])
+                .filter((c) => c.image_url)
+                .map((c) => {
+                  const img = (product.images ?? []).find((i) => i.image === c.image_url || c.image_url?.includes(i.image ?? ""));
+                  return [c.id, img?.id ?? -1];
+                })
+                .filter(([, imgId]) => imgId !== -1)
+            )}
+          />
 
           {/* Right: Info */}
           <div className="flex flex-col gap-5">

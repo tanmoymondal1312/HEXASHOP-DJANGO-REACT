@@ -19,7 +19,7 @@ from core.pagination import StandardPageNumberPagination
 from core.permissions import IsAdminOrReadOnly
 
 from .filters import ProductFilter
-from .models import Brand, Category, Product, ProductImage, ProductVariant, Review
+from .models import Brand, Category, Product, ProductColor, ProductImage, ProductVariant, Review
 from .serializers import (
     BrandSerializer,
     CategorySerializer,
@@ -104,13 +104,16 @@ class ProductViewSet(ReadOnlyModelViewSet):
                 .prefetch_related(
                     "images",
                     Prefetch(
+                        "colors",
+                        queryset=ProductColor.objects.select_related("image").order_by("sort_order"),
+                    ),
+                    Prefetch(
                         "variants",
-                        queryset=ProductVariant.objects.filter(is_active=True).select_related("image"),
+                        queryset=ProductVariant.objects.filter(is_active=True)
+                            .select_related("color"),
                     ),
                     Prefetch(
                         "reviews",
-                        # NOTE: no slice here — Django cannot add a product_id
-                        # filter on an already-sliced queryset. Limit in the serializer.
                         queryset=Review.objects.select_related("user").order_by("-created_at"),
                     ),
                 )
