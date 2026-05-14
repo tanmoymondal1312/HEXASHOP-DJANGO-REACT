@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronDown, ChevronRight, Flame, Heart, Star } from "lucide-react";
+import { ChevronRight, Flame, Heart, Star } from "lucide-react";
 import { productsApi, siteApi } from "@/lib/api";
 import { WebsiteJsonLd } from "@/components/seo/JsonLd";
 import { resolveImageUrl } from "@/lib/utils";
@@ -146,16 +146,6 @@ export default async function HomePage() {
     getSiteSettings(), getViral(), getFeatured(),
   ]);
   const { hero_image_url, hero_image_alt } = settings;
-
-  const bgParticles = [
-    { w: 5, l: "6%",  t: "30%", delay: 0,  dur: 10 },
-    { w: 3, l: "14%", t: "68%", delay: 3,  dur: 13 },
-    { w: 4, l: "21%", t: "48%", delay: 7,  dur: 11 },
-    { w: 3, l: "80%", t: "22%", delay: 2,  dur: 15 },
-    { w: 5, l: "89%", t: "58%", delay: 5,  dur: 12 },
-    { w: 2, l: "66%", t: "82%", delay: 9,  dur: 14 },
-    { w: 4, l: "48%", t: "14%", delay: 4,  dur: 17 },
-  ];
 
   const sparkles: Array<{ top: string; s: number; d: number; right?: string; left?: string }> = [
     { top: "14%", right: "6%",  s: 7, d: 0    },
@@ -586,78 +576,6 @@ export default async function HomePage() {
           .hx-btn-outline { font-size: 0.6rem; padding: 0.4rem 0.6rem; }
         }
 
-        /* ═══ FULL VIEWPORT HERO (tablet + desktop only) ═══════════════════ */
-        @media (min-width: 768px) {
-          .hx-hero {
-            min-height: calc(100vh - 64px);
-            min-height: calc(100dvh - 64px);
-            display: flex; flex-direction: column;
-          }
-          .hx-hero-inner { flex: 1; min-height: unset; }
-        }
-
-        /* ─ Background floating particles ─ */
-        @keyframes hxParticleFloat {
-          0%   { transform: translateY(0)   scale(0.7); opacity: 0; }
-          15%  { opacity: 0.65; }
-          85%  { opacity: 0.3; }
-          100% { transform: translateY(-90px) scale(1.3); opacity: 0; }
-        }
-        .hx-bg-par {
-          position: absolute; border-radius: 50%; pointer-events: none;
-          background: radial-gradient(circle, rgba(245,166,35,0.55) 0%, transparent 70%);
-          animation: hxParticleFloat ease-in-out infinite;
-          display: none;
-        }
-        @media (min-width: 768px) { .hx-bg-par { display: block; } }
-
-        /* ─ Rotating outer decorative rings ─ */
-        @keyframes hxRingCW  { to { transform: rotate(360deg);  } }
-        @keyframes hxRingCCW { to { transform: rotate(-360deg); } }
-        .hx-ring-cw  { animation: hxRingCW  22s linear infinite; transform-origin: center; }
-        .hx-ring-ccw { animation: hxRingCCW 16s linear infinite; transform-origin: center; }
-
-        /* ─ Feature pills (desktop only) ─ */
-        .hx-pills { display: none; gap: 0.45rem; flex-wrap: wrap; margin-top: 1rem; }
-        @media (min-width: 1024px) { .hx-pills { display: flex; } }
-        .hx-pill {
-          display: inline-flex; align-items: center; gap: 5px;
-          padding: 4px 13px;
-          border: 1px solid rgba(255,255,255,0.07); border-radius: 999px;
-          font-size: 0.58rem; font-weight: 600; color: #64748b;
-          background: rgba(255,255,255,0.025); letter-spacing: 0.03em;
-          transition: border-color 0.2s, color 0.2s;
-        }
-        .hx-pill:hover { border-color: rgba(245,166,35,0.28); color: #94a3b8; }
-
-        /* ─ Stats row (tablet+) ─ */
-        .hx-stats { display: none; gap: 1.1rem; margin-top: 1.1rem; align-items: center; }
-        @media (min-width: 768px) { .hx-stats { display: flex; } }
-        .hx-stat-num {
-          font-size: 1.2rem; font-weight: 900; line-height: 1;
-          background: linear-gradient(135deg, #f5a623, #facc15);
-          -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-          animation: hxFadeUp 0.65s cubic-bezier(0.22,1,0.36,1) 520ms both;
-        }
-        .hx-stat-lbl {
-          font-size: 0.56rem; color: #4b5563; font-weight: 600;
-          letter-spacing: 0.06em; text-transform: uppercase; margin-top: 2px;
-        }
-        .hx-stat-divider { width: 1px; height: 26px; background: rgba(255,255,255,0.07); flex-shrink: 0; }
-
-        /* ─ Scroll-down indicator (tablet+) ─ */
-        @keyframes hxScrollDrop {
-          0%, 100% { transform: translateX(-50%) translateY(0);  opacity: 0.45; }
-          50%       { transform: translateX(-50%) translateY(9px); opacity: 1;    }
-        }
-        .hx-scroll-ind {
-          position: absolute; bottom: 20px; left: 50%; z-index: 20;
-          display: none; flex-direction: column; align-items: center; gap: 4px;
-          animation: hxScrollDrop 2s ease-in-out infinite;
-          cursor: pointer;
-        }
-        @media (min-width: 768px) { .hx-scroll-ind { display: flex; } }
-
       ` }} />
 
       <div className="hx-wrap">
@@ -667,26 +585,8 @@ export default async function HomePage() {
 
           {/* Ambient glows */}
           <div style={{ position:"absolute", inset:0, background:"radial-gradient(ellipse at 76% 44%, rgba(30,144,255,0.18) 0%, transparent 58%)", pointerEvents:"none" }} />
-          <div style={{ position:"absolute", inset:0, background:"radial-gradient(ellipse at 20% 80%, rgba(245,166,35,0.06) 0%, transparent 55%)", pointerEvents:"none" }} />
           <div style={{ position:"absolute", bottom:0, right:"20%", width:"28%", height:"50%", background:"radial-gradient(ellipse at center bottom, rgba(245,166,35,0.08) 0%, transparent 65%)", pointerEvents:"none" }} />
-          {/* Strong bottom fade */}
           <div style={{ position:"absolute", bottom:0, left:0, right:0, height:140, background:"linear-gradient(to bottom,transparent 0%,rgba(9,13,18,0.7) 50%,#090d12 100%)", zIndex:10, pointerEvents:"none" }} />
-
-          {/* Floating background particles (tablet+) */}
-          {bgParticles.map((p, i) => (
-            <div key={i} className="hx-bg-par" style={{
-              width: p.w, height: p.w,
-              left: p.l, top: p.t,
-              animationDelay: `${p.delay}s`,
-              animationDuration: `${p.dur}s`,
-            }} />
-          ))}
-
-          {/* Scroll-down indicator (tablet+) */}
-          <div className="hx-scroll-ind">
-            <span style={{ fontSize:"0.54rem", letterSpacing:"0.14em", color:"rgba(148,163,184,0.5)", textTransform:"uppercase", fontWeight:600 }}>Scroll</span>
-            <ChevronDown style={{ width:18, height:18, color:"rgba(245,166,35,0.55)" }} />
-          </div>
 
           <div className="hx-hero-inner">
 
@@ -707,31 +607,6 @@ export default async function HomePage() {
               <div className="hx-btns hx-anim-4">
                 <Link href="/shop" className="hx-btn-gold">SHOP NOW</Link>
                 <Link href="/shop?is_featured=true" className="hx-btn-outline">EXPLORE COLLECTION</Link>
-              </div>
-
-              {/* Feature pills — desktop only */}
-              <div className="hx-pills hx-anim-4">
-                <span className="hx-pill">✓&nbsp;Free Shipping $75+</span>
-                <span className="hx-pill">✓&nbsp;30-Day Returns</span>
-                <span className="hx-pill">✓&nbsp;Premium Quality</span>
-              </div>
-
-              {/* Stats row — tablet+ */}
-              <div className="hx-stats hx-anim-5">
-                <div>
-                  <div className="hx-stat-num">200+</div>
-                  <div className="hx-stat-lbl">Styles</div>
-                </div>
-                <div className="hx-stat-divider" />
-                <div>
-                  <div className="hx-stat-num">50+</div>
-                  <div className="hx-stat-lbl">Brands</div>
-                </div>
-                <div className="hx-stat-divider" />
-                <div>
-                  <div className="hx-stat-num">5K+</div>
-                  <div className="hx-stat-lbl">Customers</div>
-                </div>
               </div>
 
               {/* Mobile search */}
@@ -767,55 +642,61 @@ export default async function HomePage() {
               </div>
             </div>
 
-          </div>{/* ─ end hx-hero-inner grid ─ */}
+            {/* Right: hexagon + hero image */}
+            <div className="hx-hero-img-col hx-anim-img hidden md:flex items-center justify-center relative">
+              {/* Hexagon SVG */}
+              <svg style={{ position:"absolute", zIndex:1 }} width="340" height="392" viewBox="0 0 340 392" fill="none">
+                <defs>
+                  <filter id="hg">
+                    <feGaussianBlur stdDeviation="3" result="b" />
+                    <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+                  </filter>
+                </defs>
+                <polygon points="170,12 330,104 330,288 170,380 10,288 10,104"
+                  fill="none" stroke="#f5a623" strokeWidth="1.2" strokeDasharray="10 6" strokeOpacity="0.5" />
+                <polygon points="170,32 312,116 312,276 170,360 28,276 28,116"
+                  fill="rgba(30,144,255,0.04)" stroke="#1e90ff" strokeWidth="2" strokeOpacity="0.9" filter="url(#hg)" />
+              </svg>
 
-          {/* ── Hero image: absolutely positioned in the SECTION, no grid cell box ── */}
-          {hero_image_url && (
-            <div
-              className="hx-anim-img hidden md:block"
-              style={{ position:"absolute", right:0, top:0, bottom:0, width:"50%", zIndex:3, pointerEvents:"none" }}
-            >
-              {/* Ambient glow behind figure */}
-              <div style={{ position:"absolute", inset:0, background:"radial-gradient(ellipse at 55% 55%, rgba(30,144,255,0.13) 0%, transparent 62%)", pointerEvents:"none" }} />
-
-              {/* Bokeh sparkle dots */}
+              {/* Sparkle dots */}
               {sparkles.map((dot, i) => (
                 <div key={i} className="hx-sparkle" style={{
-                  position:"absolute",
+                  position: "absolute", zIndex: 3,
                   top: dot.top, right: dot.right, left: dot.left,
-                  width: dot.s, height: dot.s, borderRadius:"50%",
-                  background:"#f5a623",
-                  boxShadow:`0 0 ${dot.s*3}px ${dot.s}px rgba(245,166,35,0.65)`,
-                  animationDelay:`${dot.d}ms`,
+                  width: dot.s, height: dot.s, borderRadius: "50%",
+                  background: "#f5a623",
+                  boxShadow: `0 0 ${dot.s * 3}px ${dot.s}px rgba(245,166,35,0.65)`,
+                  animationDelay: `${dot.d}ms`,
                 }} />
               ))}
 
-              {/* The person — anchored to bottom, height fills section */}
-              <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"flex-end", justifyContent:"center" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={resolveImageUrl(hero_image_url) || hero_image_url}
-                  alt={hero_image_alt || "HEXASHOP"}
-                  loading="eager"
-                  style={{
-                    height:"94%", width:"auto", maxWidth:"110%",
-                    objectFit:"contain", objectPosition:"bottom center",
-                    filter:"drop-shadow(0 0 55px rgba(30,144,255,0.2)) drop-shadow(0 28px 65px rgba(0,0,0,0.7))",
-                  }}
-                />
+              {/* Hero image */}
+              <div className="hx-float" style={{ position:"relative", zIndex:2, width:"100%", height:"100%", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                {hero_image_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={resolveImageUrl(hero_image_url) || hero_image_url}
+                    alt={hero_image_alt || "HEXASHOP"}
+                    loading="eager"
+                    style={{ objectFit:"contain", maxHeight:"88%", width:"auto", filter:"drop-shadow(0 0 28px rgba(30,144,255,0.38)) drop-shadow(0 18px 40px rgba(0,0,0,0.7))" }}
+                  />
+                ) : (
+                  <div style={{ textAlign:"center" }}>
+                    <svg width="80" height="92" viewBox="0 0 80 92" fill="none">
+                      <polygon points="40,3 77,23 77,69 40,89 3,69 3,23" fill="rgba(30,144,255,0.06)" stroke="rgba(30,144,255,0.3)" strokeWidth="1.5" />
+                      <text x="40" y="56" textAnchor="middle" fill="rgba(245,166,35,0.4)" fontSize="30" fontWeight="900" fontFamily="Inter,sans-serif">H</text>
+                    </svg>
+                    <p style={{ color:"rgba(99,102,241,0.7)", fontSize:"0.72rem", marginTop:"0.5rem" }}>
+                      Upload hero image<br /><span style={{ color:"#6b7280", fontSize:"0.65rem" }}>Admin → Hero Image</span>
+                    </p>
+                  </div>
+                )}
               </div>
 
-              {/* Left fade — blends image into text area with no hard edge */}
-              <div style={{ position:"absolute", top:0, left:0, bottom:0, width:"42%", background:"linear-gradient(to right, #090d12 0%, rgba(9,13,18,0.5) 55%, transparent 100%)", pointerEvents:"none" }} />
-              {/* Right fade */}
-              <div style={{ position:"absolute", top:0, right:0, bottom:0, width:"10%", background:"linear-gradient(to left, #090d12, transparent)", pointerEvents:"none" }} />
-              {/* Top fade */}
-              <div style={{ position:"absolute", top:0, left:0, right:0, height:"20%", background:"linear-gradient(to bottom, #090d12, transparent)", pointerEvents:"none" }} />
               {/* Bottom fade */}
-              <div style={{ position:"absolute", bottom:0, left:0, right:0, height:"50%", background:"linear-gradient(to bottom, transparent 0%, rgba(9,13,18,0.7) 55%, #090d12 100%)", pointerEvents:"none" }} />
+              <div style={{ position:"absolute", bottom:0, left:0, right:0, height:"50%", background:"linear-gradient(to bottom, transparent 0%, rgba(9,13,18,0.55) 55%, #090d12 100%)", zIndex:6, pointerEvents:"none" }} />
             </div>
-          )}
-
+          </div>
         </section>
 
         {/* ═══ MOST VIRAL ════════════════════════════════════════════════════ */}
