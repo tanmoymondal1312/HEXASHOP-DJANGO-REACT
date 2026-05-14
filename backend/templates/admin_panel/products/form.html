@@ -3,42 +3,69 @@
 
 {% block content %}
 <style>
-  .section-card{background:#1a1f2e;border:1px solid #2d3550;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;}
-  .section-title{font-size:0.75rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#6366f1;margin-bottom:1.1rem;display:flex;align-items:center;gap:0.5rem;}
-  .form-input,.form-select{background:#111827;border:1px solid #2d3550;color:#e5e7eb;border-radius:8px;padding:0.55rem 0.75rem;width:100%;font-size:0.82rem;transition:border-color .2s;}
-  .form-input:focus,.form-select:focus{outline:none;border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,0.15);}
-  .form-label{font-size:0.72rem;font-weight:600;color:#9ca3af;margin-bottom:0.3rem;display:block;}
-  .form-error{font-size:0.68rem;color:#ef4444;margin-top:0.25rem;}
-  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
-  .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;}
-  .color-card{background:#0f1623;border:1px solid #2d3550;border-radius:10px;padding:1rem;position:relative;transition:border-color .2s;}
-  .color-card:hover{border-color:#4f46e5;}
-  .color-remove{position:absolute;top:0.6rem;right:0.6rem;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#ef4444;border-radius:6px;padding:2px 8px;font-size:0.65rem;cursor:pointer;transition:all .2s;}
-  .color-remove:hover{background:rgba(239,68,68,0.3);}
-  .color-thumb{width:48px;height:48px;border-radius:8px;object-fit:cover;border:1px solid #2d3550;}
-  .color-upload-label{display:inline-flex;align-items:center;gap:0.4rem;padding:0.35rem 0.75rem;background:#1e2a40;border:1px dashed #3d4f6e;border-radius:8px;font-size:0.7rem;color:#9ca3af;cursor:pointer;transition:all .2s;}
-  .color-upload-label:hover{border-color:#6366f1;color:#c7d2fe;}
-  .size-tag{display:inline-flex;align-items:center;gap:0.35rem;background:#1e2a40;border:1px solid #3d4f6e;border-radius:6px;padding:0.3rem 0.65rem;font-size:0.72rem;color:#e5e7eb;}
-  .size-tag .remove-size{color:#6b7280;cursor:pointer;font-size:0.9rem;line-height:1;}
-  .size-tag .remove-size:hover{color:#ef4444;}
-  .add-size-btn{display:inline-flex;align-items:center;gap:0.3rem;padding:0.3rem 0.75rem;background:rgba(99,102,241,0.1);border:1px dashed #4f46e5;border-radius:6px;font-size:0.72rem;color:#818cf8;cursor:pointer;transition:all .2s;}
-  .add-size-btn:hover{background:rgba(99,102,241,0.2);}
-  .stock-table{width:100%;border-collapse:collapse;font-size:0.78rem;}
-  .stock-table th{padding:0.5rem 0.75rem;background:#0f1623;color:#6b7280;font-weight:600;font-size:0.68rem;text-transform:uppercase;letter-spacing:0.07em;border:1px solid #1e2a40;text-align:center;}
-  .stock-table td{padding:0.35rem 0.5rem;border:1px solid #1e2a40;text-align:center;}
-  .stock-table td:first-child{background:#0f1623;color:#9ca3af;font-weight:600;font-size:0.72rem;text-align:left;padding-left:0.75rem;}
-  .stock-input{background:#111827;border:1px solid #2d3550;border-radius:6px;padding:0.3rem 0.4rem;width:70px;color:#e5e7eb;font-size:0.78rem;text-align:center;}
-  .stock-input:focus{outline:none;border-color:#6366f1;}
-  .stock-input.oos{border-color:#ef4444 !important;color:#ef4444;}
-  .quick-size{display:inline-block;padding:0.2rem 0.55rem;background:#1e2a40;border:1px solid #3d4f6e;border-radius:5px;font-size:0.68rem;color:#9ca3af;cursor:pointer;transition:all .15s;user-select:none;}
-  .quick-size:hover{background:rgba(99,102,241,0.2);border-color:#6366f1;color:#c7d2fe;}
-  .btn-add-color{display:inline-flex;align-items:center;gap:0.4rem;padding:0.5rem 1.1rem;background:rgba(99,102,241,0.1);border:1px solid #4f46e5;border-radius:8px;color:#818cf8;font-size:0.75rem;font-weight:600;cursor:pointer;transition:all .2s;}
-  .btn-add-color:hover{background:rgba(99,102,241,0.22);}
-  .btn-save{background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;font-weight:700;font-size:0.82rem;padding:0.65rem 2rem;border:none;border-radius:8px;cursor:pointer;transition:opacity .2s;}
+  .sc{background:#1a1f2e;border:1px solid #2d3550;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;}
+  .st{font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#6366f1;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;}
+  .fi,.fs{background:#111827;border:1px solid #2d3550;color:#e5e7eb;border-radius:8px;padding:.55rem .75rem;width:100%;font-size:.82rem;transition:border-color .2s;}
+  .fi:focus,.fs:focus{outline:none;border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.15);}
+  .fl{font-size:.72rem;font-weight:600;color:#9ca3af;margin-bottom:.3rem;display:block;}
+  .fe{font-size:.68rem;color:#ef4444;margin-top:.25rem;}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+  .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;}
+  .hint{font-size:.65rem;color:#6b7280;margin-top:.25rem;}
+  .br{font-size:.6rem;background:rgba(239,68,68,.15);color:#ef4444;border-radius:4px;padding:1px 5px;margin-left:4px;}
+
+  /* Gallery */
+  .gal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:.75rem;margin-bottom:1rem;}
+  .gal-item{position:relative;border-radius:8px;overflow:hidden;border:2px solid #2d3550;aspect-ratio:1;background:#0f1623;cursor:pointer;transition:border-color .2s;}
+  .gal-item:hover{border-color:#4f46e5;}
+  .gal-item.primary-img{border-color:#f5a623;box-shadow:0 0 0 2px rgba(245,166,35,.3);}
+  .gal-item img{width:100%;height:100%;object-fit:cover;}
+  .gal-item .star{position:absolute;top:4px;left:4px;background:rgba(245,166,35,.9);border-radius:4px;font-size:.6rem;padding:1px 5px;color:#000;font-weight:700;}
+  .gal-item .del{position:absolute;top:4px;right:4px;background:rgba(239,68,68,.85);border:none;border-radius:4px;color:#fff;font-size:.65rem;padding:2px 6px;cursor:pointer;transition:opacity .15s;}
+  .gal-item .del:hover{opacity:.8;}
+  .set-primary-btn{width:100%;padding:.25rem;background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);border-radius:0 0 6px 6px;font-size:.6rem;color:#f5a623;cursor:pointer;transition:all .15s;margin-top:.25rem;display:block;}
+  .set-primary-btn:hover{background:rgba(245,166,35,.22);}
+  .upload-gal-label{display:inline-flex;align-items:center;gap:.5rem;padding:.55rem 1.1rem;background:rgba(99,102,241,.08);border:1px dashed #4f46e5;border-radius:8px;font-size:.75rem;color:#818cf8;cursor:pointer;transition:all .2s;}
+  .upload-gal-label:hover{background:rgba(99,102,241,.18);}
+
+  /* Colour cards — clean flex row, no absolute remove */
+  .cc{background:#0f1623;border:1px solid #2d3550;border-radius:10px;padding:.85rem 1rem;transition:border-color .2s;}
+  .cc:hover{border-color:#4f46e5;}
+  .cc-row{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;}
+  .cc-swatch{width:42px;height:42px;border-radius:50%;border:2px solid #2d3550;flex-shrink:0;cursor:pointer;}
+  .cc-name{flex:1;min-width:130px;}
+  .cc-hex{width:105px;}
+  .cc-upload{flex-shrink:0;}
+  .cc-upload label{display:inline-flex;align-items:center;gap:.35rem;padding:.38rem .75rem;background:#1e2a40;border:1px dashed #3d4f6e;border-radius:8px;font-size:.68rem;color:#9ca3af;cursor:pointer;white-space:nowrap;transition:all .2s;}
+  .cc-upload label:hover{border-color:#6366f1;color:#c7d2fe;}
+  .cc-status{font-size:.65rem;color:#4ade80;margin-top:.25rem;display:none;}
+  .cc-status.show{display:block;}
+  .cc-remove{flex-shrink:0;padding:.38rem .75rem;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#ef4444;border-radius:8px;font-size:.68rem;cursor:pointer;white-space:nowrap;transition:all .2s;}
+  .cc-remove:hover{background:rgba(239,68,68,.25);}
+
+  /* Sizes */
+  .sz-tag{display:inline-flex;align-items:center;gap:.35rem;background:#1e2a40;border:1px solid #3d4f6e;border-radius:6px;padding:.3rem .65rem;font-size:.72rem;color:#e5e7eb;}
+  .sz-tag .rx{color:#6b7280;cursor:pointer;font-size:.9rem;line-height:1;}
+  .sz-tag .rx:hover{color:#ef4444;}
+  .qs{display:inline-block;padding:.2rem .55rem;background:#1e2a40;border:1px solid #3d4f6e;border-radius:5px;font-size:.68rem;color:#9ca3af;cursor:pointer;transition:all .15s;user-select:none;}
+  .qs:hover{background:rgba(99,102,241,.2);border-color:#6366f1;color:#c7d2fe;}
+  .add-sz{display:inline-flex;align-items:center;gap:.3rem;padding:.3rem .75rem;background:rgba(99,102,241,.1);border:1px dashed #4f46e5;border-radius:6px;font-size:.72rem;color:#818cf8;cursor:pointer;}
+  .add-sz:hover{background:rgba(99,102,241,.2);}
+
+  /* Stock matrix */
+  .stbl{width:100%;border-collapse:collapse;font-size:.78rem;}
+  .stbl th{padding:.5rem .75rem;background:#0f1623;color:#6b7280;font-weight:600;font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;border:1px solid #1e2a40;text-align:center;}
+  .stbl td{padding:.35rem .5rem;border:1px solid #1e2a40;text-align:center;}
+  .stbl td:first-child{background:#0f1623;color:#9ca3af;font-weight:600;font-size:.72rem;text-align:left;padding-left:.75rem;}
+  .si{background:#111827;border:1px solid #2d3550;border-radius:6px;padding:.3rem .4rem;width:70px;color:#e5e7eb;font-size:.78rem;text-align:center;}
+  .si:focus{outline:none;border-color:#6366f1;}
+  .si.oos{border-color:#ef4444;color:#ef4444;}
+
+  .btn-add-c{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1.1rem;background:rgba(99,102,241,.1);border:1px solid #4f46e5;border-radius:8px;color:#818cf8;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .2s;}
+  .btn-add-c:hover{background:rgba(99,102,241,.22);}
+  .btn-save{background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;font-weight:700;font-size:.82rem;padding:.65rem 2rem;border:none;border-radius:8px;cursor:pointer;transition:opacity .2s;}
   .btn-save:hover{opacity:.88;}
-  .btn-cancel{background:#1e2a40;border:1px solid #3d4f6e;color:#9ca3af;font-size:0.82rem;padding:0.65rem 1.5rem;border-radius:8px;text-decoration:none;display:inline-block;}
-  .hint{font-size:0.65rem;color:#6b7280;margin-top:0.25rem;}
-  .badge-req{font-size:0.6rem;background:rgba(239,68,68,0.15);color:#ef4444;border-radius:4px;padding:1px 5px;margin-left:4px;}
+  .btn-cancel{background:#1e2a40;border:1px solid #3d4f6e;color:#9ca3af;font-size:.82rem;padding:.65rem 1.5rem;border-radius:8px;text-decoration:none;display:inline-block;}
 </style>
 
 <div class="flex items-center justify-between mb-6">
@@ -50,132 +77,178 @@
 </div>
 
 {% if submitted and form.errors %}
-<div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1.25rem;font-size:0.78rem;color:#ef4444;">
+<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:.75rem 1rem;margin-bottom:1.25rem;font-size:.78rem;color:#ef4444;">
   ✗ Please fix the errors below.
 </div>
 {% endif %}
 
 <form method="post" enctype="multipart/form-data" id="pf">
 {% csrf_token %}
+<input type="hidden" id="delete-ids" name="delete_image_ids" value="">
+<input type="hidden" id="primary-id" name="primary_image_id" value="">
 
 <!-- 1. Basic Info -->
-<div class="section-card">
-  <div class="section-title">📝 Basic Information</div>
+<div class="sc">
+  <div class="st">📝 Basic Information</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
     <div style="grid-column:1/-1;">
-      <label class="form-label">Product Name <span class="badge-req">required</span></label>
+      <label class="fl">Product Name <span class="br">required</span></label>
       {{ form.name }}
-      {% if form.name.errors %}<p class="form-error">{{ form.name.errors|join:", " }}</p>{% endif %}
+      {% if form.name.errors %}<p class="fe">{{ form.name.errors|join:", " }}</p>{% endif %}
     </div>
-    <div><label class="form-label">URL Slug</label>{{ form.slug }}<p class="hint">Auto-filled from name</p></div>
-    <div><label class="form-label">SKU <span class="badge-req">required</span></label>{{ form.sku }}</div>
-    <div><label class="form-label">Category <span class="badge-req">required</span></label>{{ form.category }}</div>
-    <div><label class="form-label">Brand</label>{{ form.brand }}</div>
-    <div><label class="form-label">Status</label>{{ form.status }}</div>
-    <div style="display:flex;align-items:center;gap:0.5rem;padding-top:1.4rem;">
-      {{ form.is_featured }}<label class="form-label" style="margin:0;">Featured Product</label>
-    </div>
+    <div><label class="fl">URL Slug</label>{{ form.slug }}<p class="hint">Auto-filled from name</p></div>
+    <div><label class="fl">SKU <span class="br">required</span></label>{{ form.sku }}</div>
+    <div><label class="fl">Category <span class="br">required</span></label>{{ form.category }}</div>
+    <div><label class="fl">Brand</label>{{ form.brand }}</div>
+    <div><label class="fl">Status</label>{{ form.status }}</div>
+    <div style="display:flex;align-items:center;gap:.5rem;padding-top:1.4rem;">{{ form.is_featured }}<label class="fl" style="margin:0;">Featured Product</label></div>
   </div>
 </div>
 
 <!-- 2. Pricing -->
-<div class="section-card">
-  <div class="section-title">💰 Pricing</div>
-  <div class="grid-3">
-    <div><label class="form-label">Sale Price <span class="badge-req">required</span></label>{{ form.base_price }}</div>
-    <div><label class="form-label">Original Price <span style="font-size:.6rem;color:#6b7280;">(strikethrough)</span></label>{{ form.compare_at_price }}</div>
-    <div><label class="form-label">Cost Price <span style="font-size:.6rem;color:#6b7280;">(private)</span></label>{{ form.cost_price }}</div>
+<div class="sc">
+  <div class="st">💰 Pricing</div>
+  <div class="g3">
+    <div><label class="fl">Sale Price <span class="br">required</span></label>{{ form.base_price }}</div>
+    <div><label class="fl">Original Price <span style="font-size:.6rem;color:#6b7280;">(strikethrough)</span></label>{{ form.compare_at_price }}</div>
+    <div><label class="fl">Cost Price <span style="font-size:.6rem;color:#6b7280;">(private)</span></label>{{ form.cost_price }}</div>
   </div>
 </div>
 
 <!-- 3. Description -->
-<div class="section-card">
-  <div class="section-title">📄 Description</div>
+<div class="sc">
+  <div class="st">📄 Description</div>
   <div style="display:flex;flex-direction:column;gap:1rem;">
-    <div><label class="form-label">Short Description</label>{{ form.short_description }}</div>
-    <div><label class="form-label">Full Description</label>{{ form.description }}</div>
+    <div><label class="fl">Short Description</label>{{ form.short_description }}</div>
+    <div><label class="fl">Full Description</label>{{ form.description }}</div>
   </div>
 </div>
 
-<!-- 4. Colours -->
-<div class="section-card">
-  <div class="section-title">🎨 Colours
-    <span style="font-size:0.65rem;color:#6b7280;font-weight:400;text-transform:none;letter-spacing:0;">(optional — customers switch between colours to see different images)</span>
+<!-- 4. Product Images (gallery) -->
+<div class="sc">
+  <div class="st">🖼️ Product Images
+    <span style="font-size:.65rem;color:#6b7280;font-weight:400;text-transform:none;letter-spacing:0;">(general gallery — not linked to colours)</span>
   </div>
-  <p class="hint" style="margin-bottom:1rem;">Upload a colour-specific photo so the product image switches when a customer picks that colour. The hex swatch is shown when no photo is uploaded.</p>
+  <p class="hint" style="margin-bottom:1rem;">Click <strong style="color:#f5a623;">★ Set Primary</strong> to choose which image appears in listings. Images used as a colour photo are marked and cannot be deleted here.</p>
 
-  <div id="colors-container" style="display:flex;flex-direction:column;gap:0.75rem;">
+  <!-- Existing images grid -->
+  <div class="gal-grid" id="gal-grid">
+    {% for img in gallery_images %}
+    <div>
+      <div class="gal-item {% if img.is_primary %}primary-img{% endif %}" id="gal-{{ img.pk }}"
+           onclick="setPrimary({{ img.pk }})">
+        <img src="{{ img.image.url }}" alt="{{ img.alt_text }}">
+        {% if img.is_primary %}<span class="star">★ Primary</span>{% endif %}
+        {% if img.pk not in colour_image_ids %}
+        <button type="button" class="del" onclick="event.stopPropagation();deleteImg({{ img.pk }})">✕</button>
+        {% else %}
+        <span style="position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:.55rem;color:rgba(99,102,241,.9);background:rgba(0,0,0,.6);padding:2px;">colour photo</span>
+        {% endif %}
+      </div>
+      {% if not img.is_primary %}
+      <button type="button" class="set-primary-btn" onclick="setPrimary({{ img.pk }})">★ Set Primary</button>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Upload new gallery images -->
+  <label class="upload-gal-label">
+    ＋ Upload Images
+    <input type="file" name="gallery_files" accept="image/*" multiple style="display:none;" onchange="previewGallery(this)">
+  </label>
+  <p class="hint" style="margin-top:.5rem;">You can select multiple files at once. First image becomes primary if no images exist yet.</p>
+</div>
+
+<!-- 5. Colours -->
+<div class="sc">
+  <div class="st">🎨 Colours
+    <span style="font-size:.65rem;color:#6b7280;font-weight:400;text-transform:none;letter-spacing:0;">(optional — customers click a colour swatch to switch the product image)</span>
+  </div>
+  <p class="hint" style="margin-bottom:1rem;">The hex code shows as a colour circle swatch. Upload a photo to let that colour switch the gallery image when clicked. No preview is shown in this panel — only the swatch colour.</p>
+
+  <div id="cc-wrap" style="display:flex;flex-direction:column;gap:.65rem;">
     {% for color in existing_colors %}
-    <div class="color-card" data-ci="{{ forloop.counter0 }}">
-      <input type="hidden" name="color_id_{{ forloop.counter0 }}" value="{{ color.pk }}">
-      <button type="button" class="color-remove" onclick="removeColor(this)">✕ Remove</button>
-      <div style="display:flex;align-items:flex-start;gap:1rem;flex-wrap:wrap;">
-        <div style="display:flex;flex-direction:column;align-items:center;gap:0.35rem;flex-shrink:0;">
-          <input type="color" value="{{ color.hex_code|default:'#6366f1' }}" style="width:44px;height:44px;border:2px solid #2d3550;border-radius:50%;cursor:pointer;"
-            oninput="this.parentElement.parentElement.parentElement.querySelector('.hex-in').value=this.value">
-          <span style="font-size:.6rem;color:#6b7280;">swatch</span>
+    <div class="cc" data-ci="{{ forloop.counter0 }}">
+      <div class="cc-row">
+        <input type="hidden" name="color_id_{{ forloop.counter0 }}" value="{{ color.pk }}">
+        <!-- Swatch colour picker -->
+        <input type="color" class="cc-swatch" value="{{ color.hex_code|default:'#6366f1' }}"
+          title="Pick colour"
+          oninput="syncHexText(this,'{{ forloop.counter0 }}')">
+        <!-- Name -->
+        <div class="cc-name">
+          <label class="fl">Colour Name</label>
+          <input type="text" name="color_name_{{ forloop.counter0 }}" value="{{ color.name }}" class="fi" placeholder="e.g. Sky Blue" required oninput="rebuildMatrix()">
         </div>
-        <div style="flex:1;min-width:130px;">
-          <label class="form-label">Colour Name</label>
-          <input type="text" name="color_name_{{ forloop.counter0 }}" value="{{ color.name }}" class="form-input" placeholder="e.g. Sky Blue" required oninput="rebuildMatrix()">
+        <!-- Hex -->
+        <div class="cc-hex">
+          <label class="fl">Hex Code</label>
+          <input type="text" name="color_hex_{{ forloop.counter0 }}" value="{{ color.hex_code|default:'' }}" class="fi" placeholder="#FFFFFF" maxlength="7" id="hex-{{ forloop.counter0 }}"
+            oninput="syncPickerFromText(this,'{{ forloop.counter0 }}')">
         </div>
-        <div style="width:105px;">
-          <label class="form-label">Hex Code</label>
-          <input type="text" name="color_hex_{{ forloop.counter0 }}" value="{{ color.hex_code|default:'' }}" class="form-input hex-in" placeholder="#FFFFFF" maxlength="7">
-        </div>
-        <div>
-          <label class="form-label">Colour Photo <span style="font-size:.6rem;color:#6b7280;">(optional)</span></label>
-          {% if color.image %}<img src="{{ color.image.image.url }}" class="color-thumb" style="margin-bottom:.4rem;display:block;">{% endif %}
-          <label class="color-upload-label">📷 {% if color.image %}Change{% else %}Upload{% endif %} photo
-            <input type="file" name="color_image_{{ forloop.counter0 }}" accept="image/*" style="display:none;" onchange="previewImg(this)">
+        <!-- Upload -->
+        <div class="cc-upload">
+          <label class="fl">Photo <span style="font-size:.6rem;color:#6b7280;">(optional)</span></label>
+          <label>
+            {% if color.image %}📷 Replace photo{% else %}📷 Upload photo{% endif %}
+            <input type="file" name="color_image_{{ forloop.counter0 }}" accept="image/*" style="display:none;"
+              onchange="markUploaded(this,'{{ forloop.counter0 }}')">
           </label>
+          <div class="cc-status {% if color.image %}show{% endif %}" id="cc-status-{{ forloop.counter0 }}">
+            ✓ {% if color.image %}Photo linked{% else %}Photo selected{% endif %}
+          </div>
+        </div>
+        <!-- Remove -->
+        <div style="flex-shrink:0;padding-top:1.35rem;">
+          <button type="button" class="cc-remove" onclick="removeColor(this)">✕ Remove</button>
         </div>
       </div>
     </div>
     {% endfor %}
   </div>
-  <button type="button" class="btn-add-color" style="margin-top:.75rem;" onclick="addColorCard()">＋ Add Colour</button>
+  <button type="button" class="btn-add-c" style="margin-top:.75rem;" onclick="addColorCard()">＋ Add Colour</button>
 </div>
 
-<!-- 5. Sizes & Stock -->
-<div class="section-card">
-  <div class="section-title">📦 Sizes &amp; Stock</div>
-  <p class="hint" style="margin-bottom:1rem;">Set stock per size (and per colour if colours are defined). Stock = 0 hides that size from shoppers.</p>
+<!-- 6. Sizes & Stock -->
+<div class="sc">
+  <div class="st">📦 Sizes &amp; Stock</div>
+  <p class="hint" style="margin-bottom:1rem;">Stock = 0 hides that size from shoppers. Leave all sizes empty if this product has no size variants.</p>
 
   <div style="margin-bottom:.75rem;">
-    <span class="form-label">Quick add sizes:</span>
+    <span class="fl">Quick add:</span>
     <div style="display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.3rem;">
-      {% for sz in common_sizes %}<span class="quick-size" onclick="addSize('{{ sz }}')">{{ sz }}</span>{% endfor %}
+      {% for sz in common_sizes %}<span class="qs" onclick="addSize('{{ sz }}')">{{ sz }}</span>{% endfor %}
     </div>
   </div>
 
-  <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem;" id="sizes-row">
+  <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem;" id="sz-row">
     {% for sz in existing_sizes %}
-    <span class="size-tag" data-sz="{{ sz }}">
+    <span class="sz-tag" data-sz="{{ sz }}">
       <input type="hidden" name="sizes" value="{{ sz }}">
-      {{ sz }} <span class="remove-size" onclick="removeSize(this.parentElement)">×</span>
+      {{ sz }} <span class="rx" onclick="removeSize(this.parentElement)">×</span>
     </span>
     {% endfor %}
     <div style="display:flex;gap:.4rem;align-items:center;">
-      <input type="text" id="csi" class="form-input" style="width:90px;" placeholder="Custom…" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustom();}">
-      <button type="button" class="add-size-btn" onclick="addCustom()">＋ Add</button>
+      <input type="text" id="csi" class="fi" style="width:90px;" placeholder="Custom…" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustom();}">
+      <button type="button" class="add-sz" onclick="addCustom()">＋ Add</button>
     </div>
   </div>
 
   <div style="overflow-x:auto;">
-    <table class="stock-table" id="stbl">
+    <table class="stbl" id="stbl">
       <thead><tr id="mhdr"><th style="text-align:left;">Size \ Colour</th></tr></thead>
       <tbody id="mbdy"></tbody>
     </table>
   </div>
 </div>
 
-<!-- 6. SEO -->
-<details class="section-card">
-  <summary class="section-title" style="cursor:pointer;list-style:none;">🔍 SEO (optional)</summary>
-  <div class="grid-2" style="margin-top:1rem;">
-    <div><label class="form-label">Meta Title (max 70)</label>{{ form.meta_title }}</div>
-    <div><label class="form-label">Meta Description (max 160)</label>{{ form.meta_description }}</div>
+<!-- 7. SEO -->
+<details class="sc">
+  <summary class="st" style="cursor:pointer;list-style:none;">🔍 SEO (optional)</summary>
+  <div class="g2" style="margin-top:1rem;">
+    <div><label class="fl">Meta Title (max 70)</label>{{ form.meta_title }}</div>
+    <div><label class="fl">Meta Description (max 160)</label>{{ form.meta_description }}</div>
   </div>
 </details>
 
@@ -186,41 +259,85 @@
 </form>
 
 <script>
-// Seeded from Django
 const initColors = [{% for c in existing_colors %}{idx:{{forloop.counter0}},id:"{{c.pk}}",name:"{{c.name|escapejs}}",hex:"{{c.hex_code|default:'#6366f1'|escapejs}}"},{% endfor %}];
 const initSizes  = [{% for sz in existing_sizes %}"{{sz|escapejs}}"{% if not forloop.last %},{% endif %}{% endfor %}];
 const initStock  = {{ stock_matrix|safe|default:"{}" }};
 
 let cidx = initColors.length;
 let activeSizes = [...initSizes];
+let toDelete = [];
+let currentPrimary = "{% for img in gallery_images %}{% if img.is_primary %}{{img.pk}}{% endif %}{% endfor %}";
 
-function addColorCard(name="",hex="#6366f1",id="") {
+// ── Gallery ──────────────────────────────────────────────────────────────────
+function setPrimary(imgId) {
+  document.querySelectorAll(".gal-item").forEach(el => {
+    el.classList.remove("primary-img");
+    const star = el.querySelector(".star");
+    if (star) star.remove();
+  });
+  document.querySelectorAll(".set-primary-btn").forEach(btn => btn.style.display = "block");
+
+  const item = document.getElementById("gal-" + imgId);
+  if (item) {
+    item.classList.add("primary-img");
+    const s = document.createElement("span"); s.className="star"; s.textContent="★ Primary";
+    item.prepend(s);
+  }
+  const btn = item?.nextElementSibling;
+  if (btn && btn.classList.contains("set-primary-btn")) btn.style.display = "none";
+
+  currentPrimary = imgId;
+  document.getElementById("primary-id").value = imgId;
+}
+
+function deleteImg(imgId) {
+  if (!confirm("Delete this image?")) return;
+  toDelete.push(imgId);
+  document.getElementById("delete-ids").value = toDelete.join(",");
+  const wrap = document.getElementById("gal-" + imgId)?.parentElement;
+  if (wrap) wrap.remove();
+}
+
+function previewGallery(input) {
+  const grid = document.getElementById("gal-grid");
+  Array.from(input.files).forEach(f => {
+    const url = URL.createObjectURL(f);
+    const wrap = document.createElement("div");
+    wrap.innerHTML = `<div class="gal-item"><img src="${url}" style="width:100%;height:100%;object-fit:cover;"></div>`;
+    grid.insertBefore(wrap, grid.lastElementChild);
+  });
+}
+
+// ── Colour cards ─────────────────────────────────────────────────────────────
+function addColorCard(name="", hex="#6366f1", id="") {
   const ci = cidx++;
-  const wrap = document.getElementById("colors-container");
+  const wrap = document.getElementById("cc-wrap");
   const d = document.createElement("div");
-  d.className="color-card"; d.dataset.ci=ci;
-  d.innerHTML=`
-    <input type="hidden" name="color_id_${ci}" value="${id}">
-    <button type="button" class="color-remove" onclick="removeColor(this)">✕ Remove</button>
-    <div style="display:flex;align-items:flex-start;gap:1rem;flex-wrap:wrap;">
-      <div style="display:flex;flex-direction:column;align-items:center;gap:.35rem;flex-shrink:0;">
-        <input type="color" value="${hex}" style="width:44px;height:44px;border:2px solid #2d3550;border-radius:50%;cursor:pointer;"
-          oninput="this.parentElement.parentElement.parentElement.querySelector('.hex-in').value=this.value;rebuildMatrix()">
-        <span style="font-size:.6rem;color:#6b7280;">swatch</span>
+  d.className = "cc"; d.dataset.ci = ci;
+  d.innerHTML = `
+    <div class="cc-row">
+      <input type="hidden" name="color_id_${ci}" value="${id}">
+      <input type="color" class="cc-swatch" value="${hex}" title="Pick colour"
+        oninput="syncHexText(this,'${ci}')">
+      <div class="cc-name">
+        <label class="fl">Colour Name</label>
+        <input type="text" name="color_name_${ci}" value="${name}" class="fi" placeholder="e.g. Sky Blue" required oninput="rebuildMatrix()">
       </div>
-      <div style="flex:1;min-width:130px;">
-        <label class="form-label">Colour Name</label>
-        <input type="text" name="color_name_${ci}" value="${name}" class="form-input" placeholder="e.g. Sky Blue" required oninput="rebuildMatrix()">
+      <div class="cc-hex">
+        <label class="fl">Hex Code</label>
+        <input type="text" name="color_hex_${ci}" value="${hex}" class="fi" placeholder="#FFFFFF" maxlength="7" id="hex-${ci}"
+          oninput="syncPickerFromText(this,'${ci}')">
       </div>
-      <div style="width:105px;">
-        <label class="form-label">Hex Code</label>
-        <input type="text" name="color_hex_${ci}" value="${hex}" class="form-input hex-in" placeholder="#FFFFFF" maxlength="7">
-      </div>
-      <div>
-        <label class="form-label">Colour Photo <span style="font-size:.6rem;color:#6b7280;">(optional)</span></label>
-        <label class="color-upload-label">📷 Upload photo
-          <input type="file" name="color_image_${ci}" accept="image/*" style="display:none;" onchange="previewImg(this)">
+      <div class="cc-upload">
+        <label class="fl">Photo <span style="font-size:.6rem;color:#6b7280;">(optional)</span></label>
+        <label>📷 Upload photo
+          <input type="file" name="color_image_${ci}" accept="image/*" style="display:none;"
+            onchange="markUploaded(this,'${ci}')">
         </label>
+        <div class="cc-status" id="cc-status-${ci}">✓ Photo selected</div>
+      </div>
+      <div style="flex-shrink:0;padding-top:1.35rem;">
+        <button type="button" class="cc-remove" onclick="removeColor(this)">✕ Remove</button>
       </div>
     </div>`;
   wrap.appendChild(d);
@@ -228,78 +345,84 @@ function addColorCard(name="",hex="#6366f1",id="") {
 }
 
 function removeColor(btn) {
-  btn.closest(".color-card").remove();
+  btn.closest(".cc").remove();
   rebuildMatrix();
 }
 
-function previewImg(input) {
-  if (!input.files[0]) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    let img = input.parentElement.previousElementSibling;
-    if (!img || img.tagName!=="IMG") {
-      img = document.createElement("img");
-      img.className="color-thumb"; img.style.cssText="margin-bottom:.4rem;display:block;";
-      input.parentElement.parentElement.insertBefore(img, input.parentElement);
-    }
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(input.files[0]);
+function syncHexText(picker, ci) {
+  const hexInput = document.getElementById("hex-" + ci);
+  if (hexInput) hexInput.value = picker.value;
+  rebuildMatrix();
+}
+function syncPickerFromText(input, ci) {
+  const card = input.closest(".cc");
+  const picker = card?.querySelector(".cc-swatch");
+  if (picker && /^#[0-9a-fA-F]{6}$/.test(input.value)) picker.value = input.value;
+  rebuildMatrix();
+}
+function markUploaded(input, ci) {
+  const status = document.getElementById("cc-status-" + ci);
+  if (status) {
+    status.textContent = input.files.length ? "✓ Photo selected" : "";
+    status.classList.toggle("show", !!input.files.length);
+  }
 }
 
+// ── Sizes ────────────────────────────────────────────────────────────────────
 function addSize(sz) {
-  sz=sz.trim(); if(!sz||activeSizes.includes(sz)) return;
+  sz = sz.trim();
+  if (!sz || activeSizes.includes(sz)) return;
   activeSizes.push(sz);
-  const row=document.getElementById("sizes-row");
-  const customWrap=row.lastElementChild;
-  const tag=document.createElement("span");
-  tag.className="size-tag"; tag.dataset.sz=sz;
-  tag.innerHTML=`<input type="hidden" name="sizes" value="${sz}">${sz} <span class="remove-size" onclick="removeSize(this.parentElement)">×</span>`;
-  row.insertBefore(tag,customWrap);
+  const row = document.getElementById("sz-row");
+  const customWrap = row.lastElementChild;
+  const tag = document.createElement("span");
+  tag.className = "sz-tag"; tag.dataset.sz = sz;
+  tag.innerHTML = `<input type="hidden" name="sizes" value="${sz}">${sz} <span class="rx" onclick="removeSize(this.parentElement)">×</span>`;
+  row.insertBefore(tag, customWrap);
   rebuildMatrix();
 }
-function addCustom(){const i=document.getElementById("csi");addSize(i.value);i.value="";}
-function removeSize(tag){activeSizes=activeSizes.filter(s=>s!==tag.dataset.sz);tag.remove();rebuildMatrix();}
+function addCustom() { const i = document.getElementById("csi"); addSize(i.value); i.value = ""; }
+function removeSize(tag) { activeSizes = activeSizes.filter(s => s !== tag.dataset.sz); tag.remove(); rebuildMatrix(); }
 
+// ── Stock matrix ─────────────────────────────────────────────────────────────
 function getCols() {
-  const cards=document.querySelectorAll("#colors-container .color-card");
-  if (!cards.length) return [{idx:0,id:"",name:"Default",hex:"#6366f1"}];
-  return Array.from(cards).map(card=>{
-    const ci=parseInt(card.dataset.ci);
-    return {
-      idx:ci,
-      id:card.querySelector("input[type=hidden]").value||"",
-      name:card.querySelector("input[type=text]").value||"—",
-      hex:card.querySelector("input[type=color]")?.value||"#6366f1"
-    };
-  });
+  const cards = document.querySelectorAll("#cc-wrap .cc");
+  if (!cards.length) return [{ idx: 0, id: "", name: "Default", hex: "#6366f1" }];
+  return Array.from(cards).map(card => ({
+    idx:  parseInt(card.dataset.ci),
+    id:   card.querySelector("input[type=hidden]").value || "",
+    name: card.querySelector("input[type=text]").value || "—",
+    hex:  card.querySelector(".cc-swatch")?.value || "#6366f1",
+  }));
 }
 
 function rebuildMatrix() {
-  const cols=getCols(), szs=[...activeSizes];
-  const hdr=document.getElementById("mhdr"), bdy=document.getElementById("mbdy");
-  let h=`<th style="text-align:left;">Size \\ Colour</th>`;
-  cols.forEach(c=>{
-    h+=`<th><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${c.hex||'#6366f1'};margin-right:4px;border:1px solid rgba(255,255,255,.15);"></span>${c.name||"—"}</th>`;
+  const cols = getCols(), szs = [...activeSizes];
+  const hdr = document.getElementById("mhdr"), bdy = document.getElementById("mbdy");
+  let h = `<th style="text-align:left;">Size \\ Colour</th>`;
+  cols.forEach(c => {
+    h += `<th><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${c.hex || '#6366f1'};margin-right:4px;border:1px solid rgba(255,255,255,.15);vertical-align:middle;"></span>${c.name || "—"}</th>`;
   });
-  hdr.innerHTML=h;
-  if (!szs.length){
-    bdy.innerHTML=`<tr><td colspan="${cols.length+1}" style="padding:1rem;color:#6b7280;font-size:.75rem;">Add at least one size to enter stock quantities.</td></tr>`;
+  hdr.innerHTML = h;
+  if (!szs.length) {
+    bdy.innerHTML = `<tr><td colspan="${cols.length + 1}" style="padding:1rem;color:#6b7280;font-size:.75rem;">Add at least one size above to enter stock quantities.</td></tr>`;
     return;
   }
-  bdy.innerHTML="";
-  szs.forEach((sz,si)=>{
-    const tr=document.createElement("tr");
-    let inner=`<td>${sz}</td>`;
-    cols.forEach((col)=>{
-      const s=(initStock[col.id]&&initStock[col.id][sz])?initStock[col.id][sz].stock:0;
-      inner+=`<td><input type="number" name="stock_${col.idx}_${si}" value="${s}" min="0" class="stock-input${s==0?' oos':''}" oninput="this.classList.toggle('oos',this.value=='0'||this.value=='')"></td>`;
+  bdy.innerHTML = "";
+  szs.forEach((sz, si) => {
+    const tr = document.createElement("tr");
+    let inner = `<td>${sz}</td>`;
+    cols.forEach(col => {
+      const s = (initStock[col.id] && initStock[col.id][sz]) ? initStock[col.id][sz].stock : 0;
+      inner += `<td><input type="number" name="stock_${col.idx}_${si}" value="${s}" min="0" class="si${s == 0 ? ' oos' : ''}" oninput="this.classList.toggle('oos',this.value=='0'||this.value=='')"></td>`;
     });
-    tr.innerHTML=inner;
+    tr.innerHTML = inner;
     bdy.appendChild(tr);
   });
 }
 
+// Init
+document.getElementById("primary-id").value = currentPrimary;
 rebuildMatrix();
 </script>
 {% endblock %}

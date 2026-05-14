@@ -95,8 +95,9 @@ def _save_colors_and_variants(request, product):
                 sort_order=ci,
             )
 
-        # Handle colour image upload
+        # Handle colour image upload — replace old image so it doesn't linger
         if cd["image"]:
+            old_image = color_obj.image
             pi = ProductImage.objects.create(
                 product=product,
                 image=cd["image"],
@@ -106,6 +107,9 @@ def _save_colors_and_variants(request, product):
             )
             color_obj.image = pi
             color_obj.save(update_fields=["image"])
+            # Delete the previous colour image now that a replacement is stored
+            if old_image and old_image.pk != pi.pk:
+                old_image.delete()
 
         touched_color_pks.add(color_obj.pk)
 
@@ -136,6 +140,43 @@ def _save_colors_and_variants(request, product):
     # ── 5. Delete colours/variants that were removed by the user ──────────────
     ProductVariant.objects.filter(product=product).exclude(pk__in=touched_variant_pks).delete()
     ProductColor.objects.filter(product=product).exclude(pk__in=touched_color_pks).delete()
+
+
+def _save_gallery_images(request, product):
+    """
+    Handle the standalone gallery image section:
+      • delete images whose IDs appear in POST[delete_image_ids]
+      • upload any files in FILES[gallery_files]
+      • set primary via POST[primary_image_id]
+    """
+    # Delete requested images (skip any currently used as a colour image)
+    colour_image_ids = set(
+        ProductColor.objects.filter(product=product)
+        .exclude(image=None)
+        .values_list("image_id", flat=True)
+    )
+    delete_ids_raw = request.POST.get("delete_image_ids", "")
+    delete_ids = [int(x) for x in delete_ids_raw.split(",") if x.strip().isdigit()]
+    for img_id in delete_ids:
+        if img_id not in colour_image_ids:
+            ProductImage.objects.filter(pk=img_id, product=product).delete()
+
+    # Upload new gallery images
+    for f in request.FILES.getlist("gallery_files"):
+        ProductImage.objects.create(
+            product=product,
+            image=f,
+            alt_text=product.name,
+            is_primary=False,
+            sort_order=999,
+        )
+
+    # Set primary image
+    primary_id_raw = request.POST.get("primary_image_id", "").strip()
+    if primary_id_raw.isdigit():
+        pid = int(primary_id_raw)
+        ProductImage.objects.filter(product=product).update(is_primary=False)
+        ProductImage.objects.filter(pk=pid, product=product).update(is_primary=True)
 
 # ── Auth helper ───────────────────────────────────────────────────────────────
 
@@ -314,6 +355,7 @@ def product_add(request):
 
     if request.method == "POST" and form.is_valid():
         product = form.save()
+        _save_gallery_images(request, product)
         _save_colors_and_variants(request, product)
         _bust_cache(product)
         qs = urlencode({"msg": "added", "name": product.name})
@@ -326,6 +368,8 @@ def product_add(request):
         "existing_colors": [],
         "existing_sizes": [],
         "stock_matrix": {},
+        "gallery_images": [],
+        "colour_image_ids": set(),
         "submitted": request.method == "POST",
     })
 
@@ -337,12 +381,19 @@ def product_edit(request, pk):
 
     if request.method == "POST" and form.is_valid():
         saved = form.save()
+        _save_gallery_images(request, saved)
         _save_colors_and_variants(request, saved)
         _bust_cache(saved)
         qs = urlencode({"msg": "updated", "name": saved.name})
         return redirect(f"/panel/products/?{qs}")
 
     # Build existing data for the template
+    colour_image_ids = set(
+        product.colors.exclude(image=None).values_list("image_id", flat=True)
+    )
+    gallery_images = list(
+        product.images.order_by("sort_order", "id")
+    )
     colors = list(product.colors.select_related("image").order_by("sort_order"))
     sizes  = sorted(
         set(
@@ -367,6 +418,8 @@ def product_edit(request, pk):
         "existing_colors": colors,
         "existing_sizes": sizes,
         "stock_matrix": stock_matrix,
+        "gallery_images": gallery_images,
+        "colour_image_ids": colour_image_ids,
         "submitted": request.method == "POST",
     })
 
