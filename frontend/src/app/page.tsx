@@ -293,10 +293,14 @@ export default async function HomePage() {
         /* ─ Hero search (mobile / tablet) ─ */
         .hx-search-wrap {
           display: block; width: 100%; box-sizing: border-box;
+          position: relative; z-index: 12; /* above hero bottom gradient (z-index:10) */
           padding: 1.5px; border-radius: 9999px;
+          /* Use a pseudo-element trick to avoid gradient transitions (causes black flash) */
           background: linear-gradient(120deg, rgba(245,166,35,0.65) 0%, rgba(30,144,255,0.65) 100%);
           box-shadow: 0 0 14px rgba(245,166,35,0.12), 0 0 28px rgba(30,144,255,0.08);
-          transition: all 0.3s ease; margin-bottom: 0.9rem;
+          /* Only transition box-shadow — never transition background (causes black flash on mobile) */
+          transition: box-shadow 0.25s ease; margin-bottom: 0.9rem;
+          -webkit-tap-highlight-color: transparent;
         }
         .hx-search-wrap:focus-within {
           background: linear-gradient(120deg, #f5a623 0%, #1e90ff 100%);
@@ -317,6 +321,7 @@ export default async function HomePage() {
           color: #fff; border: none;
           outline: none !important; box-shadow: none !important;
           -webkit-appearance: none; appearance: none;
+          -webkit-tap-highlight-color: transparent;
         }
         .hx-search-input:focus { outline: none !important; box-shadow: none !important; border: none !important; }
         .hx-search-input::placeholder { color: #5a6480; font-size: 0.82rem; }
@@ -332,6 +337,7 @@ export default async function HomePage() {
           display: flex; align-items: center; gap: 4px;
           letter-spacing: 0.04em; white-space: nowrap;
           transition: opacity 0.15s, transform 0.15s;
+          -webkit-tap-highlight-color: transparent;
         }
         .hx-search-btn:hover { opacity: 0.88; transform: scale(0.98); }
         /* Show "Search" text only on screens wide enough */

@@ -66,11 +66,13 @@ export function SearchBar({
 
   // ── Navigation ─────────────────────────────────────────────────────────────
   const navigate = useCallback((path: string) => {
-    router.push(path);
+    // Blur FIRST so the mobile keyboard dismisses before the page transition
+    inputRef.current?.blur();
     setOpen(false);
     setQuery("");
+    router.push(path);
     onClose?.();
-  }, [router, onClose]);
+  }, [router, onClose, inputRef]);
 
   const selectItem = useCallback((item: NavItem) => {
     if (item.kind === "suggestion") navigate(`/shop?q=${encodeURIComponent(item.value)}`);
