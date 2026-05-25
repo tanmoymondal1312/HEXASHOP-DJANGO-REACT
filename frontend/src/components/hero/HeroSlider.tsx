@@ -115,14 +115,14 @@ function DealsPlaceholder() {
         <rect x="62" y="72" width="116" height="76" rx="12" fill="rgba(34,197,94,0.08)" stroke="rgba(34,197,94,0.3)" strokeWidth="1.5"/>
         {/* Price hole */}
         <circle cx="85" cy="84" r="6" fill="rgba(34,197,94,0.2)" stroke="rgba(34,197,94,0.5)" strokeWidth="1.5"/>
-        {/* Taka symbol + price */}
+        {/* Dollar symbol + price */}
         <text x="120" y="102" textAnchor="middle" fill="rgba(34,197,94,0.8)"
           fontSize="11" fontWeight="700" fontFamily="Inter,sans-serif" letterSpacing="1">
           STARTING FROM
         </text>
         <text x="120" y="134" textAnchor="middle" fill="#22c55e"
           fontSize="26" fontWeight="900" fontFamily="Inter,sans-serif">
-          ৳299
+          $29
         </text>
         {/* OFF badge */}
         <rect x="78" y="164" width="84" height="24" rx="6" fill="rgba(239,68,68,0.8)"/>
@@ -175,7 +175,9 @@ export default function HeroSlider({ heroImageUrl, heroImageAlt }: Props) {
     return () => { if (timerRef.current) clearInterval(timerRef.current) }
   }, [startTimer])
 
-  const handleDot = (i: number) => { goTo(i); startTimer() }
+  const handleDot  = (i: number) => { goTo(i); startTimer() }
+  const handlePrev = () => { goTo((activeRef.current - 1 + TOTAL_SLIDES) % TOTAL_SLIDES); startTimer() }
+  const handleNext = () => { goTo((activeRef.current + 1) % TOTAL_SLIDES); startTimer() }
 
   const t = THEMES[active]
 
@@ -262,6 +264,41 @@ export default function HeroSlider({ heroImageUrl, heroImageAlt }: Props) {
           transition: background 0.65s ease, box-shadow 0.65s ease;
         }
 
+        /* ── Arrow navigation buttons ── */
+        .hx-arrow {
+          position: absolute; top: 50%; z-index: 20;
+          width: 38px; height: 38px; border-radius: 50%;
+          background: rgba(255,255,255,0.06);
+          backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+          border: 1px solid rgba(255,255,255,0.13);
+          color: rgba(255,255,255,0.6);
+          display: flex; align-items: center; justify-content: center;
+          cursor: pointer; outline: none; padding: 0;
+          transform: translateY(-50%);
+          transition: background 0.22s ease, border-color 0.22s ease,
+                      color 0.22s ease, transform 0.22s ease, box-shadow 0.22s ease;
+        }
+        .hx-arrow:hover {
+          background: rgba(255,255,255,0.13);
+          border-color: var(--arrow-clr, #f5a623);
+          color: var(--arrow-clr, #f5a623);
+          transform: translateY(-50%) scale(1.1);
+          box-shadow: 0 0 22px 4px rgba(255,255,255,0.08),
+                      0 4px 20px rgba(0,0,0,0.45);
+        }
+        .hx-arrow:active { transform: translateY(-50%) scale(0.95); }
+        .hx-arrow-left  { left: 0.6rem; }
+        .hx-arrow-right { right: 0.6rem; }
+        @media (min-width: 768px) {
+          .hx-arrow       { width: 46px; height: 46px; }
+          .hx-arrow-left  { left: 1.25rem; }
+          .hx-arrow-right { right: 1.25rem; }
+        }
+        @media (min-width: 1280px) {
+          .hx-arrow-left  { left: 2rem; }
+          .hx-arrow-right { right: 2rem; }
+        }
+
         /* ── Ethnic btn override ── */
         .hx-btn-ethnic {
           background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%) !important;
@@ -305,6 +342,33 @@ export default function HeroSlider({ heroImageUrl, heroImageAlt }: Props) {
           background: "linear-gradient(to bottom,transparent 0%,rgba(9,13,18,0.7) 50%,#090d12 100%)",
           zIndex: 10, pointerEvents: "none",
         }} />
+
+        {/* ── Left / Right arrow buttons ─────────────────────────── */}
+        <button
+          className="hx-arrow hx-arrow-left"
+          style={{ "--arrow-clr": t.dot } as React.CSSProperties}
+          onClick={handlePrev}
+          aria-label="Previous slide"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" strokeWidth="2.6"
+            strokeLinecap="round" strokeLinejoin="round">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </button>
+
+        <button
+          className="hx-arrow hx-arrow-right"
+          style={{ "--arrow-clr": t.dot } as React.CSSProperties}
+          onClick={handleNext}
+          aria-label="Next slide"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" strokeWidth="2.6"
+            strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </button>
 
         {/* ── GRID ─────────────────────────────────────────────────── */}
         <div className="hx-hero-inner">
@@ -350,7 +414,7 @@ export default function HeroSlider({ heroImageUrl, heroImageAlt }: Props) {
                 </h1>
 
                 <p className="hx-sub sl-2" style={{ color: "#c9a227", letterSpacing: "0.3em" }}>
-                  শাড়ি ও লেহেঙ্গা Collection
+                  Sharee &amp; Lehenga Collection
                 </p>
 
                 <p className="hx-desc sl-3">
@@ -384,7 +448,7 @@ export default function HeroSlider({ heroImageUrl, heroImageAlt }: Props) {
                 </h1>
 
                 <p className="hx-sub sl-2" style={{ color: "#22c55e" }}>
-                  Fashion Starts at Just ৳299
+                  Fashion Starts at Just $29
                 </p>
 
                 <p className="hx-desc sl-3">
@@ -395,7 +459,7 @@ export default function HeroSlider({ heroImageUrl, heroImageAlt }: Props) {
                 {/* Starting price display */}
                 <div className="hx-price-row sl-4">
                   <span className="hx-price-from">Starting from</span>
-                  <span className="hx-price-big">৳299</span>
+                  <span className="hx-price-big">$29</span>
                 </div>
 
                 <div className="hx-btns sl-4">
