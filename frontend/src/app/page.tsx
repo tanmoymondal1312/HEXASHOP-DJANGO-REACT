@@ -1,4 +1,3 @@
-import "./home-sections.css";
 import Link from "next/link";
 import { ChevronRight, Flame, Heart, Star } from "lucide-react";
 import { productsApi, siteApi } from "@/lib/api";
