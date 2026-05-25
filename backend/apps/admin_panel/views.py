@@ -333,12 +333,46 @@ def hero_image(request):
     })
 
 
+def _slide_defaults():
+    """Return a dict with empty defaults for every slide field."""
+    return {
+        "title": "",
+        "heading_accent": "",
+        "badge_text": "",
+        "subtitle": "",
+        "description": "",
+        "accent_color": "#1e90ff",
+        "cta_text": "",
+        "cta_url": "",
+        "secondary_cta_text": "",
+        "secondary_cta_url": "",
+        "sort_order": "0",
+        "is_active": "1",
+    }
+
+
+def _slide_to_dict(slide):
+    """Serialise a Banner instance into a plain dict for the template."""
+    return {
+        "title":               slide.title,
+        "heading_accent":      slide.heading_accent,
+        "badge_text":          slide.badge_text,
+        "subtitle":            slide.subtitle,
+        "description":         slide.description,
+        "accent_color":        slide.accent_color or "#1e90ff",
+        "cta_text":            slide.cta_text,
+        "cta_url":             slide.cta_url,
+        "secondary_cta_text":  slide.secondary_cta_text,
+        "secondary_cta_url":   slide.secondary_cta_url,
+        "sort_order":          str(slide.sort_order),
+        "is_active":           "1" if slide.is_active else "0",
+    }
+
+
 @staff_required
 def hero_slide_add(request):
     """Add a new hero slide."""
-    saved = False
     errors = {}
-    data = {}
 
     if request.method == "POST":
         data = request.POST
@@ -348,30 +382,36 @@ def hero_slide_add(request):
 
         if not errors:
             slide = Banner(position="hero")
-            slide.title            = title
-            slide.heading_accent   = data.get("heading_accent", "").strip()
-            slide.badge_text       = data.get("badge_text", "").strip()
-            slide.subtitle         = data.get("subtitle", "").strip()
-            slide.description      = data.get("description", "").strip()
-            slide.accent_color     = data.get("accent_color", "#1e90ff").strip() or "#1e90ff"
-            slide.cta_text         = data.get("cta_text", "").strip()
-            slide.cta_url          = data.get("cta_url", "").strip()
+            slide.title              = title
+            slide.heading_accent     = data.get("heading_accent", "").strip()
+            slide.badge_text         = data.get("badge_text", "").strip()
+            slide.subtitle           = data.get("subtitle", "").strip()
+            slide.description        = data.get("description", "").strip()
+            slide.accent_color       = data.get("accent_color", "#1e90ff").strip() or "#1e90ff"
+            slide.cta_text           = data.get("cta_text", "").strip()
+            slide.cta_url            = data.get("cta_url", "").strip()
             slide.secondary_cta_text = data.get("secondary_cta_text", "").strip()
             slide.secondary_cta_url  = data.get("secondary_cta_url", "").strip()
-            slide.sort_order       = int(data.get("sort_order", 0) or 0)
-            slide.is_active        = data.get("is_active") == "1"
+            slide.sort_order         = int(data.get("sort_order", 0) or 0)
+            slide.is_active          = data.get("is_active") == "1"
             if "image" in request.FILES:
                 slide.image = request.FILES["image"]
             slide.save()
             cache.delete("public_site_settings")
             return redirect("/panel/hero-image/?msg=added")
 
+        # POST with errors — keep what the user typed
+        form_data = dict(request.POST)
+    else:
+        # GET — empty form
+        form_data = _slide_defaults()
+
     return render(request, "admin_panel/hero_slides/form.html", {
         "action": "Add",
         "slide": None,
-        "data": data,
+        "data": form_data,
         "errors": errors,
-        "saved": saved,
+        "saved": False,
     })
 
 
@@ -382,36 +422,42 @@ def hero_slide_edit(request, pk):
     errors = {}
 
     if request.method == "POST":
-        data = request.POST
-        title = data.get("title", "").strip()
+        post = request.POST
+        title = post.get("title", "").strip()
         if not title:
             errors["title"] = "Heading is required."
 
         if not errors:
-            slide.title            = title
-            slide.heading_accent   = data.get("heading_accent", "").strip()
-            slide.badge_text       = data.get("badge_text", "").strip()
-            slide.subtitle         = data.get("subtitle", "").strip()
-            slide.description      = data.get("description", "").strip()
-            slide.accent_color     = data.get("accent_color", "#1e90ff").strip() or "#1e90ff"
-            slide.cta_text         = data.get("cta_text", "").strip()
-            slide.cta_url          = data.get("cta_url", "").strip()
-            slide.secondary_cta_text = data.get("secondary_cta_text", "").strip()
-            slide.secondary_cta_url  = data.get("secondary_cta_url", "").strip()
-            slide.sort_order       = int(data.get("sort_order", 0) or 0)
-            slide.is_active        = data.get("is_active") == "1"
+            slide.title              = title
+            slide.heading_accent     = post.get("heading_accent", "").strip()
+            slide.badge_text         = post.get("badge_text", "").strip()
+            slide.subtitle           = post.get("subtitle", "").strip()
+            slide.description        = post.get("description", "").strip()
+            slide.accent_color       = post.get("accent_color", "#1e90ff").strip() or "#1e90ff"
+            slide.cta_text           = post.get("cta_text", "").strip()
+            slide.cta_url            = post.get("cta_url", "").strip()
+            slide.secondary_cta_text = post.get("secondary_cta_text", "").strip()
+            slide.secondary_cta_url  = post.get("secondary_cta_url", "").strip()
+            slide.sort_order         = int(post.get("sort_order", 0) or 0)
+            slide.is_active          = post.get("is_active") == "1"
             if "image" in request.FILES:
                 slide.image = request.FILES["image"]
-            elif data.get("clear_image"):
+            elif post.get("clear_image"):
                 slide.image = None
             slide.save()
             cache.delete("public_site_settings")
             return redirect(f"/panel/hero-image/{pk}/edit/?saved=1")
 
+        # POST with validation errors — keep what the user typed
+        form_data = dict(request.POST)
+    else:
+        # GET — pre-fill from the existing slide
+        form_data = _slide_to_dict(slide)
+
     return render(request, "admin_panel/hero_slides/form.html", {
         "action": "Edit",
-        "slide": slide,
-        "data": request.POST if request.method == "POST" else {},
+        "slide": slide,          # still passed so the template can show current image
+        "data": form_data,
         "errors": errors,
         "saved": request.GET.get("saved") == "1",
     })
