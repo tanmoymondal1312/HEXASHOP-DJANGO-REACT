@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import type { HeroSlide as ApiSlide } from "@/types";
 
-// ─── Slide data ────────────────────────────────────────────────────────────────
+// ─── Internal slide shape ─────────────────────────────────────────────────────
 
 interface Slide {
   id: number;
@@ -18,11 +19,14 @@ interface Slide {
   ctaSecondary: { label: string; href: string };
   accentColor: string;
   glowColor: string;
+  imageUrl: string | null;
 }
 
-const SLIDES: Slide[] = [
+// ─── Fallback slides (used when no slides are in the DB) ──────────────────────
+
+const FALLBACK_SLIDES: Slide[] = [
   {
-    id: 1,
+    id: -1,
     badge: "New Arrivals 2025",
     heading: "HEXA",
     headingAccent: "SHOP",
@@ -32,9 +36,10 @@ const SLIDES: Slide[] = [
     ctaSecondary: { label: "EXPLORE COLLECTION", href: "/shop?is_featured=true" },
     accentColor: "#1e90ff",
     glowColor:   "rgba(30,144,255,0.22)",
+    imageUrl: null,
   },
   {
-    id: 2,
+    id: -2,
     badge: "Featured Picks",
     heading: "FASHION",
     headingAccent: "FORWARD",
@@ -44,9 +49,10 @@ const SLIDES: Slide[] = [
     ctaSecondary: { label: "ALL PRODUCTS",  href: "/shop" },
     accentColor: "#f5a623",
     glowColor:   "rgba(245,166,35,0.20)",
+    imageUrl: null,
   },
   {
-    id: 3,
+    id: -3,
     badge: "Trending Now",
     heading: "TOP",
     headingAccent: "TRENDS",
@@ -56,8 +62,42 @@ const SLIDES: Slide[] = [
     ctaSecondary: { label: "EXPLORE ALL",   href: "/shop" },
     accentColor: "#a855f7",
     glowColor:   "rgba(168,85,247,0.18)",
+    imageUrl: null,
   },
 ];
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+/** Convert a hex colour (#rrggbb) into rgba(r,g,b,alpha) string */
+function hexToGlow(hex: string, alpha = 0.22): string {
+  const clean = hex.replace("#", "");
+  const r = parseInt(clean.slice(0, 2), 16);
+  const g = parseInt(clean.slice(2, 4), 16);
+  const b = parseInt(clean.slice(4, 6), 16);
+  if (isNaN(r) || isNaN(g) || isNaN(b)) return `rgba(30,144,255,${alpha})`;
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+/** Map an API slide to the internal Slide shape */
+function fromApi(s: ApiSlide, fallbackImageUrl: string | null): Slide {
+  const accent = s.accent_color || "#1e90ff";
+  return {
+    id:           s.id,
+    badge:        s.badge_text || "",
+    heading:      s.title || "HEXASHOP",
+    headingAccent: s.heading_accent || "",
+    subtitle:     s.subtitle || "",
+    description:  s.description || "",
+    ctaPrimary:   { label: s.cta_text || "SHOP NOW", href: s.cta_url || "/shop" },
+    ctaSecondary: {
+      label: s.secondary_cta_text || "EXPLORE",
+      href:  s.secondary_cta_url  || "/shop",
+    },
+    accentColor: accent,
+    glowColor:   hexToGlow(accent),
+    imageUrl:    s.image_url || fallbackImageUrl,
+  };
+}
 
 const AUTOPLAY_MS = 5000;
 
@@ -66,13 +106,35 @@ const AUTOPLAY_MS = 5000;
 interface HeroSliderProps {
   heroImageUrl: string | null;
   heroImageAlt?: string;
+  /** Slides fetched from the API (may be empty — falls back to FALLBACK_SLIDES) */
+  apiSlides?: ApiSlide[];
 }
 
-export default function HeroSlider({ heroImageUrl, heroImageAlt = "HEXASHOP" }: HeroSliderProps) {
+export default function HeroSlider({
+  heroImageUrl,
+  heroImageAlt = "HEXASHOP",
+  apiSlides = [],
+}: HeroSliderProps) {
+
+  // Build the slides array: use API slides when available, otherwise fall back.
+  // Each API slide's image is the slide's own image; if none, use the hero_image.
+  const SLIDES = useMemo<Slide[]>(() => {
+    if (apiSlides.length > 0) {
+      return apiSlides.map((s) => fromApi(s, heroImageUrl));
+    }
+    // Fallback: inject the hero_image into every fallback slide
+    return FALLBACK_SLIDES.map((s) => ({ ...s, imageUrl: heroImageUrl }));
+  }, [apiSlides, heroImageUrl]);
+
   const [current, setCurrent] = useState(0);
   const [animDir, setAnimDir] = useState<"left" | "right">("right");
   const [paused, setPaused] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Reset to slide 0 if SLIDES length changes (e.g. hydration)
+  useEffect(() => {
+    setCurrent(0);
+  }, [SLIDES.length]);
 
   const goTo = useCallback((idx: number, dir: "left" | "right" = "right") => {
     setAnimDir(dir);
@@ -81,20 +143,20 @@ export default function HeroSlider({ heroImageUrl, heroImageAlt = "HEXASHOP" }: 
 
   const prev = useCallback(() => {
     goTo((current - 1 + SLIDES.length) % SLIDES.length, "left");
-  }, [current, goTo]);
+  }, [current, goTo, SLIDES.length]);
 
   const next = useCallback(() => {
     goTo((current + 1) % SLIDES.length, "right");
-  }, [current, goTo]);
+  }, [current, goTo, SLIDES.length]);
 
   // Auto-play
   useEffect(() => {
-    if (paused) return;
+    if (paused || SLIDES.length <= 1) return;
     timerRef.current = setTimeout(next, AUTOPLAY_MS);
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
-  }, [current, paused, next]);
+  }, [current, paused, next, SLIDES.length]);
 
-  const slide = SLIDES[current];
+  const slide = SLIDES[current] ?? SLIDES[0];
 
   return (
     <>
@@ -390,10 +452,12 @@ export default function HeroSlider({ heroImageUrl, heroImageAlt = "HEXASHOP" }: 
           <div className="hx-slide-content">
 
             {/* Badge */}
-            <div className="hx-badge hx-s1" style={{ color: slide.accentColor, borderColor: slide.accentColor + "55", backgroundColor: slide.accentColor + "14" }}>
-              <span style={{ width:6, height:6, borderRadius:"50%", background:slide.accentColor, display:"inline-block", flexShrink:0, boxShadow:`0 0 6px 2px ${slide.accentColor}88` }} />
-              {slide.badge}
-            </div>
+            {slide.badge && (
+              <div className="hx-badge hx-s1" style={{ color: slide.accentColor, borderColor: slide.accentColor + "55", backgroundColor: slide.accentColor + "14" }}>
+                <span style={{ width:6, height:6, borderRadius:"50%", background:slide.accentColor, display:"inline-block", flexShrink:0, boxShadow:`0 0 6px 2px ${slide.accentColor}88` }} />
+                {slide.badge}
+              </div>
+            )}
 
             <h1 className="hx-h1 hx-s2">
               <span style={{ color:"#fff" }}>{slide.heading}</span>
@@ -405,16 +469,20 @@ export default function HeroSlider({ heroImageUrl, heroImageAlt = "HEXASHOP" }: 
             <p className="hx-desc hx-s4">{slide.description}</p>
 
             <div className="hx-btns hx-s4">
-              <Link
-                href={slide.ctaPrimary.href}
-                className="hx-btn-gold"
-                style={{ background: `linear-gradient(135deg, ${slide.accentColor === "#f5a623" ? "#f5a623" : slide.accentColor} 0%, ${slide.accentColor === "#f5a623" ? "#f59e0b" : slide.accentColor + "cc"} 100%)` }}
-              >
-                {slide.ctaPrimary.label}
-              </Link>
-              <Link href={slide.ctaSecondary.href} className="hx-btn-outline">
-                {slide.ctaSecondary.label}
-              </Link>
+              {slide.ctaPrimary.label && (
+                <Link
+                  href={slide.ctaPrimary.href}
+                  className="hx-btn-gold"
+                  style={{ background: `linear-gradient(135deg, ${slide.accentColor} 0%, ${slide.accentColor}cc 100%)` }}
+                >
+                  {slide.ctaPrimary.label}
+                </Link>
+              )}
+              {slide.ctaSecondary.label && (
+                <Link href={slide.ctaSecondary.href} className="hx-btn-outline">
+                  {slide.ctaSecondary.label}
+                </Link>
+              )}
             </div>
 
             {/* Mobile search */}
@@ -490,15 +558,15 @@ export default function HeroSlider({ heroImageUrl, heroImageAlt = "HEXASHOP" }: 
 
             {/* Hero image — floating */}
             <div className="hx-float" style={{ position:"relative", zIndex:2, width:"100%", height:"100%", display:"flex", alignItems:"center", justifyContent:"center" }}>
-              {heroImageUrl ? (
+              {slide.imageUrl ? (
                 <Image
-                  src={heroImageUrl}
-                  alt={heroImageAlt}
+                  src={slide.imageUrl}
+                  alt={slide.subtitle || heroImageAlt}
                   width={300} height={360}
                   style={{ objectFit:"contain", maxHeight:"88%",
                     filter:`drop-shadow(0 0 28px ${slide.glowColor}) drop-shadow(0 18px 40px rgba(0,0,0,0.7))` }}
                   priority
-                  unoptimized={heroImageUrl.includes("localhost")}
+                  unoptimized={slide.imageUrl.includes("localhost")}
                 />
               ) : (
                 <div style={{ textAlign:"center" }}>

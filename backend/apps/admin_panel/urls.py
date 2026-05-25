@@ -12,6 +12,9 @@ urlpatterns = [
     path("api/stats/", views.stats_api, name="stats_api"),
     path("announcement/", views.announcement, name="announcement"),
     path("hero-image/", views.hero_image, name="hero_image"),
+    path("hero-image/add/", views.hero_slide_add, name="hero_slide_add"),
+    path("hero-image/<int:pk>/edit/", views.hero_slide_edit, name="hero_slide_edit"),
+    path("hero-image/<int:pk>/delete/", views.hero_slide_delete, name="hero_slide_delete"),
     # Products
     path("products/", views.product_list, name="product_list"),
     path("products/add/", views.product_add, name="product_add"),

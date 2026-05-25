@@ -14,7 +14,7 @@ from django.utils import timezone
 from apps.accounts.models import User
 from apps.cart.models import CartItem
 from apps.products.models import Category, Product, ProductColor, ProductImage, ProductVariant
-from apps.store_settings.models import SiteSettings
+from apps.store_settings.models import Banner, SiteSettings
 
 from django.core.cache import cache
 
@@ -321,23 +321,111 @@ def announcement(request):
     return render(request, "admin_panel/announcement.html", {"form": form})
 
 
-# ── Hero Image ────────────────────────────────────────────────────────────────
+# ── Hero Slides ────────────────────────────────────────────────────────────────
 
 @staff_required
 def hero_image(request):
-    obj = SiteSettings.load()
+    """List all hero slides."""
+    slides = Banner.objects.filter(position="hero").order_by("sort_order", "-created_at")
+    return render(request, "admin_panel/hero_image.html", {
+        "slides": slides,
+        "msg": request.GET.get("msg", ""),
+    })
+
+
+@staff_required
+def hero_slide_add(request):
+    """Add a new hero slide."""
     saved = False
+    errors = {}
+    data = {}
+
     if request.method == "POST":
-        alt = request.POST.get("hero_image_alt", "").strip()
-        obj.hero_image_alt = alt
-        if "hero_image" in request.FILES:
-            obj.hero_image = request.FILES["hero_image"]
-        elif request.POST.get("clear_hero_image"):
-            obj.hero_image = None
-        obj.save()
+        data = request.POST
+        title = data.get("title", "").strip()
+        if not title:
+            errors["title"] = "Heading is required."
+
+        if not errors:
+            slide = Banner(position="hero")
+            slide.title            = title
+            slide.heading_accent   = data.get("heading_accent", "").strip()
+            slide.badge_text       = data.get("badge_text", "").strip()
+            slide.subtitle         = data.get("subtitle", "").strip()
+            slide.description      = data.get("description", "").strip()
+            slide.accent_color     = data.get("accent_color", "#1e90ff").strip() or "#1e90ff"
+            slide.cta_text         = data.get("cta_text", "").strip()
+            slide.cta_url          = data.get("cta_url", "").strip()
+            slide.secondary_cta_text = data.get("secondary_cta_text", "").strip()
+            slide.secondary_cta_url  = data.get("secondary_cta_url", "").strip()
+            slide.sort_order       = int(data.get("sort_order", 0) or 0)
+            slide.is_active        = data.get("is_active") == "1"
+            if "image" in request.FILES:
+                slide.image = request.FILES["image"]
+            slide.save()
+            cache.delete("public_site_settings")
+            return redirect("/panel/hero-image/?msg=added")
+
+    return render(request, "admin_panel/hero_slides/form.html", {
+        "action": "Add",
+        "slide": None,
+        "data": data,
+        "errors": errors,
+        "saved": saved,
+    })
+
+
+@staff_required
+def hero_slide_edit(request, pk):
+    """Edit an existing hero slide."""
+    slide = get_object_or_404(Banner, pk=pk, position="hero")
+    errors = {}
+
+    if request.method == "POST":
+        data = request.POST
+        title = data.get("title", "").strip()
+        if not title:
+            errors["title"] = "Heading is required."
+
+        if not errors:
+            slide.title            = title
+            slide.heading_accent   = data.get("heading_accent", "").strip()
+            slide.badge_text       = data.get("badge_text", "").strip()
+            slide.subtitle         = data.get("subtitle", "").strip()
+            slide.description      = data.get("description", "").strip()
+            slide.accent_color     = data.get("accent_color", "#1e90ff").strip() or "#1e90ff"
+            slide.cta_text         = data.get("cta_text", "").strip()
+            slide.cta_url          = data.get("cta_url", "").strip()
+            slide.secondary_cta_text = data.get("secondary_cta_text", "").strip()
+            slide.secondary_cta_url  = data.get("secondary_cta_url", "").strip()
+            slide.sort_order       = int(data.get("sort_order", 0) or 0)
+            slide.is_active        = data.get("is_active") == "1"
+            if "image" in request.FILES:
+                slide.image = request.FILES["image"]
+            elif data.get("clear_image"):
+                slide.image = None
+            slide.save()
+            cache.delete("public_site_settings")
+            return redirect(f"/panel/hero-image/{pk}/edit/?saved=1")
+
+    return render(request, "admin_panel/hero_slides/form.html", {
+        "action": "Edit",
+        "slide": slide,
+        "data": request.POST if request.method == "POST" else {},
+        "errors": errors,
+        "saved": request.GET.get("saved") == "1",
+    })
+
+
+@staff_required
+def hero_slide_delete(request, pk):
+    """Delete a hero slide."""
+    slide = get_object_or_404(Banner, pk=pk, position="hero")
+    if request.method == "POST":
+        slide.delete()
         cache.delete("public_site_settings")
-        saved = True
-    return render(request, "admin_panel/hero_image.html", {"obj": obj, "saved": saved})
+        return redirect("/panel/hero-image/?msg=deleted")
+    return render(request, "admin_panel/hero_slides/delete.html", {"slide": slide})
 
 
 # ── Products ──────────────────────────────────────────────────────────────────

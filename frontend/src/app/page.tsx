@@ -3,7 +3,7 @@ import { ChevronRight, Flame, Heart, Star } from "lucide-react";
 import { productsApi, siteApi } from "@/lib/api";
 import { WebsiteJsonLd } from "@/components/seo/JsonLd";
 import { resolveImageUrl } from "@/lib/utils";
-import type { Product } from "@/types";
+import type { HeroSlide, Product } from "@/types";
 import HeroSlider from "@/components/hero/HeroSlider";
 
 // ─── Data fetchers ────────────────────────────────────────────────────────────
@@ -14,6 +14,15 @@ async function getSiteSettings() {
     return data as { hero_image_url: string | null; hero_image_alt: string };
   } catch {
     return { hero_image_url: null, hero_image_alt: "HEXASHOP" };
+  }
+}
+
+async function getHeroSlides(): Promise<HeroSlide[]> {
+  try {
+    const { data } = await siteApi.heroSlides();
+    return data ?? [];
+  } catch {
+    return [];
   }
 }
 
@@ -143,8 +152,8 @@ function FeaturedCard({ product, priority, delay }: { product: Product; priority
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function HomePage() {
-  const [settings, viral, featured] = await Promise.all([
-    getSiteSettings(), getViral(), getFeatured(),
+  const [settings, heroSlides, viral, featured] = await Promise.all([
+    getSiteSettings(), getHeroSlides(), getViral(), getFeatured(),
   ]);
   const { hero_image_url, hero_image_alt } = settings;
 
@@ -347,7 +356,11 @@ export default async function HomePage() {
       <div className="hx-wrap">
 
         {/* ═══ HERO SLIDER ═════════════════════════════════════════════════════ */}
-        <HeroSlider heroImageUrl={hero_image_url} heroImageAlt={hero_image_alt} />
+        <HeroSlider
+          heroImageUrl={hero_image_url}
+          heroImageAlt={hero_image_alt}
+          apiSlides={heroSlides}
+        />
 
         {/* ═══ MOST VIRAL ════════════════════════════════════════════════════ */}
         <section className="hx-viral">

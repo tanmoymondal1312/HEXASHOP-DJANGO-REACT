@@ -1,3 +1,19 @@
+export interface HeroSlide {
+  id: number;
+  title: string;
+  heading_accent: string;
+  badge_text: string;
+  subtitle: string;
+  description: string;
+  accent_color: string;
+  image_url: string | null;
+  cta_text: string;
+  cta_url: string;
+  secondary_cta_text: string;
+  secondary_cta_url: string;
+  sort_order: number;
+}
+
 export interface Category {
   id: number;
   name: string;

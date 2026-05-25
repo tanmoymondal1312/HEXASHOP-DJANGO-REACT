@@ -121,8 +121,32 @@ class Banner(models.Model):
         blank=True,
         help_text="Or paste an external image URL (used if no image is uploaded).",
     )
+    # ── Hero-slider–specific extras ───────────────────────────────────────────
+    badge_text = models.CharField(
+        max_length=100, blank=True, default="",
+        help_text='Small badge above the heading (e.g. "New Arrivals 2025").',
+    )
+    heading_accent = models.CharField(
+        max_length=100, blank=True, default="",
+        help_text='Colored second part of heading (e.g. "SHOP" in HEXASHOP).',
+    )
+    description = models.TextField(
+        blank=True, default="",
+        help_text="Short paragraph shown under the subtitle.",
+    )
+    accent_color = models.CharField(
+        max_length=20, blank=True, default="#1e90ff",
+        help_text="Hex accent colour for this slide (e.g. #1e90ff, #f5a623, #a855f7).",
+    )
+
     cta_text = models.CharField(max_length=100, blank=True, verbose_name="Button Text")
     cta_url = models.CharField(max_length=500, blank=True, verbose_name="Button URL")
+    secondary_cta_text = models.CharField(
+        max_length=100, blank=True, default="", verbose_name="Secondary Button Text",
+    )
+    secondary_cta_url = models.CharField(
+        max_length=500, blank=True, default="", verbose_name="Secondary Button URL",
+    )
     position = models.CharField(max_length=20, choices=POSITION_CHOICES, default="hero")
     sort_order = models.PositiveSmallIntegerField(default=0)
     is_active = models.BooleanField(default=True)

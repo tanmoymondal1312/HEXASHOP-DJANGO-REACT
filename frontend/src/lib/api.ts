@@ -104,6 +104,7 @@ export const wishlistApi = {
 // ─── Site Settings ────────────────────────────────────────────────────────────
 export const siteApi = {
   settings: () => api.get("/settings/"),
+  heroSlides: () => api.get("/settings/hero-slides/"),
 };
 
 // ─── Notifications ────────────────────────────────────────────────────────────
