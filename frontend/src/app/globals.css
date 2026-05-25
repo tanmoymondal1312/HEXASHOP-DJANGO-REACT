@@ -2,13 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Hero slider + home sections ──────────────────────────────
-   Imported here (via layout.tsx) so they land in <head> as
-   static CSS — never injected by JS, never fights Tailwind.
-─────────────────────────────────────────────────────────────── */
-@import '../components/hero/hero-slider.css';
-@import './home-sections.css';
-
 @layer base {
   :root {
     --brand-primary: #F5A623;
