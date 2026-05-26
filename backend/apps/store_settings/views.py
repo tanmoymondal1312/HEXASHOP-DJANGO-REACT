@@ -20,7 +20,9 @@ class SiteSettingsPublicView(APIView):
         # We skip the shared cache here so build_absolute_uri uses the real host.
         obj = SiteSettings.load()
         data = SiteSettingsPublicSerializer(obj, context={"request": request}).data
-        return Response(data)
+        response = Response(data)
+        response["Cache-Control"] = "public, max-age=300, s-maxage=600, stale-while-revalidate=3600"
+        return response
 
 
 class HeroSlidesView(APIView):

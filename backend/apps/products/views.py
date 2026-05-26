@@ -172,7 +172,9 @@ class ProductViewSet(ReadOnlyModelViewSet):
         ctx = {"request": request}
         data = ProductListSerializer(products, many=True, context=ctx).data
         cache.set(cache_key, data, 1800)
-        return Response(data)
+        response = Response(data)
+        response["Cache-Control"] = "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
+        return response
 
     @action(detail=False, methods=["get"], url_path="viral")
     def viral(self, request):
@@ -205,7 +207,9 @@ class ProductViewSet(ReadOnlyModelViewSet):
         ctx = {"request": request}
         data = ProductListSerializer(products, many=True, context=ctx).data
         cache.set(cache_key, data, 900)
-        return Response(data)
+        response = Response(data)
+        response["Cache-Control"] = "public, max-age=60, s-maxage=900, stale-while-revalidate=1800"
+        return response
 
 
 class RecentlyViewedView(APIView):
