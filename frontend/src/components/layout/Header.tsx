@@ -131,7 +131,10 @@ export function Header() {
             </Link>
 
             {/* ── Desktop nav ────────────────────────────────────────── */}
-            <nav className="hidden md:flex items-center gap-0.5 flex-shrink-0">
+            {/* md:ml-auto pushes nav + search + actions as a group to the
+                right edge, leaving the logo pinned left — avoids the empty
+                gap that used to sit after the actions icons on wide screens. */}
+            <nav className="hidden md:flex items-center gap-0.5 flex-shrink-0 md:ml-auto">
               {NAV_LINKS.map(({ href, label }) => (
                 <Link key={href} href={href}
                   className={cn(
