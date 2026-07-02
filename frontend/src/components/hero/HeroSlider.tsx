@@ -204,6 +204,12 @@ export default function HeroSlider({ heroImageUrl, heroImageAlt }: Props) {
         }
         .sl-img { animation: hxImgIn 0.7s cubic-bezier(0.22,1,0.36,1) 0.08s both; }
 
+        /* ── Text-slide stack: all 3 slides overlap in one grid cell so
+           the column locks to the tallest slide's height — prevents the
+           content jumping up/down when switching slides. ── */
+        .hx-hero-textstack { display: grid; }
+        .hx-hero-slidecell { grid-area: 1 / 1; min-width: 0; }
+
         /* ── Slide 2: Ethnic badge ── */
         .hx-ethnic-badge {
           display: inline-flex; align-items: center; gap: 6px;
@@ -375,10 +381,18 @@ export default function HeroSlider({ heroImageUrl, heroImageAlt }: Props) {
 
           {/* ═══ LEFT — text content ════════════════════════════════ */}
           <div>
+            {/* All 3 slides stacked in the same grid cell so the column
+                height locks to the tallest slide — switching slides no
+                longer resizes the row and shunts content up/down. */}
+            <div className="hx-hero-textstack">
 
             {/* ── SLIDE 1 — HEXASHOP main ── */}
-            {active === 0 && (
-              <div key={`s0-${contentKey}`}>
+            <div
+              key={active === 0 ? `s0-${contentKey}` : "s0-static"}
+              className="hx-hero-slidecell"
+              style={{ visibility: active === 0 ? "visible" : "hidden", pointerEvents: active === 0 ? "auto" : "none" }}
+              aria-hidden={active !== 0}
+            >
                 <h1 className="hx-h1 sl-0">
                   <span style={{ color: "#fff" }}>HEXA</span>
                   <span style={{ color: "#1e90ff" }}>SHOP</span>
@@ -395,12 +409,15 @@ export default function HeroSlider({ heroImageUrl, heroImageAlt }: Props) {
                   <Link href="/shop" className="hx-btn-gold">SHOP NOW</Link>
                   <Link href="/shop?is_featured=true" className="hx-btn-outline">EXPLORE COLLECTION</Link>
                 </div>
-              </div>
-            )}
+            </div>
 
             {/* ── SLIDE 2 — Sharee & Lehenga ── */}
-            {active === 1 && (
-              <div key={`s1-${contentKey}`}>
+            <div
+              key={active === 1 ? `s1-${contentKey}` : "s1-static"}
+              className="hx-hero-slidecell"
+              style={{ visibility: active === 1 ? "visible" : "hidden", pointerEvents: active === 1 ? "auto" : "none" }}
+              aria-hidden={active !== 1}
+            >
 
                 {/* Ethnic badge */}
                 <div className="hx-ethnic-badge sl-0">
@@ -431,12 +448,15 @@ export default function HeroSlider({ heroImageUrl, heroImageAlt }: Props) {
                   </Link>
                 </div>
 
-              </div>
-            )}
+            </div>
 
             {/* ── SLIDE 3 — Low Cost / Deals ── */}
-            {active === 2 && (
-              <div key={`s2-${contentKey}`}>
+            <div
+              key={active === 2 ? `s2-${contentKey}` : "s2-static"}
+              className="hx-hero-slidecell"
+              style={{ visibility: active === 2 ? "visible" : "hidden", pointerEvents: active === 2 ? "auto" : "none" }}
+              aria-hidden={active !== 2}
+            >
 
                 {/* Deals badge */}
                 <div className="hx-deals-badge sl-0">🔥 UPTO 70% OFF</div>
@@ -471,8 +491,9 @@ export default function HeroSlider({ heroImageUrl, heroImageAlt }: Props) {
                   </Link>
                 </div>
 
-              </div>
-            )}
+            </div>
+
+            </div>{/* /hx-hero-textstack */}
 
             {/* ── Mobile search (always visible across all slides) ── */}
             <form
