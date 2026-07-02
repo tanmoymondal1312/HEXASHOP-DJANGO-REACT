@@ -380,7 +380,7 @@ export default function HeroSlider({ heroImageUrl, heroImageAlt }: Props) {
         <div className="hx-hero-inner">
 
           {/* ═══ LEFT — text content ════════════════════════════════ */}
-          <div>
+          <div className="hx-hero-text-col">
             {/* All 3 slides stacked in the same grid cell so the column
                 height locks to the tallest slide — switching slides no
                 longer resizes the row and shunts content up/down. */}
