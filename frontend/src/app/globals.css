@@ -269,8 +269,12 @@ input[type="search"]::-webkit-search-results-decoration {
 /* ── Dots / hero image column ──────────────────────────────── */
 .hx-dots { display:flex; align-items:center; gap:0.35rem; }
 .hx-hero-img-col { min-height:260px; }
-@media (min-width:768px)  { .hx-hero-img-col { min-height:320px; } }
-@media (min-width:1024px) { .hx-hero-img-col { min-height:400px; } }
+/* Fixed (not min-) height — makes maxHeight:88% on the slide images actually
+   resolve, so all 3 slides render into an identical box instead of the
+   column growing/shrinking per-slide (only visible at md+, mobile hides
+   this column entirely). Tall enough to clear the 392px decorative hex SVG. */
+@media (min-width:768px)  { .hx-hero-img-col { height:400px; } }
+@media (min-width:1024px) { .hx-hero-img-col { height:440px; } }
 
 /* ── Section shared ─────────────────────────────────────────── */
 .hx-section-head {
