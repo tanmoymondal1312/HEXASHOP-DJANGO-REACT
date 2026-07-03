@@ -325,11 +325,20 @@ def announcement(request):
 
 @staff_required
 def hero_image(request):
-    """List all hero slides."""
-    slides = Banner.objects.filter(position="hero").order_by("sort_order", "-created_at")
+    """Hero slides are now managed in the new visual Hero Builder Studio
+    (Next.js, JSON-document driven). This page just points staff there — the old
+    Banner-based editor is deprecated and no longer feeds the storefront."""
+    from django.conf import settings
+    from apps.store_settings.models import HeroSlide
+
+    # Prefer the configured studio URL (matches the frontend's API host so auth
+    # works); fall back to the request host for other environments.
+    studio_url = getattr(settings, "HERO_STUDIO_URL", None) or (
+        f"http://{request.get_host().split(':')[0]}:3000/studio/hero"
+    )
     return render(request, "admin_panel/hero_image.html", {
-        "slides": slides,
-        "msg": request.GET.get("msg", ""),
+        "studio_url": studio_url,
+        "slide_count": HeroSlide.objects.count(),
     })
 
 

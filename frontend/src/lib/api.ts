@@ -17,7 +17,12 @@ api.interceptors.response.use(
   (res) => res,
   async (error) => {
     const original = error.config;
-    if (error.response?.status === 401 && !original._retry) {
+    // The refresh endpoint must never trigger its own refresh — otherwise a
+    // failing refresh (e.g. anonymous user) re-enters this handler while
+    // `refreshing` is true, queues a promise that is never flushed, and the
+    // original request (often /auth/me) hangs forever. Let it reject cleanly.
+    const isRefreshCall = !!original.url?.includes("/auth/token/refresh");
+    if (error.response?.status === 401 && !original._retry && !isRefreshCall) {
       if (refreshing) {
         return new Promise((resolve, reject) => {
           refreshQueue.push((token) => {

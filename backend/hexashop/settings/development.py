@@ -19,6 +19,11 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 # mDNS hostname for LAN access — any device on the same Wi-Fi can reach the site
 _LAN_HOST = "tanmoy-ubuntu-computer.local"
 
+# Where the Next.js Hero Builder Studio lives. Must be the SAME host the frontend
+# points its API at (the mDNS host in LAN mode) so the JWT auth cookie is sent —
+# opening the studio via a different host (e.g. 127.0.0.1) breaks login.
+HERO_STUDIO_URL = f"http://{_LAN_HOST}:3000/studio/hero"
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
