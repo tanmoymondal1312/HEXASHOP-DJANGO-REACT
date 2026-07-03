@@ -220,3 +220,68 @@ class PromoCode(models.Model):
         if self.max_uses is None:
             return None  # unlimited
         return max(0, self.max_uses - self.uses_count)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  HERO BUILDER  —  JSON-document–driven hero slides (Shopify/Framer-style)
+#
+#  A HeroSlide stores its entire visual config as a single versioned JSON
+#  `document` (never HTML). React reads the document and renders it. Uploaded
+#  images live in HeroAsset (files can't live in JSON) and are referenced from
+#  the document by {assetId, url}. See docs of HERO_SLIDE_SCHEMA_VERSION below.
+# ══════════════════════════════════════════════════════════════════════════════
+
+HERO_SLIDE_SCHEMA_VERSION = 1
+
+
+class HeroAsset(models.Model):
+    """An uploaded media file used by hero slides. Future-ready: images now,
+    video/other later. The slide document references these by id + url."""
+
+    image = models.ImageField(upload_to="hero/")
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-uploaded_at"]
+        verbose_name = "Hero Asset"
+        verbose_name_plural = "Hero Assets"
+
+    def __str__(self):
+        return f"HeroAsset #{self.pk}"
+
+
+class HeroSlide(models.Model):
+    """One slide of the home-page hero. All styling/content is stored in
+    `document` (a versioned JSON schema) so new capabilities (animation, video
+    background, per-breakpoint overrides, i18n, scheduling) can be added without
+    schema migrations. `title` / `promo` inside the document are native Tiptap
+    JSON — the frontend renders them directly, no HTML is ever stored."""
+
+    name = models.CharField(
+        max_length=120,
+        help_text='Admin-facing label for this slide (e.g. "Ethnic Grace").',
+    )
+    document = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Full versioned slide schema (background, badge, title, "
+        "subtitle, description, promo, buttons, image reference).",
+    )
+    schema_version = models.PositiveSmallIntegerField(
+        default=HERO_SLIDE_SCHEMA_VERSION
+    )
+    is_active = models.BooleanField(default=True)
+    sort_order = models.PositiveIntegerField(default=0)
+    # Scheduling (wired into the UI in a later phase; respected by the public API now)
+    valid_from = models.DateTimeField(null=True, blank=True)
+    valid_to = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["sort_order", "-created_at"]
+        verbose_name = "Hero Slide"
+        verbose_name_plural = "Hero Slides"
+
+    def __str__(self):
+        return self.name or f"HeroSlide #{self.pk}"

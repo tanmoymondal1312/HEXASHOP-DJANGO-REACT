@@ -24,6 +24,19 @@ async function getSiteSettings() {
   }
 }
 
+async function getHeroSlides(): Promise<import("@/types/hero").HeroSlideDTO[]> {
+  try {
+    const res = await fetch(`${API_BASE}/settings/hero-slides/`, {
+      next: { revalidate: 60 },           // cache hero slides 1 min
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+}
+
 async function getViral(): Promise<Product[]> {
   try {
     const res = await fetch(`${API_BASE}/products/viral/`, {
@@ -163,10 +176,10 @@ function FeaturedCard({ product, priority, delay }: { product: Product; priority
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function HomePage() {
-  const [settings, viral, featured] = await Promise.all([
-    getSiteSettings(), getViral(), getFeatured(),
+  const [settings, heroSlides, viral, featured] = await Promise.all([
+    getSiteSettings(), getHeroSlides(), getViral(), getFeatured(),
   ]);
-  const { hero_image_url, hero_image_alt } = settings;
+  const { hero_image_url } = settings;
 
   return (
     <>
@@ -174,11 +187,8 @@ export default async function HomePage() {
 
       <div className="hx-wrap">
 
-        {/* ═══ HERO — 3-slide auto-rotating carousel ══════════════════════════ */}
-        <HeroSlider
-          heroImageUrl={hero_image_url}
-          heroImageAlt={hero_image_alt || "HEXASHOP"}
-        />
+        {/* ═══ HERO — document-driven auto-rotating carousel ══════════════════ */}
+        <HeroSlider slides={heroSlides} fallbackImageUrl={hero_image_url} />
 
         {/* ═══ MOST VIRAL ════════════════════════════════════════════════════ */}
         <section className="hx-viral">

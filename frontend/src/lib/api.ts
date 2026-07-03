@@ -106,6 +106,29 @@ export const siteApi = {
   settings: () => api.get("/settings/"),
 };
 
+// ─── Studio (staff-only Hero Builder) ─────────────────────────────────────────
+export const studioApi = {
+  heroSlides: {
+    list: () => api.get("/studio/hero-slides/"),
+    get: (id: number) => api.get(`/studio/hero-slides/${id}/`),
+    create: (data: Record<string, unknown>) => api.post("/studio/hero-slides/", data),
+    update: (id: number, data: Record<string, unknown>) =>
+      api.patch(`/studio/hero-slides/${id}/`, data),
+    remove: (id: number) => api.delete(`/studio/hero-slides/${id}/`),
+    reorder: (order: Array<{ id: number; sort_order: number }>) =>
+      api.post("/studio/hero-slides/reorder/", order),
+  },
+  heroAssets: {
+    upload: (file: File) => {
+      const form = new FormData();
+      form.append("image", file);
+      return api.post("/studio/hero-assets/", form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+    },
+  },
+};
+
 // ─── Notifications ────────────────────────────────────────────────────────────
 export const notificationsApi = {
   subscribeStockAlert: (email: string, variantId: number) =>

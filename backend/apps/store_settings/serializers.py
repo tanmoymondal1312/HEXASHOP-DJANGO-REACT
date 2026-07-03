@@ -1,6 +1,8 @@
+import copy
+
 from rest_framework import serializers
 
-from .models import Banner, SiteSettings
+from .models import HeroAsset, HeroSlide, SiteSettings
 
 
 class SiteSettingsPublicSerializer(serializers.ModelSerializer):
@@ -29,32 +31,66 @@ class SiteSettingsPublicSerializer(serializers.ModelSerializer):
         return url
 
 
-class HeroSlideSerializer(serializers.ModelSerializer):
-    """Serialises active hero-position Banner rows for the frontend slider."""
+# ── Hero Builder ──────────────────────────────────────────────────────────────
+def _absolutize_document_image(document, request):
+    """Return a copy of the slide document with any Django-served /media image
+    URL made absolute. Next.js-served paths (e.g. /slides/…) are left as-is."""
+    if not isinstance(document, dict):
+        return document
+    img = document.get("image")
+    url = img.get("url") if isinstance(img, dict) else None
+    if request and url and url.startswith("/media"):
+        document = copy.deepcopy(document)
+        document["image"]["url"] = request.build_absolute_uri(url)
+    return document
 
-    image_url = serializers.SerializerMethodField()
+
+class HeroAssetSerializer(serializers.ModelSerializer):
+    url = serializers.SerializerMethodField()
 
     class Meta:
-        model = Banner
-        fields = (
-            "id",
-            "title",
-            "heading_accent",
-            "badge_text",
-            "subtitle",
-            "description",
-            "accent_color",
-            "image_url",
-            "cta_text",
-            "cta_url",
-            "secondary_cta_text",
-            "secondary_cta_url",
-            "sort_order",
-        )
+        model = HeroAsset
+        fields = ("id", "url", "image", "uploaded_at")
+        extra_kwargs = {"image": {"write_only": True}}
 
-    def get_image_url(self, obj) -> str | None:
+    def get_url(self, obj) -> str | None:
+        if not obj.image:
+            return None
         request = self.context.get("request")
-        if obj.image:
-            url = obj.image.url
-            return request.build_absolute_uri(url) if request else url
-        return obj.image_url or None
+        url = obj.image.url
+        return request.build_absolute_uri(url) if request else url
+
+
+class HeroSlidePublicSerializer(serializers.ModelSerializer):
+    """Read-only payload the storefront consumes."""
+
+    document = serializers.SerializerMethodField()
+
+    class Meta:
+        model = HeroSlide
+        fields = ("id", "name", "document", "sort_order")
+
+    def get_document(self, obj):
+        return _absolutize_document_image(obj.document, self.context.get("request"))
+
+
+class HeroSlideAdminSerializer(serializers.ModelSerializer):
+    """Full read/write payload for the staff-only studio."""
+
+    document = serializers.JSONField()
+
+    class Meta:
+        model = HeroSlide
+        fields = (
+            "id", "name", "document", "schema_version",
+            "is_active", "sort_order", "valid_from", "valid_to",
+            "created_at", "updated_at",
+        )
+        read_only_fields = ("schema_version", "created_at", "updated_at")
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["document"] = _absolutize_document_image(
+            data.get("document"), self.context.get("request")
+        )
+        return data

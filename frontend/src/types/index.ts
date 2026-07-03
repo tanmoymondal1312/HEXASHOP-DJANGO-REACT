@@ -143,6 +143,7 @@ export interface User {
   phone: string;
   is_email_verified: boolean;
   date_joined: string;
+  is_staff?: boolean;
 }
 
 export interface Address {

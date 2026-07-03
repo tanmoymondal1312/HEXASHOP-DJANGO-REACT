@@ -38,6 +38,7 @@ urlpatterns = [
         path("wishlist/", include("apps.wishlist.urls")),
         path("notifications/", include("apps.notifications.urls")),
         path("settings/", include("apps.store_settings.urls")),
+        path("studio/", include("apps.store_settings.studio_urls")),
     ])),
 ]
 
