@@ -37,11 +37,12 @@ export const GradientMark = Mark.create({
 });
 
 /**
- * Adds a `fontSize` attribute onto the built-in `textStyle` mark, so font size
- * lives alongside colour in the same mark: { type:"textStyle", attrs:{color,fontSize} }.
+ * Extends the built-in `textStyle` mark with `fontSize`, `fontFamily` and
+ * `fontWeight` attributes, so all typographic styling lives alongside colour in
+ * one mark: { type:"textStyle", attrs:{ color, fontSize, fontFamily, fontWeight } }.
  */
-export const FontSize = Extension.create({
-  name: "fontSize",
+export const TypographyStyle = Extension.create({
+  name: "typographyStyle",
   addGlobalAttributes() {
     return [
       {
@@ -52,6 +53,18 @@ export const FontSize = Extension.create({
             parseHTML: (el: HTMLElement) => el.style.fontSize || null,
             renderHTML: (attrs: { fontSize?: string | null }) =>
               attrs.fontSize ? { style: `font-size:${attrs.fontSize}` } : {},
+          },
+          fontFamily: {
+            default: null,
+            parseHTML: (el: HTMLElement) => el.style.fontFamily || null,
+            renderHTML: (attrs: { fontFamily?: string | null }) =>
+              attrs.fontFamily ? { style: `font-family:${attrs.fontFamily}` } : {},
+          },
+          fontWeight: {
+            default: null,
+            parseHTML: (el: HTMLElement) => el.style.fontWeight || null,
+            renderHTML: (attrs: { fontWeight?: string | null }) =>
+              attrs.fontWeight ? { style: `font-weight:${attrs.fontWeight}` } : {},
           },
         },
       },

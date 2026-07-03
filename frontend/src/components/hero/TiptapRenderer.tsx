@@ -28,6 +28,8 @@ function styleFromMarks(marks: TiptapMark[] = []): CSSProperties {
       case "textStyle":
         if (mark.attrs?.color) style.color = mark.attrs.color as string;
         if (mark.attrs?.fontSize) style.fontSize = mark.attrs.fontSize as string;
+        if (mark.attrs?.fontFamily) style.fontFamily = mark.attrs.fontFamily as string;
+        if (mark.attrs?.fontWeight) style.fontWeight = mark.attrs.fontWeight as string;
         break;
       case "highlight":
         style.backgroundColor =

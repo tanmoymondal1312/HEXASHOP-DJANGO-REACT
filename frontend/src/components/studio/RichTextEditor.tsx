@@ -14,9 +14,20 @@ import {
   Highlighter, Baseline, Sparkles,
 } from "lucide-react";
 import type { TiptapNode } from "@/types/hero";
-import { GradientMark, FontSize } from "./extensions";
+import { GradientMark, TypographyStyle } from "./extensions";
 
 const FONT_SIZES = ["1rem", "1.5rem", "2rem", "2.6rem", "3.2rem", "4rem", "5rem"];
+const FONT_WEIGHTS = ["300", "400", "500", "600", "700", "800", "900"];
+const FONT_FAMILIES: { label: string; value: string }[] = [
+  { label: "Inter (default)", value: "Inter, sans-serif" },
+  { label: "System sans", value: "system-ui, sans-serif" },
+  { label: "Serif (Georgia)", value: "Georgia, serif" },
+  { label: "Times", value: "'Times New Roman', serif" },
+  { label: "Monospace", value: "'Courier New', monospace" },
+  { label: "Arial", value: "Arial, sans-serif" },
+  { label: "Trebuchet", value: "'Trebuchet MS', sans-serif" },
+  { label: "Impact", value: "Impact, sans-serif" },
+];
 
 interface Props {
   value: TiptapNode;
@@ -38,7 +49,7 @@ export default function RichTextEditor({ value, onChange, minHeight = 90 }: Prop
       Underline,
       TextStyle,
       Color,
-      FontSize,
+      TypographyStyle,
       Highlight.configure({ multicolor: true }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       GradientMark,
@@ -142,14 +153,33 @@ function Toolbar({ editor }: { editor: Editor }) {
 
       <Divider />
 
+      {/* Font family */}
+      <select
+        onChange={(e) => editor.chain().focus().setMark("textStyle", { fontFamily: e.target.value }).run()}
+        defaultValue=""
+        style={selectStyle}
+        title="Font family"
+      >
+        <option value="" disabled>Font</option>
+        {FONT_FAMILIES.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
+      </select>
+
+      {/* Font weight */}
+      <select
+        onChange={(e) => editor.chain().focus().setMark("textStyle", { fontWeight: e.target.value }).run()}
+        defaultValue=""
+        style={selectStyle}
+        title="Font weight"
+      >
+        <option value="" disabled>Weight</option>
+        {FONT_WEIGHTS.map((w) => <option key={w} value={w}>{w}</option>)}
+      </select>
+
       {/* Font size */}
       <select
         onChange={(e) => editor.chain().focus().setMark("textStyle", { fontSize: e.target.value }).run()}
         defaultValue=""
-        style={{
-          background: "#0a0f18", color: "#8b9ab5", border: "1px solid #263450",
-          borderRadius: 7, fontSize: "0.75rem", padding: "0 6px", height: 30, cursor: "pointer",
-        }}
+        style={selectStyle}
         title="Font size"
       >
         <option value="" disabled>Size</option>
@@ -158,6 +188,12 @@ function Toolbar({ editor }: { editor: Editor }) {
     </div>
   );
 }
+
+const selectStyle: React.CSSProperties = {
+  background: "#0a0f18", color: "#8b9ab5", border: "1px solid #263450",
+  borderRadius: 7, fontSize: "0.75rem", padding: "0 6px", height: 30, cursor: "pointer",
+  maxWidth: 110,
+};
 
 function Divider() {
   return <span style={{ width: 1, background: "#1f2d45", margin: "2px 3px" }} />;
