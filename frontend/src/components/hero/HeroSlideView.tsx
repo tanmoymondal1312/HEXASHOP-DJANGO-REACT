@@ -110,7 +110,12 @@ export default function HeroSlideView({ document: doc, fallbackImageUrl, animate
                       fontWeight: b.style.fontWeight,
                       padding: `${b.style.paddingY}px ${b.style.paddingX}px`,
                       boxShadow: b.style.shadow === "none" ? "none" : b.style.shadow,
-                    }}
+                      width: b.style.width && b.style.width !== "auto" ? b.style.width : undefined,
+                      height: b.style.height && b.style.height !== "auto" ? b.style.height : undefined,
+                      // Per-button hover via CSS vars (SSR-safe, no JS state)
+                      "--h-op": b.style.hover?.opacity ?? 0.88,
+                      "--h-ty": `${b.style.hover?.translateY ?? -1}px`,
+                    } as React.CSSProperties}
                   >
                     {b.text}
                   </Link>

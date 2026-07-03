@@ -1,6 +1,19 @@
-import type { HeroDocument, TiptapNode } from "@/types/hero";
+import type { HeroButton, HeroDocument, TiptapNode } from "@/types/hero";
 
 export const HERO_SCHEMA_VERSION = 1;
+
+/** A fresh button with sensible gold-CTA defaults (used by the Button Builder). */
+export function newButton(id: string): HeroButton {
+  return {
+    id, text: "NEW BUTTON", link: "/shop",
+    style: {
+      bg: "linear-gradient(135deg,#f5a623 0%,#f59e0b 100%)", color: "#000000",
+      borderColor: "transparent", borderRadius: 6, fontSize: 0.8, fontWeight: 800,
+      paddingX: 26, paddingY: 10, shadow: "0 4px 14px rgba(245,166,35,0.35)",
+      width: "auto", height: "auto", hover: { opacity: 0.88, translateY: -1 },
+    },
+  };
+}
 
 const titleDoc = (text: string): TiptapNode => ({
   type: "doc",
@@ -21,16 +34,7 @@ export function blankDocument(): HeroDocument {
     subtitle: { text: "", color: "#94a3b8" },
     description: { text: "", color: "#94a3b8" },
     promo: null,
-    buttons: [
-      {
-        id: "b1", text: "SHOP NOW", link: "/shop",
-        style: {
-          bg: "linear-gradient(135deg,#f5a623 0%,#f59e0b 100%)", color: "#000",
-          borderColor: "transparent", borderRadius: 6, fontSize: 0.8, fontWeight: 800,
-          paddingX: 26, paddingY: 10, shadow: "0 4px 14px rgba(245,166,35,0.35)",
-        },
-      },
-    ],
+    buttons: [{ ...newButton("b1"), text: "SHOP NOW" }],
   };
 }
 

@@ -4,14 +4,20 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { ArrowLeft, Save, Upload, Trash2, Check } from "lucide-react";
-import { studioApi } from "@/lib/api";
+import { studioApi, siteApi } from "@/lib/api";
 import { normalizeDocument } from "@/lib/heroDefaults";
 import type { HeroDocument, TiptapNode } from "@/types/hero";
 import {
   Panel, TextInput, TextArea, Toggle, Range, ColorField,
 } from "@/components/studio/Controls";
 import RichTextEditor from "@/components/studio/RichTextEditor";
+import ButtonBuilder from "@/components/studio/ButtonBuilder";
 import SlideThumb from "@/components/studio/SlideThumb";
+
+const DEFAULT_PROMO: TiptapNode = {
+  type: "doc",
+  content: [{ type: "paragraph", content: [{ type: "text", text: "Starting from $29" }] }],
+};
 
 export default function HeroEditorPage() {
   const router = useRouter();
@@ -24,6 +30,7 @@ export default function HeroEditorPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [fallbackImg, setFallbackImg] = useState<string | null>(null);
   const dirty = useRef(false);
 
   useEffect(() => {
@@ -37,6 +44,7 @@ export default function HeroEditorPage() {
         setLoading(false);
       }
     })();
+    siteApi.settings().then(({ data }) => setFallbackImg(data.hero_image_url)).catch(() => {});
   }, [id]);
 
   // ── document updaters ──────────────────────────────────────────────────────
@@ -186,12 +194,24 @@ export default function HeroEditorPage() {
               onChange={(v) => patchNested("description", { color: v })} />
           </Panel>
 
-          <Panel title="Promo text & Buttons" defaultOpen={false} badge="Phase 2">
-            <div style={{ fontSize: "0.75rem", color: "#8b9ab5", lineHeight: 1.6 }}>
-              The full button builder (per-button styling, add / delete / reorder)
-              and the promo rich-text editor arrive in Phase 2. Existing buttons and
-              promo text still render in the preview and on the store.
-            </div>
+          <Panel title="Promo text" defaultOpen={false}>
+            <Toggle
+              label="Show promo text"
+              checked={!!doc.promo}
+              onChange={(v) => patch("promo", v ? (doc.promo ?? DEFAULT_PROMO) : null)}
+            />
+            {doc.promo && (
+              <>
+                <div style={{ fontSize: "0.7rem", color: "#4d607e" }}>
+                  Rich text — select to apply colour, gradient, size, etc.
+                </div>
+                <RichTextEditor value={doc.promo} onChange={(t: TiptapNode) => patch("promo", t)} minHeight={70} />
+              </>
+            )}
+          </Panel>
+
+          <Panel title="Buttons" defaultOpen={false}>
+            <ButtonBuilder buttons={doc.buttons} onChange={(b) => patch("buttons", b)} />
           </Panel>
         </div>
       </div>
@@ -208,7 +228,7 @@ export default function HeroEditorPage() {
           </Link>
         </div>
         <div style={{ position: "sticky", top: 12 }}>
-          <SlideThumb document={doc} baseWidth={1280} baseHeight={620} />
+          <SlideThumb document={doc} fallbackImageUrl={fallbackImg} baseWidth={1280} baseHeight={620} />
         </div>
       </div>
     </div>

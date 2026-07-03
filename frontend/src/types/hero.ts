@@ -44,6 +44,11 @@ export interface HeroTextField {
   color: string;
 }
 
+export interface HeroButtonHover {
+  opacity: number;
+  translateY: number; // px
+}
+
 export interface HeroButtonStyle {
   bg: string;
   color: string;
@@ -54,6 +59,9 @@ export interface HeroButtonStyle {
   paddingX: number; // px
   paddingY: number; // px
   shadow: string;
+  width?: string; // "auto" | "120px" | "100%" …
+  height?: string; // "auto" | "44px" …
+  hover?: HeroButtonHover;
 }
 
 export interface HeroButton {

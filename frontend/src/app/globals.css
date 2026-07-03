@@ -522,7 +522,10 @@ input[type="search"]::-webkit-search-results-decoration {
   text-decoration:none; white-space:nowrap; letter-spacing:0.05em;
   transition:opacity 0.2s, transform 0.2s;
 }
-.hx-btn-dyn:hover { opacity:0.88; transform:translateY(-1px); }
+.hx-btn-dyn:hover {
+  opacity:var(--h-op, 0.88);
+  transform:translateY(var(--h-ty, -1px));
+}
 
 /* Promo block (Tiptap-rendered) */
 .hx-promo { margin:0.35rem 0 1rem; font-size:clamp(1.4rem,5vw,2rem); font-weight:900; line-height:1.1; }
