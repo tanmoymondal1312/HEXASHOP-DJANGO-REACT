@@ -57,6 +57,7 @@ export default function HeroListPage() {
   const handleDelete = async (id: number, name: string) => {
     if (!confirm(`Delete slide “${name}”? This cannot be undone.`)) return;
     await studioApi.heroSlides.remove(id);
+    await studioApi.revalidateStore();
     setSlides((s) => s.filter((x) => x.id !== id));
   };
 
@@ -68,6 +69,7 @@ export default function HeroListPage() {
     const reordered = arrayMove(slides, oldIndex, newIndex);
     setSlides(reordered); // optimistic
     await studioApi.heroSlides.reorder(reordered.map((s, i) => ({ id: s.id, sort_order: i })));
+    await studioApi.revalidateStore();
   };
 
   return (

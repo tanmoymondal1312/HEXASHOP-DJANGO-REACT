@@ -127,6 +127,11 @@ export const studioApi = {
       });
     },
   },
+  /** Ask Next.js to refresh the storefront hero cache immediately (on-demand
+   *  ISR). Same-origin Next route, so a plain relative fetch (not the Django
+   *  axios client). Best-effort — failures are non-fatal. */
+  revalidateStore: () =>
+    fetch("/api/revalidate", { method: "POST" }).catch(() => {}),
 };
 
 // ─── Notifications ────────────────────────────────────────────────────────────

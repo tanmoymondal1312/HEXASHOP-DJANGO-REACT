@@ -27,7 +27,9 @@ async function getSiteSettings() {
 async function getHeroSlides(): Promise<import("@/types/hero").HeroSlideDTO[]> {
   try {
     const res = await fetch(`${API_BASE}/settings/hero-slides/`, {
-      next: { revalidate: 60 },           // cache hero slides 1 min
+      // Cached (ISR) but tagged so the studio can revalidate on save → instant
+      // store updates without making the whole home page dynamic.
+      next: { revalidate: 60, tags: ["hero-slides"] },
     });
     if (!res.ok) return [];
     const data = await res.json();

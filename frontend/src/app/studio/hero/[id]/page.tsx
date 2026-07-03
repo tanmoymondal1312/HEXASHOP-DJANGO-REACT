@@ -65,6 +65,7 @@ export default function HeroEditorPage() {
     setSaving(true);
     try {
       await studioApi.heroSlides.update(id, { name, is_active: isActive, document: doc });
+      await studioApi.revalidateStore(); // storefront reflects the save immediately
       dirty.current = false;
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
