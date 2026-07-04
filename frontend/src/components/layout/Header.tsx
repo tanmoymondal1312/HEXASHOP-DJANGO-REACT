@@ -79,6 +79,10 @@ export function Header() {
     }
   };
 
+  // The staff studio has its own chrome — hide the storefront header/announcement
+  // bar there so there's no double navbar.
+  if (pathname.startsWith("/studio")) return null;
+
   return (
     <>
       {/* ── Announcement bar ─────────────────────────────────────────── */}

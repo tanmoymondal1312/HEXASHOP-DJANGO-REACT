@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { Mail, Instagram, Twitter, Facebook, Youtube } from "lucide-react";
 import { notificationsApi } from "@/lib/api";
 import toast from "react-hot-toast";
@@ -17,6 +18,7 @@ const HELP_LINKS = [
 ];
 
 export function Footer() {
+  const pathname = usePathname();
   const [email, setEmail] = useState("");
   const [subscribing, setSubscribing] = useState(false);
 
@@ -34,6 +36,9 @@ export function Footer() {
       setSubscribing(false);
     }
   };
+
+  // Studio has its own chrome — no storefront footer there.
+  if (pathname.startsWith("/studio")) return null;
 
   return (
     <footer className="bg-brand-surface border-t border-brand-border mt-16">
