@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import type { TiptapNode } from "@/types/hero";
 import { GradientMark, TypographyStyle } from "./extensions";
+import { PopoverPortal } from "./PopoverPortal";
 
 const FONT_SIZES = ["1rem", "1.5rem", "2rem", "2.6rem", "3.2rem", "4rem", "5rem"];
 const FONT_WEIGHTS = ["300", "400", "500", "600", "700", "800", "900"];
@@ -97,9 +98,6 @@ export default function RichTextEditor({ value, onChange, minHeight = 90 }: Prop
 
 /* ── Toolbar ──────────────────────────────────────────────────────────────── */
 function Toolbar({ editor }: { editor: Editor }) {
-  const [showText, setShowText] = useState(false);
-  const [showHi, setShowHi] = useState(false);
-  const [showGrad, setShowGrad] = useState(false);
   const [gFrom, setGFrom] = useState("#f5a623");
   const [gTo, setGTo] = useState("#1e90ff");
 
@@ -122,14 +120,14 @@ function Toolbar({ editor }: { editor: Editor }) {
       <Divider />
 
       {/* Text colour */}
-      <Popover open={showText} setOpen={setShowText} icon={<Baseline size={15} />} active={editor.isActive("textStyle")} title="Text colour">
+      <Popover icon={<Baseline size={15} />} active={editor.isActive("textStyle")} title="Text colour">
         <HexColorPicker color="#ffffff" onChange={(c) => editor.chain().focus().setColor(c).run()} />
         <button style={clearBtn} onClick={() => editor.chain().focus().unsetColor().run()}>Clear colour</button>
       </Popover>
 
       {/* Gradient text */}
-      <Popover open={showGrad} setOpen={setShowGrad} icon={<Sparkles size={15} />} active={editor.isActive("gradient")} title="Gradient text">
-        <div style={{ display: "grid", gap: 8, width: 200 }}>
+      <Popover icon={<Sparkles size={15} />} active={editor.isActive("gradient")} title="Gradient text">
+        <div style={{ display: "grid", gap: 8 }}>
           <span style={{ fontSize: "0.7rem", color: "#8b9ab5" }}>From</span>
           <HexColorPicker color={gFrom} onChange={setGFrom} />
           <span style={{ fontSize: "0.7rem", color: "#8b9ab5" }}>To</span>
@@ -140,7 +138,7 @@ function Toolbar({ editor }: { editor: Editor }) {
       </Popover>
 
       {/* Highlight */}
-      <Popover open={showHi} setOpen={setShowHi} icon={<Highlighter size={15} />} active={editor.isActive("highlight")} title="Highlight">
+      <Popover icon={<Highlighter size={15} />} active={editor.isActive("highlight")} title="Highlight">
         <HexColorPicker color="#facc15" onChange={(c) => editor.chain().focus().setHighlight({ color: c }).run()} />
         <button style={clearBtn} onClick={() => editor.chain().focus().unsetHighlight().run()}>Clear highlight</button>
       </Popover>
@@ -200,45 +198,30 @@ function Divider() {
 }
 
 function Popover({
-  open, setOpen, icon, active, title, children,
+  icon, active, title, children,
 }: {
-  open: boolean; setOpen: (v: boolean) => void; icon: React.ReactNode;
-  active: boolean; title: string; children: React.ReactNode;
+  icon: React.ReactNode; active: boolean; title: string; children: React.ReactNode;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!open) return;
-    const onDoc = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, [open, setOpen]);
-
+  // Portaled panel → never clipped by the editor box or the scrollable column.
   return (
-    <div style={{ position: "relative" }} ref={ref}>
-      <button
-        style={{
-          width: 30, height: 30, borderRadius: 7, display: "grid", placeItems: "center",
-          border: "1px solid " + (active ? "#6366f1" : "#263450"),
-          background: active ? "rgba(99,102,241,0.18)" : "transparent",
-          color: active ? "#a5b4fc" : "#8b9ab5", cursor: "pointer",
-        }}
-        onClick={() => setOpen(!open)}
-        title={title}
-      >
-        {icon}
-      </button>
-      {open && (
-        <div style={{
-          position: "absolute", top: 36, left: 0, zIndex: 60,
-          background: "#141c2e", border: "1px solid #263450", borderRadius: 12,
-          padding: 10, boxShadow: "0 12px 40px rgba(0,0,0,0.55)", display: "grid", gap: 8,
-        }}>
-          {children}
-        </div>
+    <PopoverPortal
+      button={(open) => (
+        <button
+          type="button"
+          style={{
+            width: 30, height: 30, borderRadius: 7, display: "grid", placeItems: "center",
+            border: "1px solid " + (active || open ? "#6366f1" : "#263450"),
+            background: active || open ? "rgba(99,102,241,0.18)" : "transparent",
+            color: active || open ? "#a5b4fc" : "#8b9ab5", cursor: "pointer",
+          }}
+          title={title}
+        >
+          {icon}
+        </button>
       )}
-    </div>
+    >
+      {children}
+    </PopoverPortal>
   );
 }
 

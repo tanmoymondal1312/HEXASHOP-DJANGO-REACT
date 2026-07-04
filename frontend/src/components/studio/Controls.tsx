@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState, ReactNode } from "react";
+import { useState, ReactNode } from "react";
 import { HexColorPicker } from "react-colorful";
 import { ChevronDown } from "lucide-react";
+import { PopoverPortal } from "./PopoverPortal";
 
 /* ── Collapsible panel (accordion section) ─────────────────────────────────── */
 export function Panel({
@@ -117,50 +118,38 @@ export function Range({
   );
 }
 
-/* ── Color field (swatch → popover picker + hex input) ─────────────────────── */
+/* ── Color field (swatch → portaled picker + hex input) ────────────────────── */
 export function ColorField({
   label, value, onChange,
 }: { label: string; value: string; onChange: (v: string) => void }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
   // Only feed react-colorful a real hex (it can't parse gradients/rgba).
   const isHex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(value);
 
-  useEffect(() => {
-    if (!open) return;
-    const onDoc = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, [open]);
-
   return (
-    <div style={{ position: "relative" }} ref={ref}>
+    <div>
       <Label>{label}</Label>
       <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-        <button
-          type="button"
-          onClick={() => setOpen((o) => !o)}
-          style={{
-            width: 34, height: 34, borderRadius: 8, border: "1px solid #263450",
-            background: value, cursor: "pointer", flexShrink: 0,
-          }}
-          aria-label={`Pick ${label}`}
-        />
+        {/* Portaled so the picker is never clipped by the scrollable panel */}
+        <PopoverPortal
+          button={() => (
+            <button
+              type="button"
+              style={{
+                width: 34, height: 34, borderRadius: 8, border: "1px solid #263450",
+                background: value, cursor: "pointer", flexShrink: 0,
+              }}
+              aria-label={`Pick ${label}`}
+            />
+          )}
+        >
+          <HexColorPicker color={isHex ? value : "#1e90ff"} onChange={onChange} />
+        </PopoverPortal>
         <input
           style={inputStyle}
           value={value}
           onChange={(e) => onChange(e.target.value)}
         />
       </div>
-      {open && (
-        <div style={{ position: "absolute", zIndex: 50, marginTop: 8 }}>
-          <div style={{ background: "#141c2e", padding: 10, borderRadius: 12, border: "1px solid #263450", boxShadow: "0 12px 40px rgba(0,0,0,0.5)" }}>
-            <HexColorPicker color={isHex ? value : "#1e90ff"} onChange={onChange} />
-          </div>
-        </div>
-      )}
     </div>
   );
 }
