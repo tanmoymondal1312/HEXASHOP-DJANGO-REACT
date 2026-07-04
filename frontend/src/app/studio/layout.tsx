@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
@@ -13,21 +13,45 @@ export default function StudioLayout({ children }: { children: React.ReactNode }
   const router = useRouter();
   const pathname = usePathname();
   const { user, isAuthenticated, isLoading, fetchUser } = useAuthStore();
+  // Safety net: if the auth check never resolves (e.g. a stale cached bundle),
+  // don't hang on "Loading…" forever — bail to login after a few seconds.
+  const [timedOut, setTimedOut] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated && !user) fetchUser();
   }, [isAuthenticated, user, fetchUser]);
 
   useEffect(() => {
-    if (!isLoading && (!isAuthenticated || !user?.is_staff)) {
+    const t = setTimeout(() => setTimedOut(true), 6000);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    const authFailed = !isLoading && (!isAuthenticated || !user?.is_staff);
+    const stuck = timedOut && !user;
+    if (authFailed || stuck) {
       router.replace(`/auth/login?next=${encodeURIComponent(pathname)}`);
     }
-  }, [isLoading, isAuthenticated, user, router, pathname]);
+  }, [isLoading, isAuthenticated, user, timedOut, router, pathname]);
 
-  if (isLoading || !user) {
+  if ((isLoading || !user) && !timedOut) {
     return (
       <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", background: "#070b12" }}>
-        <div style={{ color: "#8b9ab5", fontSize: 14 }}>Loading studio…</div>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ color: "#8b9ab5", fontSize: 14 }}>Loading studio…</div>
+          <Link href={`/auth/login?next=${encodeURIComponent(pathname)}`}
+            style={{ color: "#6366f1", fontSize: 12, marginTop: 10, display: "inline-block" }}>
+            Taking too long? Sign in →
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", background: "#070b12" }}>
+        <div style={{ color: "#8b9ab5", fontSize: 14 }}>Redirecting to sign in…</div>
       </div>
     );
   }

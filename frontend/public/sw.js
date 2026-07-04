@@ -1,7 +1,11 @@
-const CACHE_NAME = "hexashop-v1";
+const CACHE_NAME = "hexashop-v2";
 const STATIC_ASSETS = ["/", "/shop", "/offline.html"];
-const API_CACHE_NAME = "hexashop-api-v1";
-const IMG_CACHE_NAME = "hexashop-img-v1";
+const API_CACHE_NAME = "hexashop-api-v2";
+const IMG_CACHE_NAME = "hexashop-img-v2";
+
+// Never let the SW handle the staff studio or Next build assets from cache —
+// always go to network so a code change is picked up immediately.
+const NETWORK_ONLY_PREFIXES = ["/studio", "/_next/"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -26,6 +30,12 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
+
+  // Studio + Next build assets → always network, never cached (avoids serving a
+  // stale app bundle that could hang the studio on an old auth flow).
+  if (NETWORK_ONLY_PREFIXES.some((p) => url.pathname.startsWith(p))) {
+    return; // let the browser handle it normally (no SW caching)
+  }
 
   // Images → cache-first, 7 days
   if (request.destination === "image" || url.hostname === "res.cloudinary.com") {
