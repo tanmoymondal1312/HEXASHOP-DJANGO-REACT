@@ -179,7 +179,8 @@ class ProductViewSet(ReadOnlyModelViewSet):
     @action(detail=False, methods=["get"], url_path="viral")
     def viral(self, request):
         """
-        Returns the 8 most 'viral' active products.
+        Returns the 18 most 'viral' active products — the home page shows them
+        in a horizontally-scrollable carousel.
         Virality score = sold_count × 3 + review_count × 2 + view_count × 0.1
         Cached for 15 minutes.
         """
@@ -202,7 +203,7 @@ class ProductViewSet(ReadOnlyModelViewSet):
             .prefetch_related(
                 Prefetch("images", queryset=ProductImage.objects.order_by("sort_order"))
             )
-            .order_by("-viral_score")[:8]
+            .order_by("-viral_score")[:18]
         )
         ctx = {"request": request}
         data = ProductListSerializer(products, many=True, context=ctx).data

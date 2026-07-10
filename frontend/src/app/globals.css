@@ -347,6 +347,51 @@ input[type="search"]::-webkit-search-results-decoration {
 @media (min-width:640px)  { .hx-viral-grid { grid-template-columns:repeat(4,1fr); gap:0.8rem; } }
 @media (min-width:1024px) { .hx-viral-grid { grid-template-columns:repeat(5,1fr); gap:1.1rem; } }
 
+/* ── Horizontal product carousel (Most Viral) ───────────────── */
+.hx-hscroll-wrap { position:relative; }
+.hx-hscroll {
+  display:flex; gap:0.55rem; overflow-x:auto;
+  scroll-snap-type:x proximity;
+  -webkit-overflow-scrolling:touch;
+  padding-bottom:4px; /* keep hover shadow from clipping */
+}
+@media (min-width:640px)  { .hx-hscroll { gap:0.8rem; } }
+@media (min-width:1024px) { .hx-hscroll { gap:1.1rem; } }
+/* Item widths mirror the old grid rhythm: ~2.6 visible on phones,
+   4 on tablet, 5 on desktop */
+.hx-hscroll-item {
+  flex:0 0 auto; scroll-snap-align:start;
+  width:calc((100% - 2*0.55rem)/2.6);
+}
+@media (min-width:640px)  { .hx-hscroll-item { width:calc((100% - 3*0.8rem)/4); } }
+@media (min-width:1024px) { .hx-hscroll-item { width:calc((100% - 4*1.1rem)/5); } }
+
+/* Carousel arrows — hero-arrow look, scoped to the strip */
+.hx-car-arrow {
+  position:absolute; top:50%; transform:translateY(-50%); z-index:10;
+  width:38px; height:38px; border-radius:50%;
+  background:rgba(13,17,26,0.82);
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,0.16); color:rgba(255,255,255,0.75);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; outline:none; padding:0;
+  box-shadow:0 4px 18px rgba(0,0,0,0.5);
+  transition:background 0.22s, border-color 0.22s, color 0.22s,
+             transform 0.22s, opacity 0.3s;
+}
+.hx-car-arrow:hover {
+  background:rgba(245,166,35,0.16); border-color:#f5a623; color:#f5a623;
+  transform:translateY(-50%) scale(1.08);
+}
+.hx-car-arrow:active { transform:translateY(-50%) scale(0.94); }
+.hx-car-arrow-left  { left:-8px; }
+.hx-car-arrow-right { right:-8px; }
+@media (min-width:1024px) {
+  .hx-car-arrow { width:42px; height:42px; }
+  .hx-car-arrow-left  { left:-14px; }
+  .hx-car-arrow-right { right:-14px; }
+}
+
 .hx-viral-card { animation:hxFadeUp 0.55s cubic-bezier(0.22,1,0.36,1) both; }
 .hx-viral-img {
   position:relative; border-radius:0.625rem; overflow:hidden;

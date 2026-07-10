@@ -5,6 +5,7 @@ import { WebsiteJsonLd } from "@/components/seo/JsonLd";
 import { resolveImageUrl } from "@/lib/utils";
 import type { Product } from "@/types";
 import HeroSlider from "@/components/hero/HeroSlider";
+import HScroll from "@/components/ui/HScroll";
 
 // ─── #7 ISR: revalidate the page every 60 s ───────────────────────────────────
 export const revalidate = 60;
@@ -46,7 +47,7 @@ async function getViral(): Promise<Product[]> {
     });
     if (!res.ok) return [];
     const data = await res.json();
-    return (Array.isArray(data) ? data : data?.results ?? []).slice(0, 5);
+    return (Array.isArray(data) ? data : data?.results ?? []).slice(0, 18);
   } catch {
     return [];
   }
@@ -202,16 +203,23 @@ export default async function HomePage() {
               </div>
               <Link href="/shop?ordering=-sold_count" className="hx-view-all">VIEW ALL</Link>
             </div>
-            <div className="hx-viral-grid">
-              {viral.length > 0
-                ? viral.map((p, i) => <ViralCard key={p.id} product={p} priority={i < 3} delay={i * 80} />)
-                : [1,2,3,4,5].map(i => (
-                    <div key={i} className="hx-viral-img" style={{ opacity: 0.3 }}>
-                      <div className="hx-img-ph" />
-                    </div>
-                  ))
-              }
-            </div>
+            {viral.length > 0 ? (
+              <HScroll ariaLabel="Most viral products">
+                {viral.map((p, i) => (
+                  <div key={p.id} className="hx-hscroll-item" role="listitem">
+                    <ViralCard product={p} priority={i < 5} delay={Math.min(i, 6) * 80} />
+                  </div>
+                ))}
+              </HScroll>
+            ) : (
+              <div className="hx-viral-grid">
+                {[1,2,3,4,5].map(i => (
+                  <div key={i} className="hx-viral-img" style={{ opacity: 0.3 }}>
+                    <div className="hx-img-ph" />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
