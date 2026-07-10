@@ -60,7 +60,7 @@ async function getFeatured(): Promise<Product[]> {
     });
     if (!res.ok) return [];
     const data = await res.json();
-    return (Array.isArray(data) ? data : data?.results ?? []).slice(0, 10);
+    return (Array.isArray(data) ? data : data?.results ?? []).slice(0, 20);
   } catch {
     return [];
   }

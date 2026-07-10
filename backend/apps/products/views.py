@@ -156,18 +156,35 @@ class ProductViewSet(ReadOnlyModelViewSet):
 
     @action(detail=False, methods=["get"], url_path="featured")
     def featured(self, request):
+        """Featured products for the home page. Excludes whatever the viral
+        carousel is showing so the two home sections never repeat a product."""
         cache_key = "featured_products"
         cached = cache.get(cache_key)
         if cached is not None:
             return Response(cached)
 
+        from django.db.models import ExpressionWrapper, FloatField
+
+        viral_ids = (
+            Product.objects.filter(status=Product.Status.ACTIVE)
+            .annotate(
+                viral_score=ExpressionWrapper(
+                    F("sold_count") * 3 + F("review_count") * 2 + F("view_count") * 0.1,
+                    output_field=FloatField(),
+                )
+            )
+            .order_by("-viral_score")
+            .values_list("id", flat=True)[:18]
+        )
+
         products = (
             Product.objects.filter(is_featured=True, status=Product.Status.ACTIVE)
+            .exclude(id__in=list(viral_ids))
             .select_related("category", "brand")
             .prefetch_related(
                 Prefetch("images", queryset=ProductImage.objects.order_by("sort_order"))
             )
-            .order_by("-sold_count")[:8]
+            .order_by("-sold_count")[:24]
         )
         ctx = {"request": request}
         data = ProductListSerializer(products, many=True, context=ctx).data
