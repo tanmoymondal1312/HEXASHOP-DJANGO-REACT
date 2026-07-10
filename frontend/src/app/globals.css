@@ -359,13 +359,14 @@ input[type="search"]::-webkit-search-results-decoration {
   grid-template-rows:repeat(2, auto);
   grid-auto-columns:calc((100% - 2*0.55rem)/2.6);
   gap:0.55rem; overflow-x:auto;
-  scroll-snap-type:x proximity;
+  /* NOTE: no scroll-snap here — snapping fights the 1px/frame auto-drift
+     (the browser keeps re-snapping the strip back to the nearest item). */
   -webkit-overflow-scrolling:touch;
   padding-bottom:4px; /* keep hover shadow from clipping */
 }
 @media (min-width:640px)  { .hx-hscroll { gap:0.8rem;  grid-auto-columns:calc((100% - 3*0.8rem)/4); } }
 @media (min-width:1024px) { .hx-hscroll { gap:1.1rem; grid-auto-columns:calc((100% - 4*1.1rem)/5); } }
-.hx-hscroll-item { scroll-snap-align:start; min-width:0; }
+.hx-hscroll-item { min-width:0; }
 
 /* Carousel arrows — hero-arrow look, scoped to the strip */
 .hx-car-arrow {

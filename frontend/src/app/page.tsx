@@ -204,7 +204,7 @@ export default async function HomePage() {
               <Link href="/shop?ordering=-sold_count" className="hx-view-all">VIEW ALL</Link>
             </div>
             {viral.length > 0 ? (
-              <HScroll ariaLabel="Most viral products">
+              <HScroll ariaLabel="Most viral products" autoScrollSpeed={30}>
                 {viral.map((p, i) => (
                   <div key={p.id} className="hx-hscroll-item" role="listitem">
                     <ViralCard product={p} priority={i < 5} delay={Math.min(i, 6) * 80} />
