@@ -42,6 +42,24 @@ export default function HeroSlideView({ document: doc, fallbackImageUrl, animate
           opacity: bg.opacity ?? 1,
         }}
       />
+      {/* Mobile-only faded background image (desktop keeps the right column).
+          Overlay sits on top of the img for text readability; the text grid
+          (.hx-hero-inner, z-index 2) renders above both. Entrance animation is
+          on the wrapper — animating the img itself would end at opacity:1 and
+          destroy the dim effect. */}
+      {imgUrl && doc.image?.showOnMobile !== false && (
+        <div className={`hx-mob-img-wrap ${a(0)}`} aria-hidden>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            className="hx-mob-img"
+            src={imgUrl}
+            alt=""
+            style={{ opacity: doc.image?.mobileOpacity ?? 0.38 }}
+          />
+          <div className="hx-mob-img-overlay" />
+        </div>
+      )}
+
       <div
         className="hx-slide-ambient"
         style={{

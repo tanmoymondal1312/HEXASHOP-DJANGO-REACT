@@ -25,7 +25,7 @@ export function blankDocument(): HeroDocument {
   return {
     version: HERO_SCHEMA_VERSION,
     background: { color: "#0d1a2d", opacity: 1, hexColor: "#1e90ff", starColor: "#f5a623" },
-    image: { assetId: null, url: null, alt: "" },
+    image: { assetId: null, url: null, alt: "", showOnMobile: true, mobileOpacity: 0.38 },
     badge: {
       enabled: false, text: "", bgColor: "rgba(30,144,255,0.14)", textColor: "#1e90ff",
       borderRadius: 999, fontSize: 0.58, paddingX: 14, paddingY: 5,

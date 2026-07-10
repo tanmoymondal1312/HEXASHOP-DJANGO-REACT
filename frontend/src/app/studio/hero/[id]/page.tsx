@@ -153,6 +153,14 @@ export default function HeroEditorPage() {
             </div>
             <TextInput label="Image alt text" value={doc.image.alt}
               onChange={(v) => patchNested("image", { alt: v })} placeholder="Describe the image" />
+            <Toggle label="Show on mobile (faded background)"
+              checked={doc.image.showOnMobile !== false}
+              onChange={(v) => patchNested("image", { showOnMobile: v })} />
+            {doc.image.showOnMobile !== false && (
+              <Range label="Mobile image opacity" value={doc.image.mobileOpacity ?? 0.38}
+                min={0.1} max={0.8} step={0.02}
+                onChange={(v) => patchNested("image", { mobileOpacity: v })} />
+            )}
           </Panel>
 
           <Panel title="Top Badge">

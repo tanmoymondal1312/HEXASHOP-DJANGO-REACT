@@ -92,7 +92,8 @@ def blank_document():
     return {
         "version": SCHEMA_VERSION,
         "background": _bg("#0d1a2d", "#1e90ff", "#f5a623"),
-        "image": {"assetId": None, "url": None, "alt": ""},
+        "image": {"assetId": None, "url": None, "alt": "",
+                  "showOnMobile": True, "mobileOpacity": 0.38},
         "badge": {
             "enabled": False, "text": "", "bgColor": "rgba(30,144,255,0.14)",
             "textColor": "#1e90ff", "borderRadius": 999, "fontSize": 0.58,

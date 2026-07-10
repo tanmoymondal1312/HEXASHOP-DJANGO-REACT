@@ -505,6 +505,31 @@ input[type="search"]::-webkit-search-results-decoration {
 .hx-slide-bg, .hx-slide-ambient {
   position:absolute; inset:0; pointer-events:none;
 }
+
+/* Mobile-only faded hero image behind the text (hidden at md+, where the
+   dedicated image column takes over). Right-anchored, dimmed via inline
+   opacity, darkened left→right so the left-aligned text stays readable. */
+.hx-mob-img-wrap {
+  position:absolute; inset:0; overflow:hidden; pointer-events:none;
+}
+.hx-mob-img {
+  position:absolute; top:50%; right:-6%; transform:translateY(-50%);
+  height:92%; max-width:72%; object-fit:contain;
+  filter:drop-shadow(0 14px 30px rgba(0,0,0,0.6));
+}
+.hx-mob-img-overlay {
+  position:absolute; inset:0;
+  background:linear-gradient(90deg,
+    rgba(9,13,18,0.90) 0%, rgba(9,13,18,0.55) 45%, rgba(9,13,18,0.12) 100%);
+}
+@media (min-width:768px) { .hx-mob-img-wrap { display:none; } }
+
+/* Give short-text slides enough canvas on mobile for the faded image, and
+   let the text grid fill it so its align-items:center centres vertically */
+@media (max-width:767px) {
+  .hx-hero .hx-slide-view { min-height:340px; }
+  .hx-slide-view .hx-hero-inner { flex:1; }
+}
 .hx-slide-view .hx-hero-inner { position:relative; z-index:2; }
 @media (min-width:768px) { .hx-slide-view .hx-hero-inner { flex:1; } }
 
@@ -564,5 +589,14 @@ input[type="search"]::-webkit-search-results-decoration {
 .hx-arrow:active { transform:translateY(-50%) scale(0.95); }
 .hx-arrow-left  { left:0.6rem; }
 .hx-arrow-right { right:0.6rem; }
+/* Mobile: arrows drop to the dots row at the bottom — vertically-centred
+   arrows overlap the text now that the faded image made the hero taller. */
+@media (max-width:767px) {
+  .hx-arrow { top:auto; bottom:0.8rem; transform:none; width:32px; height:32px; }
+  .hx-arrow:hover  { transform:scale(1.08); }
+  .hx-arrow:active { transform:scale(0.95); }
+  .hx-arrow-left  { left:0.9rem; }
+  .hx-arrow-right { right:0.9rem; }
+}
 @media (min-width:768px)  { .hx-arrow { width:46px; height:46px; } .hx-arrow-left{left:1.25rem;} .hx-arrow-right{right:1.25rem;} }
 @media (min-width:1280px) { .hx-arrow-left{left:2rem;} .hx-arrow-right{right:2rem;} }

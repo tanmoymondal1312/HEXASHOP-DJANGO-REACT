@@ -26,6 +26,10 @@ export interface HeroImageRef {
   assetId: number | null;
   url: string | null;
   alt: string;
+  /** Mobile faded-background layer. Missing = shown (backward compatible). */
+  showOnMobile?: boolean;
+  /** Opacity of the mobile background image. Missing = 0.38. */
+  mobileOpacity?: number;
 }
 
 export interface HeroBadge {
