@@ -348,23 +348,24 @@ input[type="search"]::-webkit-search-results-decoration {
 @media (min-width:1024px) { .hx-viral-grid { grid-template-columns:repeat(5,1fr); gap:1.1rem; } }
 
 /* ── Horizontal product carousel (Most Viral) ───────────────── */
+/* Two stacked rows that scroll together as one strip: grid-auto-flow:column
+   fills items top→bottom then advances a column, so one horizontal scroll
+   moves both rows. Column widths mirror the old grid rhythm (~2.6 visible
+   on phones, 4 on tablet, 5 on desktop). */
 .hx-hscroll-wrap { position:relative; }
 .hx-hscroll {
-  display:flex; gap:0.55rem; overflow-x:auto;
+  display:grid;
+  grid-auto-flow:column;
+  grid-template-rows:repeat(2, auto);
+  grid-auto-columns:calc((100% - 2*0.55rem)/2.6);
+  gap:0.55rem; overflow-x:auto;
   scroll-snap-type:x proximity;
   -webkit-overflow-scrolling:touch;
   padding-bottom:4px; /* keep hover shadow from clipping */
 }
-@media (min-width:640px)  { .hx-hscroll { gap:0.8rem; } }
-@media (min-width:1024px) { .hx-hscroll { gap:1.1rem; } }
-/* Item widths mirror the old grid rhythm: ~2.6 visible on phones,
-   4 on tablet, 5 on desktop */
-.hx-hscroll-item {
-  flex:0 0 auto; scroll-snap-align:start;
-  width:calc((100% - 2*0.55rem)/2.6);
-}
-@media (min-width:640px)  { .hx-hscroll-item { width:calc((100% - 3*0.8rem)/4); } }
-@media (min-width:1024px) { .hx-hscroll-item { width:calc((100% - 4*1.1rem)/5); } }
+@media (min-width:640px)  { .hx-hscroll { gap:0.8rem;  grid-auto-columns:calc((100% - 3*0.8rem)/4); } }
+@media (min-width:1024px) { .hx-hscroll { gap:1.1rem; grid-auto-columns:calc((100% - 4*1.1rem)/5); } }
+.hx-hscroll-item { scroll-snap-align:start; min-width:0; }
 
 /* Carousel arrows — hero-arrow look, scoped to the strip */
 .hx-car-arrow {
