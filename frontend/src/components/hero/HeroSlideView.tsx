@@ -225,6 +225,12 @@ export default function HeroSlideView({ document: doc, fallbackImageUrl, animate
                   width: "100%",
                   maxWidth: 320,
                   filter: `drop-shadow(0 0 28px ${bg.hexColor}6b) drop-shadow(0 18px 40px rgba(0,0,0,0.75))`,
+                  // Dissolve the photo itself toward the bottom — no hard hem
+                  // line, regardless of what the backdrop colour is.
+                  WebkitMaskImage:
+                    "linear-gradient(to bottom, black 58%, rgba(0,0,0,0.4) 82%, transparent 97%)",
+                  maskImage:
+                    "linear-gradient(to bottom, black 58%, rgba(0,0,0,0.4) 82%, transparent 97%)",
                 }}
               />
             ) : (
@@ -255,16 +261,17 @@ export default function HeroSlideView({ document: doc, fallbackImageUrl, animate
             )}
           </div>
 
-          {/* bottom fade */}
+          {/* bottom fade — starts higher and goes fully dark sooner so the
+              image visibly melts into the background instead of ending */}
           <div
             style={{
               position: "absolute",
               bottom: 0,
               left: 0,
               right: 0,
-              height: "50%",
+              height: "58%",
               background:
-                "linear-gradient(to bottom, transparent 0%, rgba(9,13,18,0.55) 55%, #090d12 100%)",
+                "linear-gradient(to bottom, transparent 0%, rgba(9,13,18,0.45) 30%, rgba(9,13,18,0.85) 58%, #090d12 88%)",
               zIndex: 6,
               pointerEvents: "none",
             }}

@@ -516,6 +516,9 @@ input[type="search"]::-webkit-search-results-decoration {
   position:absolute; top:50%; right:-6%; transform:translateY(-50%);
   height:92%; max-width:72%; object-fit:contain;
   filter:drop-shadow(0 14px 30px rgba(0,0,0,0.6));
+  /* dissolve toward the bottom — no visible hem line */
+  -webkit-mask-image:linear-gradient(to bottom, black 55%, rgba(0,0,0,0.35) 80%, transparent 96%);
+  mask-image:linear-gradient(to bottom, black 55%, rgba(0,0,0,0.35) 80%, transparent 96%);
 }
 .hx-mob-img-overlay {
   position:absolute; inset:0;
