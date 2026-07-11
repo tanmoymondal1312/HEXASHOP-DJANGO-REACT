@@ -18,9 +18,10 @@ build/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
-media/
 staticfiles/
 .env
+# NOTE: backend/media/ is intentionally tracked — it holds the demo product &
+# hero images that pair with the DB snapshot in backend/db_backup/
 
 # Temporary product image source folder (delete after seeding)
 products_images/
