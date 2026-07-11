@@ -89,7 +89,7 @@ function ViralCard({ product, priority, delay }: { product: Product; priority?: 
             sizes="(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 20vw"
             style={{ objectFit: "cover" }}
             priority={priority}
-            unoptimized={src.includes("localhost")}
+            unoptimized={src.includes("localhost") || src.includes("/media/")}
           />
         ) : (
           <div className="hx-img-ph" />
@@ -143,7 +143,7 @@ function FeaturedCard({ product, priority, delay }: { product: Product; priority
             sizes="(max-width: 500px) 50vw, (max-width: 1024px) 33vw, 20vw"
             style={{ objectFit: "cover" }}
             priority={priority}
-            unoptimized={src.includes("localhost")}
+            unoptimized={src.includes("localhost") || src.includes("/media/")}
           />
         ) : (
           <div className="hx-img-ph" />

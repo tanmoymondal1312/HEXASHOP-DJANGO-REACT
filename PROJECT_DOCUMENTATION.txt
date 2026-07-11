@@ -1,0 +1,305 @@
+================================================================================
+ HEXASHOP — FULL PROJECT DOCUMENTATION
+ A production-grade luxury fashion e-commerce platform
+ Repo: https://github.com/tanmoymondal1312/HEXASHOP-DJANGO-REACT
+================================================================================
+
+
+--------------------------------------------------------------------------------
+1. WHAT THIS PROJECT IS
+--------------------------------------------------------------------------------
+HEXASHOP is a full-stack e-commerce store (dark, luxury-fashion themed) with:
+  • A customer storefront (home, shop, product detail, cart, wishlist, auth)
+  • A visual "Hero Builder Studio" — a Shopify/Framer-style page-builder where
+    staff design the homepage hero slides with rich text and live preview
+  • A Django admin + a custom staff panel
+  • 65 seeded products (including a 50-item "Luxury Edit" collection with
+    curated photography), categories, brands, variants and a full DB snapshot
+    so the whole store can be cloned and run with data.
+
+
+--------------------------------------------------------------------------------
+2. TECHNOLOGY STACK
+--------------------------------------------------------------------------------
+FRONTEND (folder: frontend/)
+  • Next.js 14 (App Router)          — SSR + ISR rendering, API routes
+  • React 18 + TypeScript            — component architecture
+  • Tailwind CSS 3                   — utility styling (+ custom hx-* CSS system)
+  • Zustand                          — client state (cart, auth)
+  • TanStack React Query             — server-state / infinite scroll
+  • Axios                            — API client with JWT-refresh interceptor
+  • Tiptap 2 (headless editor)       — rich-text editing in the Hero Studio
+  • @dnd-kit                         — drag & drop (slides / button reorder)
+  • react-colorful                   — color pickers in the Studio
+  • Framer Motion, Radix UI, Lucide  — animation / primitives / icons
+  • Service Worker (public/sw.js)    — offline fallback + image/API caching
+
+BACKEND (folder: backend/)
+  • Django 4.2 + Django REST Framework — API-first backend
+  • PostgreSQL 16                    — primary database
+  • Redis                            — cache + session store + Celery broker
+  • Celery (4 queues)                — async tasks (emails, inventory, reports)
+  • SimpleJWT                        — JWT auth in HttpOnly cookies
+  • django-axes                      — brute-force login lockout
+  • Cloudinary (prod) / local media (dev) — image storage
+  • WhiteNoise, django-prometheus, health-check, sentry-sdk — ops tooling
+
+INFRA / TOOLING
+  • Nginx configs (nginx/) for dev & production
+  • systemd service files (deploy/) — gunicorn, celery, celery-beat
+  • docker-compose.yml — optional containerised setup
+  • GitHub Actions (.github/workflows/) — CI/CD pipeline
+  • Playwright — E2E browser verification
+
+
+--------------------------------------------------------------------------------
+3. HIGH-LEVEL ARCHITECTURE
+--------------------------------------------------------------------------------
+  Browser
+    │
+    ├── Next.js (port 3000) — renders pages
+    │     • Server Components fetch the Django API at build/request time
+    │     • ISR: home page revalidates every 60s, plus ON-DEMAND revalidation
+    │       (POST /api/revalidate) so Studio saves appear instantly
+    │     • Client components handle cart, auth state, carousels, Studio
+    │
+    └── Django API (port 8000) — /api/v1/...
+          • DRF viewsets/actions, JWT cookie auth, Redis caching
+          • PostgreSQL for data, /media/ for images (dev)
+          • Celery workers for async jobs
+
+AUTH FLOW (cookie-based JWT):
+  1. POST /api/v1/auth/login/  → sets HttpOnly cookies:
+       access_token  (15 min, Path=/)
+       refresh_token (7 days, Path=/api/v1/auth/token/refresh/)
+  2. Axios sends cookies (withCredentials) on every request.
+  3. On 401 the axios interceptor calls token/refresh once, replays the
+     original request, and redirects to /auth/login if refresh fails.
+     (The refresh call itself never triggers another refresh — deadlock guard.)
+  4. /auth/me/ returns the user incl. is_staff — used to gate /studio.
+
+
+--------------------------------------------------------------------------------
+4. BACKEND — DJANGO APPS & KEY ENDPOINTS
+--------------------------------------------------------------------------------
+apps/accounts        — custom User (UUID id, email login), profiles, addresses
+apps/products        — Category (tree), Brand, Product, ProductImage,
+                       ProductColor, ProductVariant, Review
+apps/cart            — DB cart for logged-in users, Redis cart for guests,
+                       merged on login
+apps/wishlist        — wishlist with toggle API
+apps/orders          — order models
+apps/notifications   — stock alerts, newsletter (Celery-driven emails)
+apps/store_settings  — SiteSettings (announcement bar, hero fallback image),
+                       Banner (legacy), PromoCode, HeroSlide + HeroAsset (new)
+apps/admin_panel     — server-rendered staff panel at /panel/ (products,
+                       categories, announcement, dashboard w/ page-view stats)
+
+KEY PUBLIC API (all under /api/v1/):
+  GET  /products/                     list w/ cursor pagination, filters, search (?q=)
+  GET  /products/<slug>/              product detail
+  GET  /products/viral/               top-18 by viral score
+                                      (sold×3 + reviews×2 + views×0.1), cached 15 min
+  GET  /products/featured/            up to 24 featured products EXCLUDING the
+                                      viral top-18 (home sections never repeat)
+  GET  /products/categories/          category tree
+  GET  /settings/                     site settings (announcement, hero fallback)
+  GET  /settings/hero-slides/         active hero slide JSON documents
+  POST /auth/register|login|logout, GET/PATCH /auth/me/, POST /auth/token/refresh/
+  GET/POST /cart/, /wishlist/, /notifications/...
+
+STAFF-ONLY STUDIO API (IsAdminUser):
+  CRUD /studio/hero-slides/           hero slide documents
+  POST /studio/hero-slides/reorder/   bulk sort_order update
+  POST /studio/hero-assets/           image upload (multipart)
+
+CACHING:
+  Redis keys: viral_products (15m), featured_products (30m),
+  public_site_settings (5m) — invalidated on writes.
+  HTTP: Cache-Control with s-maxage + stale-while-revalidate on public GETs.
+
+
+--------------------------------------------------------------------------------
+5. FRONTEND — PAGES & COMPONENTS
+--------------------------------------------------------------------------------
+src/app/
+  page.tsx                 HOME — fetches settings + hero slides + viral +
+                           featured in parallel (Promise.all), ISR 60s
+  shop/                    product listing (filters, search, infinite scroll)
+  products/[slug]/         product detail (SSR, JSON-LD, variants, add-to-cart)
+  auth/login|register/     auth pages (react-hook-form + zod)
+  studio/                  HERO BUILDER (staff-only, see §6)
+  api/revalidate/route.ts  on-demand ISR: revalidates tag "hero-slides" + "/"
+
+src/components/
+  layout/Header.tsx        navbar (hidden on /studio), announcement bar,
+                           categories dropdown, persistent search
+  layout/Footer.tsx        footer (hidden on /studio)
+  hero/HeroSlider.tsx      homepage slider: stacks N slides in one CSS-grid
+                           cell (height locks to tallest → no layout jump),
+                           autoplay 4s, arrows + dots
+  hero/HeroSlideView.tsx   renders ONE slide from its JSON document — the SAME
+                           component powers storefront AND studio preview
+                           (true WYSIWYG). Desktop: text | hexagon+image
+                           columns. Mobile: faded background image + overlay.
+  hero/TiptapRenderer.tsx  walks Tiptap JSON → styled <span>s (color, gradient,
+                           highlight, font family/size/weight, align, B/I/U).
+                           No dangerouslySetInnerHTML anywhere.
+  ui/HScroll.tsx           reusable horizontal carousel: arrows, edge-fade,
+                           and slow auto-drift (~30px/s) that runs only while
+                           ≥60% in view; pauses on hover/touch/manual scroll;
+                           glides back to start at the end; respects
+                           prefers-reduced-motion.
+  studio/*                 Studio UI (see §6)
+  cart/, products/, search/, seo/ — cart drawer, cards, search bar, JSON-LD
+
+HOME PAGE SECTIONS:
+  1. Hero — dynamic slide carousel (from DB documents)
+  2. Most Viral — 18 products in a 2-ROW horizontally scrolling strip
+     (grid-auto-flow:column → both rows scroll together), auto-drifting
+  3. Featured Products — 20 products, guaranteed no overlap with Most Viral
+
+
+--------------------------------------------------------------------------------
+6. HERO BUILDER STUDIO (flagship feature)
+--------------------------------------------------------------------------------
+URL: /studio/hero (staff login required; non-staff → redirected to login)
+
+WHAT IT IS: a visual page-builder for the homepage hero. Slides are stored as
+versioned JSON DOCUMENTS (never HTML). React renders the JSON — the same
+renderer serves the storefront and the editor's live preview.
+
+DOCUMENT SCHEMA (per slide, stored in HeroSlide.document JSONField):
+  {
+    version: 1,
+    background: { color, opacity, hexColor, starColor },
+    image:      { assetId, url, alt, showOnMobile, mobileOpacity },
+    badge:      { enabled, text, bgColor, textColor, borderRadius,
+                  fontSize, paddingX, paddingY },
+    title:      <native Tiptap JSON>,     // rich text
+    subtitle:   { text, color },
+    description:{ text, color },
+    promo:      <Tiptap JSON> | null,
+    buttons:    [ { id, text, link, style:{ bg, color, borderColor,
+                    borderRadius, fontSize, fontWeight, paddingX, paddingY,
+                    shadow, width, height, hover:{opacity, translateY} } } ]
+  }
+
+EDITOR CAPABILITIES:
+  • Slide list: live-rendered card thumbnails, add / edit / delete,
+    drag-to-reorder (persists via reorder API)
+  • Background: color pickers (portal-rendered, never clipped) + opacity
+  • Hero image: upload / replace / remove (+ per-slide mobile visibility
+    toggle and mobile opacity slider)
+  • Badge: full styling controls
+  • Main Title & Promo: custom Tiptap editor with toolbar —
+    Bold/Italic/Underline, text color, GRADIENT text, highlight, alignment,
+    font family, font weight, font size; per-word/character styling
+  • Button Builder: unlimited buttons, every style property editable,
+    add/delete/drag-reorder, hover controls
+  • LIVE PREVIEW: right-hand pane re-renders on every keystroke
+  • Save → PATCH API → on-demand ISR revalidate → storefront updates instantly
+
+DATA MODELS: HeroSlide (name, document, schema_version, is_active, sort_order,
+valid_from/to for future scheduling) + HeroAsset (uploaded images).
+The original 3 static slides were ported into documents via a data migration
+(store_settings 0005) so the storefront looked identical after the switch.
+
+FUTURE-READY BY DESIGN: animation presets, video backgrounds, per-breakpoint
+overrides, scheduling and i18n can all be added inside the document schema
+without DB migrations.
+
+
+--------------------------------------------------------------------------------
+7. PRODUCT CATALOG & SEED DATA
+--------------------------------------------------------------------------------
+  • 65 products total: 15 original + 50 "Luxury Edit" (SKUs LUX-0001..0050)
+  • Luxury Edit was built from 77 curated Unsplash photos (downloaded,
+    PIL-validated, visually reviewed; best 50 kept): watches, handbags,
+    fragrances (Chanel/Versace bottles), diamond jewelry, sunglasses, heels,
+    sneakers, gowns, suits, leather accessories
+  • Each product: luxury copywriting, price ($118–$3,200), many with
+    compare-at price (discount badges), rating 4.3–4.9, sold/view counts,
+    tags, and VARIANTS with stock (sizes S–XL, shoes 38–42, perfume 50/100ML)
+  • Categories incl. new "Fragrances"; brands incl. Chanel, Versace, Ray-Ban
+    + house brands (Maison Aurel, Velaré, Noir Atelier, Oro Milano, Éclat Paris)
+  • Product images live in backend/media/products/ (tracked in git)
+
+
+--------------------------------------------------------------------------------
+8. DATABASE
+--------------------------------------------------------------------------------
+  • PostgreSQL; connection via DATABASE_URL env (dj-database-url)
+  • Notable tables: users, products, product_variants, product_images,
+    categories (self-referencing tree), brands, carts, wishlists, orders,
+    hero slides (store_settings_heroslide), site settings (singleton row)
+  • Full snapshot committed at backend/db_backup/hexashop_db.sql
+    (pg_dump --no-owner --no-privileges) + restore instructions in
+    backend/db_backup/README.md
+  • Dev fallback: SQLite if DATABASE_URL is missing (development settings)
+
+
+--------------------------------------------------------------------------------
+9. RUNNING LOCALLY
+--------------------------------------------------------------------------------
+Prereqs already on this machine: PostgreSQL 16 + Redis as systemd services
+(auto-start on boot). Env files: backend/.env (DB/Redis on localhost),
+frontend/.env.local (API at localhost:8000).
+
+EASIEST:  ./start-lan.sh
+  → Django on 0.0.0.0:8000 + Next.js on 0.0.0.0:3000
+  → uses mDNS hostname so phones on the same Wi-Fi can browse:
+       http://tanmoy-ubuntu-computer.local:3000
+
+MANUAL:
+  cd backend && source venv/bin/activate && python manage.py runserver
+  cd frontend && npm run dev
+
+URLS:
+  Storefront      http://localhost:3000
+  Hero Studio     http://localhost:3000/studio/hero      (staff login)
+  API             http://localhost:8000/api/v1/
+  Django admin    http://localhost:8000/admin/
+  Staff panel     http://localhost:8000/panel/
+
+NOTE (LAN mode): always open the SAME host the frontend was started with
+(the .local hostname) — auth cookies are host-bound, so mixing
+localhost/127.0.0.1 with the .local host breaks login.
+
+
+--------------------------------------------------------------------------------
+10. DEPLOYMENT
+--------------------------------------------------------------------------------
+  • Backend on a VPS: gunicorn + celery + celery-beat via systemd (deploy/),
+    nginx reverse proxy (nginx/nginx.prod.conf), certbot SSL
+  • Frontend: next build + node server (or Vercel)
+  • Production settings add HSTS/CSP security headers, Cloudinary media,
+    Sentry, rate limiting (100/min anon, 1000/min auth)
+  • CI/CD via GitHub Actions: test → build → deploy
+
+
+--------------------------------------------------------------------------------
+11. SECURITY
+--------------------------------------------------------------------------------
+  • JWT in HttpOnly cookies (XSS-safe), refresh rotation + blacklist
+  • CSRF: SameSite=Lax cookies; CORS locked to known origins
+  • django-axes login lockout; DRF throttling; Django ORM only (no raw SQL)
+  • React auto-escaping + zero dangerouslySetInnerHTML in hero rendering
+  • Secrets live only in .env files (gitignored — never pushed)
+
+
+--------------------------------------------------------------------------------
+12. NOTEWORTHY ENGINEERING DETAILS
+--------------------------------------------------------------------------------
+  • WYSIWYG guarantee: one shared <HeroSlideView> renders both the storefront
+    hero and the Studio preview — preview can never drift from production.
+  • Layout-shift-proof hero: all slides render stacked in one grid cell, so
+    the section height is the max of all slides (no jump on slide change);
+    image column heights are fixed per breakpoint.
+  • Image "dissolve": hero photos fade out via CSS mask-image toward the
+    bottom + a strengthened overlay — no visible hem line ever.
+  • Featured/viral de-dup is enforced server-side in the featured endpoint.
+  • On-demand ISR: Studio saves call /api/revalidate → home updates instantly
+    while normal visitors still get fast cached pages.
+  • Service worker never caches /studio or /_next assets (stale-bundle guard).
+================================================================================
