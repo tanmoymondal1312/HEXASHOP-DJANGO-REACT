@@ -246,3 +246,28 @@ class Review(TimeStampedModel):
 
     def __str__(self) -> str:
         return f"{self.user} rated {self.product} {self.rating}★"
+
+
+# ── Signals ───────────────────────────────────────────────────────────────────
+from django.db.models.signals import post_save  # noqa: E402
+from django.dispatch import receiver  # noqa: E402
+from django.db import transaction  # noqa: E402
+
+
+@receiver(post_save, sender=ProductImage)
+def queue_image_compression(sender, instance, **kwargs):
+    """Whenever a product image is uploaded/replaced, compress it to <100KB in
+    the background (Celery inventory queue) — the request is never blocked, and
+    a broker outage must never break the upload itself."""
+
+    def enqueue():
+        try:
+            from .tasks import compress_product_image
+            compress_product_image.delay(instance.pk)
+        except Exception:
+            import logging
+            logging.getLogger(__name__).warning(
+                "could not queue compression for ProductImage %s", instance.pk
+            )
+
+    transaction.on_commit(enqueue)

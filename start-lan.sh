@@ -35,6 +35,13 @@ source venv/bin/activate
 python manage.py runserver 0.0.0.0:8000 &
 DJANGO_PID=$!
 
+# ── Start Celery worker (background jobs: image compression, emails…) ──
+echo "► Starting Celery worker ..."
+python -m celery -A celery_app worker \
+  -Q default,emails,inventory,reporting \
+  --concurrency=2 -l warning &
+CELERY_PID=$!
+
 sleep 1
 
 # ── Start Next.js ─────────────────────────────────────────────
@@ -53,8 +60,8 @@ echo ""
 cleanup() {
   echo ""
   echo "Stopping servers..."
-  kill "$DJANGO_PID" "$NEXTJS_PID" 2>/dev/null || true
-  wait "$DJANGO_PID" "$NEXTJS_PID" 2>/dev/null || true
+  kill "$DJANGO_PID" "$NEXTJS_PID" "$CELERY_PID" 2>/dev/null || true
+  wait "$DJANGO_PID" "$NEXTJS_PID" "$CELERY_PID" 2>/dev/null || true
   echo "Done."
   exit 0
 }

@@ -20,6 +20,7 @@ app.conf.task_routes = {
     "apps.notifications.tasks.send_back_in_stock_alert": {"queue": "emails"},
     "apps.notifications.tasks.send_newsletter_email": {"queue": "emails"},
     "apps.products.tasks.process_product_images": {"queue": "inventory"},
+    "apps.products.tasks.compress_product_image": {"queue": "inventory"},
     "apps.products.tasks.bulk_update_inventory": {"queue": "inventory"},
     "apps.products.tasks.generate_sitemap": {"queue": "reporting"},
 }
