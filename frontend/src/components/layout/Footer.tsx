@@ -46,13 +46,16 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand */}
           <div>
-            <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-brand-primary rounded-lg flex items-center justify-center">
-                <span className="text-black font-bold text-sm">H</span>
-              </div>
-              <span className="font-bold text-lg">
-                HEXA<span className="text-brand-secondary">SHOP</span>
-              </span>
+            <Link href="/" className="block mb-4" aria-label="HEXASHOP home">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/og-image.jpg"
+                alt="HEXASHOP — Style That Defines You"
+                width={1200}
+                height={630}
+                loading="lazy"
+                className="w-full max-w-[300px] h-auto rounded-xl border border-brand-border shadow-lg shadow-black/40"
+              />
             </Link>
             <p className="text-sm text-brand-muted leading-relaxed mb-4">
               Premium fashion that defines your style. Quality you can trust, prices you'll love.
