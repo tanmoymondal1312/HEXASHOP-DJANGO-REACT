@@ -118,7 +118,7 @@ export function ProductGallery({ images, productName, colorImageMap = {} }: Prod
               fade ? "opacity-100 scale-100" : "opacity-0 scale-[0.98]"
             )}
             priority
-            unoptimized={currentImg.image.includes("localhost") || currentImg.image.startsWith("/media")}
+            unoptimized={currentImg.image.includes("localhost") || currentImg.image.includes("/media/")}
             placeholder="blur"
             blurDataURL={PLACEHOLDER}
           />
@@ -197,7 +197,7 @@ export function ProductGallery({ images, productName, colorImageMap = {} }: Prod
                   fill
                   sizes="72px"
                   className="object-cover"
-                  unoptimized={img.image.includes("localhost") || img.image.startsWith("/media")}
+                  unoptimized={img.image.includes("localhost") || img.image.includes("/media/")}
                   placeholder="blur"
                   blurDataURL={PLACEHOLDER}
                 />
@@ -235,7 +235,7 @@ export function ProductGallery({ images, productName, colorImageMap = {} }: Prod
               sizes="90vw"
               className="object-contain"
               priority
-              unoptimized={currentImg.image.includes("localhost") || currentImg.image.startsWith("/media")}
+              unoptimized={currentImg.image.includes("localhost") || currentImg.image.includes("/media/")}
             />
           </div>
 
@@ -267,7 +267,7 @@ export function ProductGallery({ images, productName, colorImageMap = {} }: Prod
                     i === active ? "border-brand-primary" : "border-white/20 opacity-50 hover:opacity-80"
                   )}
                 >
-                  <Image src={img.image} alt={`View ${i + 1}`} fill sizes="48px" className="object-cover" unoptimized={img.image.includes("localhost") || img.image.startsWith("/media")} />
+                  <Image src={img.image} alt={`View ${i + 1}`} fill sizes="48px" className="object-cover" unoptimized={img.image.includes("localhost") || img.image.includes("/media/")} />
                 </button>
               ))}
             </div>

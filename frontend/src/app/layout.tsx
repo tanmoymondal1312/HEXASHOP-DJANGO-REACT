@@ -7,6 +7,7 @@ import { Footer } from "@/components/layout/Footer";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { Toaster } from "react-hot-toast";
 import TopLoader from "@/components/ui/TopLoader";
+import SWRegister from "@/components/ui/SWRegister";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 // Luxury serif for the brand wordmark (navbar logo)
@@ -55,6 +56,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className="dark">
       <body className={`${inter.className} ${cinzel.variable} bg-brand-dark text-white antialiased`}>
         <Providers>
+          <SWRegister />
           <TopLoader />
           <Header />
           <main>{children}</main>

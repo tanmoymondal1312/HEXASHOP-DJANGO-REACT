@@ -1,15 +1,19 @@
-const CACHE_NAME = "hexashop-v2";
+const CACHE_NAME = "hexashop-v3";
 const STATIC_ASSETS = ["/", "/shop", "/offline.html"];
-const API_CACHE_NAME = "hexashop-api-v2";
-const IMG_CACHE_NAME = "hexashop-img-v2";
+const API_CACHE_NAME = "hexashop-api-v3";
+const IMG_CACHE_NAME = "hexashop-img-v3";
 
 // Never let the SW handle the staff studio or Next build assets from cache —
 // always go to network so a code change is picked up immediately.
 const NETWORK_ONLY_PREFIXES = ["/studio", "/_next/"];
 
 self.addEventListener("install", (event) => {
+  // Cache each asset individually — one missing file must not abort install
+  // (a failed cache.addAll leaves the SW permanently stuck in "installing").
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+    caches.open(CACHE_NAME).then((cache) =>
+      Promise.allSettled(STATIC_ASSETS.map((url) => cache.add(url)))
+    )
   );
   self.skipWaiting();
 });
