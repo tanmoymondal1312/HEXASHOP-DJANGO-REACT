@@ -331,10 +331,14 @@ def hero_image(request):
     from django.conf import settings
     from apps.store_settings.models import HeroSlide
 
-    # Prefer the configured studio URL (matches the frontend's API host so auth
-    # works); fall back to the request host for other environments.
+    # Prefer the configured studio URL (dev sets HERO_STUDIO_URL to the LAN
+    # host:3000 so auth cookies line up). In production the storefront is
+    # served on THIS same domain by nginx, so a relative link is always right —
+    # never a :3000 port, which isn't publicly exposed.
     studio_url = getattr(settings, "HERO_STUDIO_URL", None) or (
         f"http://{request.get_host().split(':')[0]}:3000/studio/hero"
+        if settings.DEBUG
+        else "/studio/hero"
     )
     return render(request, "admin_panel/hero_image.html", {
         "studio_url": studio_url,
