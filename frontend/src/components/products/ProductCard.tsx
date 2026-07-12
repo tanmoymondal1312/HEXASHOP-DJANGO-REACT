@@ -10,6 +10,7 @@ import { useWishlist } from "@/hooks/useWishlist";
 import { useAuthStore } from "@/store/authStore";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
+import BlurImage from "@/components/ui/BlurImage";
 
 interface ProductCardProps {
   product: Product;
@@ -66,23 +67,13 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
       <div className="relative aspect-square overflow-hidden" style={{ background: "#0d1117" }}>
 
         {imageUrl && !imgError ? (
-          /*
-           * Use a plain <img> tag — not next/image.
-           * next/image's <Image fill unoptimized> can still throw onError for
-           * localhost images in certain Next.js versions because the component
-           * wraps the img in a span with position:absolute that requires an
-           * explicit-sized parent, and the optimiser pipeline still probes the
-           * URL server-side even when unoptimized=true.
-           *
-           * A native <img> has zero middleware in the way: the browser fetches
-           * directly from http://localhost:8000/media/... and it just works.
-           */
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <BlurImage
             src={imageUrl}
             alt={product.name}
-            loading={priority ? "eager" : "lazy"}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            blur={product.primary_image_blur}
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            priority={priority}
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
             onError={() => setImgError(true)}
           />
         ) : (

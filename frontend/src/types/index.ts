@@ -21,6 +21,8 @@ export interface ProductImage {
   alt_text: string;
   sort_order: number;
   is_primary: boolean;
+  /** Tiny base64 LQIP data-URI for blur-up loading */
+  blur_data?: string;
 }
 
 export interface ProductColor {
@@ -77,6 +79,8 @@ export interface Product {
   compare_at_price: string | null;
   discount_percentage: number | null;
   primary_image?: string | null;
+  /** Tiny base64 LQIP data-URI for the primary image */
+  primary_image_blur?: string | null;
   images?: ProductImage[];
   colors?: ProductColor[];
   variants?: ProductVariant[];

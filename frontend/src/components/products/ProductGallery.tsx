@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, X, ZoomIn } from "lucide-react";
 import { cn, resolveImageUrl } from "@/lib/utils";
+import BlurImage from "@/components/ui/BlurImage";
 import type { ProductImage } from "@/types";
 
 interface ProductGalleryProps {
@@ -108,19 +109,17 @@ export function ProductGallery({ images, productName, colorImageMap = {} }: Prod
           className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-brand-surface border border-brand-border group cursor-zoom-in"
           onClick={() => setLightbox(true)}
         >
-          <Image
+          <BlurImage
+            key={currentImg.image}
             src={currentImg.image}
             alt={currentImg.alt_text || productName}
-            fill
+            blur={currentImg.blur_data}
             sizes="(max-width: 768px) 100vw, 50vw"
             className={cn(
               "object-cover transition-all duration-200",
-              fade ? "opacity-100 scale-100" : "opacity-0 scale-[0.98]"
+              fade ? "scale-100" : "scale-[0.98]"
             )}
             priority
-            unoptimized={currentImg.image.includes("localhost") || currentImg.image.includes("/media/")}
-            placeholder="blur"
-            blurDataURL={PLACEHOLDER}
           />
 
           {/* Gradient overlay on hover */}
@@ -199,7 +198,7 @@ export function ProductGallery({ images, productName, colorImageMap = {} }: Prod
                   className="object-cover"
                   unoptimized={img.image.includes("localhost") || img.image.includes("/media/")}
                   placeholder="blur"
-                  blurDataURL={PLACEHOLDER}
+                  blurDataURL={img.blur_data || PLACEHOLDER}
                 />
               </button>
             ))}
@@ -236,6 +235,8 @@ export function ProductGallery({ images, productName, colorImageMap = {} }: Prod
               className="object-contain"
               priority
               unoptimized={currentImg.image.includes("localhost") || currentImg.image.includes("/media/")}
+              placeholder="blur"
+              blurDataURL={currentImg.blur_data || PLACEHOLDER}
             />
           </div>
 

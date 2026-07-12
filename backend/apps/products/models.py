@@ -138,6 +138,12 @@ class ProductImage(TimeStampedModel):
     alt_text = models.CharField(max_length=200, blank=True)
     sort_order = models.PositiveIntegerField(default=0)
     is_primary = models.BooleanField(default=False)
+    blur_data = models.TextField(
+        blank=True,
+        default="",
+        help_text="Tiny base64 LQIP data-URI shown blurred while the real "
+        "image loads. Generated automatically by the Celery image pipeline.",
+    )
 
     class Meta:
         db_table = "product_images"

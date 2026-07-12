@@ -31,6 +31,25 @@ def process_product_images(self, product_id: int) -> None:
         raise self.retry(exc=exc, countdown=60 * (self.request.retries + 1))
 
 
+def _generate_blur_placeholder(pi, img) -> None:
+    """Store a tiny (16px-wide) blurred JPEG as a base64 data-URI on the row.
+    Uses queryset .update() so no post_save signal fires."""
+    import base64
+    from io import BytesIO
+
+    from PIL import Image as PILImage
+
+    from .models import ProductImage
+
+    tiny = img.convert("RGB").copy()
+    tiny.thumbnail((16, 16), PILImage.LANCZOS)
+    buf = BytesIO()
+    tiny.save(buf, "JPEG", quality=40)
+    data_uri = "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode()
+    ProductImage.objects.filter(pk=pi.pk).update(blur_data=data_uri)
+    pi.blur_data = data_uri
+
+
 @shared_task(queue="inventory", bind=True, max_retries=2)
 def compress_product_image(self, image_id: int, target_kb: int = 100) -> str:
     """Compress an uploaded ProductImage down to <= target_kb (JPEG).
@@ -58,8 +77,6 @@ def compress_product_image(self, image_id: int, target_kb: int = 100) -> str:
         original_size = pi.image.size
     except (OSError, ValueError):
         return "unreadable"
-    if original_size <= target_kb * 1024:
-        return f"already-small ({original_size // 1024}KB)"
 
     try:
         with pi.image.open("rb") as f:
@@ -67,6 +84,16 @@ def compress_product_image(self, image_id: int, target_kb: int = 100) -> str:
             img.load()
     except Exception as exc:  # transient storage error → retry
         raise self.retry(exc=exc, countdown=30 * (self.request.retries + 1))
+
+    # ── LQIP blur placeholder — always ensure one exists, even when the
+    #    image is already small enough to skip recompression. A ~16px JPEG
+    #    base64 data-URI (~400 bytes) rides along in API responses so the
+    #    frontend can paint a blurred preview instantly.
+    if not pi.blur_data:
+        _generate_blur_placeholder(pi, img)
+
+    if original_size <= target_kb * 1024:
+        return f"already-small ({original_size // 1024}KB)"
 
     # Flatten transparency onto white; JPEG has no alpha channel.
     if img.mode in ("RGBA", "LA", "P"):

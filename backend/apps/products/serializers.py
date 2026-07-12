@@ -27,7 +27,7 @@ class BrandSerializer(serializers.ModelSerializer):
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImage
-        fields = ("id", "image", "alt_text", "sort_order", "is_primary")
+        fields = ("id", "image", "alt_text", "sort_order", "is_primary", "blur_data")
 
 
 class ProductColorSerializer(serializers.ModelSerializer):
@@ -83,6 +83,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class ProductListSerializer(serializers.ModelSerializer):
     primary_image = serializers.SerializerMethodField()
+    primary_image_blur = serializers.SerializerMethodField()
     first_variant = serializers.SerializerMethodField()
     category_name = serializers.CharField(source="category.name", read_only=True)
     brand_name = serializers.CharField(source="brand.name", read_only=True, default=None)
@@ -92,7 +93,8 @@ class ProductListSerializer(serializers.ModelSerializer):
         model = Product
         fields = (
             "id", "name", "slug", "base_price", "compare_at_price",
-            "discount_percentage", "primary_image", "category_name",
+            "discount_percentage", "primary_image", "primary_image_blur",
+            "category_name",
             "brand_name", "avg_rating", "review_count", "is_featured",
             "first_variant",
         )
@@ -109,13 +111,19 @@ class ProductListSerializer(serializers.ModelSerializer):
             return {"id": v.id, "is_in_stock": v.is_in_stock, "stock": v.stock}
         return None
 
-    def get_primary_image(self, obj) -> str | None:
+    def _primary_image_obj(self, obj):
         images = getattr(obj, "prefetched_images", None)
         if images is None:
-            img = obj.images.filter(is_primary=True).first()
-        else:
-            primary = [i for i in images if i.is_primary]
-            img = primary[0] if primary else (images[0] if images else None)
+            return obj.images.filter(is_primary=True).first()
+        primary = [i for i in images if i.is_primary]
+        return primary[0] if primary else (images[0] if images else None)
+
+    def get_primary_image_blur(self, obj) -> str | None:
+        img = self._primary_image_obj(obj)
+        return (img.blur_data or None) if img else None
+
+    def get_primary_image(self, obj) -> str | None:
+        img = self._primary_image_obj(obj)
         if img and img.image:
             url = img.image.url
             # Build absolute URL so Next.js Image (port 3000) can load from

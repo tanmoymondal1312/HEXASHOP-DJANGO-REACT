@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight, Flame, Heart, Star } from "lucide-react";
 import { WebsiteJsonLd } from "@/components/seo/JsonLd";
@@ -6,6 +5,7 @@ import { resolveImageUrl } from "@/lib/utils";
 import type { Product } from "@/types";
 import HeroSlider from "@/components/hero/HeroSlider";
 import HScroll from "@/components/ui/HScroll";
+import BlurImage from "@/components/ui/BlurImage";
 
 // ─── #7 ISR: revalidate the page every 60 s ───────────────────────────────────
 export const revalidate = 60;
@@ -82,14 +82,13 @@ function ViralCard({ product, priority, delay }: { product: Product; priority?: 
     >
       <div className="hx-viral-img">
         {src ? (
-          <Image
+          <BlurImage
             src={src}
             alt={product.name}
-            fill
+            blur={product.primary_image_blur}
             sizes="(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 20vw"
-            style={{ objectFit: "cover" }}
+            className="object-cover"
             priority={priority}
-            unoptimized={src.includes("localhost") || src.includes("/media/")}
           />
         ) : (
           <div className="hx-img-ph" />
@@ -136,14 +135,13 @@ function FeaturedCard({ product, priority, delay }: { product: Product; priority
     >
       <div className="hx-feat-img">
         {src ? (
-          <Image
+          <BlurImage
             src={src}
             alt={product.name}
-            fill
+            blur={product.primary_image_blur}
             sizes="(max-width: 500px) 50vw, (max-width: 1024px) 33vw, 20vw"
-            style={{ objectFit: "cover" }}
+            className="object-cover"
             priority={priority}
-            unoptimized={src.includes("localhost") || src.includes("/media/")}
           />
         ) : (
           <div className="hx-img-ph" />

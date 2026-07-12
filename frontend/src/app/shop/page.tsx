@@ -7,6 +7,7 @@ import { ProductFilters } from "@/components/products/ProductFilters";
 import { SortSelect } from "./SortSelect";
 import { Pagination } from "./Pagination";
 import { resolveImageUrl } from "@/lib/utils";
+import BlurImage from "@/components/ui/BlurImage";
 import type { Category, Product, PaginatedResponse } from "@/types";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -157,13 +158,13 @@ function ShopProductCard({ product, priority }: { product: Product; priority?: b
           style={{ aspectRatio: "4/3", background: "#0d1117" }}
         >
           {src ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <BlurImage
               src={src}
               alt={product.name}
-              loading={priority ? "eager" : "lazy"}
-              decoding="async"
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              blur={product.primary_image_blur}
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              priority={priority}
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
             />
           ) : (
             <div
