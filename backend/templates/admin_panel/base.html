@@ -6,7 +6,8 @@
   <title>{% block title %}Dashboard{% endblock %} · HEXASHOP Admin</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzQiIGhlaWdodD0iMzgiIHZpZXdCb3g9IjAgMCAzNCAzOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iaHhHb2xkIiB4MT0iMCIgeTE9IjAiIHgyPSIzNCIgeTI9IjM4IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNmNWQ3NzgiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSI0NSUiIHN0b3AtY29sb3I9IiNlOWI5NDkiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSI3MCUiIHN0b3AtY29sb3I9IiNmZmYzYzQiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjYzk5NzFjIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8IS0tIGRhcmsgcGxhdGUgc28gdGhlIGNyZXN0IHJlYWRzIG9uIGFueSB0YWIgYmFja2dyb3VuZCAtLT4KICA8cG9seWdvbiBwb2ludHM9IjE3LDAuNSAzMy41LDkuNyAzMy41LDI4LjMgMTcsMzcuNSAwLjUsMjguMyAwLjUsOS43IiBmaWxsPSIjMEEwRTFBIi8+CiAgPCEtLSBvdXRlciBjcmVzdCAtLT4KICA8cG9seWdvbiBwb2ludHM9IjE3LDEgMzMsMTAgMzMsMjggMTcsMzcgMSwyOCAxLDEwIiBmaWxsPSJub25lIiBzdHJva2U9InVybCgjaHhHb2xkKSIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPCEtLSBpbm5lciBjcmVzdCAtLT4KICA8cG9seWdvbiBwb2ludHM9IjE3LDUuNSAyOC41LDEyIDI4LjUsMjYgMTcsMzIuNSA1LjUsMjYgNS41LDEyIiBmaWxsPSJyZ2JhKDIzMywxODUsNzMsMC4wOCkiIHN0cm9rZT0icmdiYSgyMzMsMTg1LDczLDAuNSkiIHN0cm9rZS13aWR0aD0iMC45Ii8+CiAgPHRleHQgeD0iMTciIHk9IjI1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ1cmwoI2h4R29sZCkiIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSI3MDAiIGZvbnQtZmFtaWx5PSJDaW56ZWwsIEdlb3JnaWEsICdUaW1lcyBOZXcgUm9tYW4nLCBzZXJpZiI+SDwvdGV4dD4KPC9zdmc+Cg==">
 
   <style>
     /* ── Base ──────────────────────────────────────────────────────────── */
@@ -52,8 +53,14 @@
     }
     .sidebar-logo a { text-decoration: none; display: flex; align-items: center; gap: 0.625rem; }
     .logo-hex { width: 34px; height: 34px; }
-    .logo-text { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.02em; }
-    .logo-text span { color: var(--blue); }
+    .logo-text {
+      font-family: 'Cinzel', Georgia, serif; font-size: 1.02rem; font-weight: 700;
+      letter-spacing: 0.13em; padding-top: 2px;
+      background: linear-gradient(100deg,#f5d778 0%,#e9b949 22%,#fff3c4 42%,#e9b949 58%,#c9971c 80%,#f5d778 100%);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; color: transparent;
+    }
+    .logo-hex { filter: drop-shadow(0 0 6px rgba(233,185,73,0.35)); }
 
     .sidebar-section { padding: 1rem 0.875rem 0; }
     .sidebar-label {
@@ -312,11 +319,15 @@
     <div class="sidebar-logo">
       <a href="{% url 'admin_panel:dashboard' %}">
         <svg class="logo-hex" viewBox="0 0 34 38" fill="none">
-          <polygon points="17,1 33,10 33,28 17,37 1,28 1,10" fill="none" stroke="#f5a623" stroke-width="1.8"/>
-          <polygon points="17,6 28,12.5 28,25.5 17,32 6,25.5 6,12.5" fill="rgba(245,166,35,0.08)" stroke="rgba(245,166,35,0.35)" stroke-width="1"/>
-          <text x="17" y="23" text-anchor="middle" fill="#f5a623" font-size="13" font-weight="800" font-family="Inter">H</text>
+          <defs><linearGradient id="pnlGold" x1="0" y1="0" x2="34" y2="38" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#f5d778"/><stop offset="45%" stop-color="#e9b949"/>
+            <stop offset="70%" stop-color="#fff3c4"/><stop offset="100%" stop-color="#c9971c"/>
+          </linearGradient></defs>
+          <polygon points="17,1 33,10 33,28 17,37 1,28 1,10" fill="none" stroke="url(#pnlGold)" stroke-width="1.6"/>
+          <polygon points="17,5.5 28.5,12 28.5,26 17,32.5 5.5,26 5.5,12" fill="rgba(233,185,73,0.07)" stroke="rgba(233,185,73,0.45)" stroke-width="0.8"/>
+          <text x="17" y="24" text-anchor="middle" fill="url(#pnlGold)" font-size="14" font-weight="700" font-family="Cinzel, Georgia, serif">H</text>
         </svg>
-        <span class="logo-text">HEXA<span>SHOP</span></span>
+        <span class="logo-text">HEXASHOP</span>
       </a>
     </div>
 
