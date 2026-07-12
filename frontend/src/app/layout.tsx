@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Cinzel } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { Header } from "@/components/layout/Header";
@@ -9,6 +9,13 @@ import { Toaster } from "react-hot-toast";
 import TopLoader from "@/components/ui/TopLoader";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
+// Luxury serif for the brand wordmark (navbar logo)
+const cinzel = Cinzel({
+  subsets: ["latin"],
+  weight: ["700", "800"],
+  display: "swap",
+  variable: "--font-cinzel",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://hexashop.com"),
@@ -46,7 +53,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.className} bg-brand-dark text-white antialiased`}>
+      <body className={`${inter.className} ${cinzel.variable} bg-brand-dark text-white antialiased`}>
         <Providers>
           <TopLoader />
           <Header />

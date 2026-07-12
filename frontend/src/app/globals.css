@@ -650,3 +650,34 @@ input[type="search"]::-webkit-search-results-decoration {
 }
 @media (min-width:768px)  { .hx-arrow { width:46px; height:46px; } .hx-arrow-left{left:1.25rem;} .hx-arrow-right{right:1.25rem;} }
 @media (min-width:1280px) { .hx-arrow-left{left:2rem;} .hx-arrow-right{right:2rem;} }
+
+/* ══ Royal-serif gold brand lockup (navbar logo) ═════════════ */
+.hx-brand { gap:0.55rem; -webkit-tap-highlight-color:transparent; }
+.hx-brand-hex {
+  filter:drop-shadow(0 0 6px rgba(233,185,73,0.35));
+  transition:filter 0.3s ease, transform 0.3s ease;
+}
+.hx-brand:hover .hx-brand-hex {
+  filter:drop-shadow(0 0 10px rgba(233,185,73,0.6));
+  transform:scale(1.06);
+}
+.hx-brand-word {
+  font-family:var(--font-cinzel), Georgia, serif;
+  font-weight:700;
+  font-size:1.02rem;               /* mobile — always visible */
+  letter-spacing:0.13em;
+  line-height:1;
+  padding-top:2px;                  /* optical alignment with crest */
+  background:linear-gradient(100deg,
+    #f5d778 0%, #e9b949 22%, #fff3c4 42%, #e9b949 58%, #c9971c 80%, #f5d778 100%);
+  background-size:220% auto;
+  background-position:0% center;
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent; color:transparent;
+  white-space:nowrap;
+  transition:background-position 0.9s ease;
+}
+@media (min-width:640px)  { .hx-brand-word { font-size:1.22rem; letter-spacing:0.16em; } }
+@media (min-width:1024px) { .hx-brand-word { font-size:1.3rem; } }
+/* champagne shimmer sweep on hover */
+.hx-brand:hover .hx-brand-word { background-position:100% center; }

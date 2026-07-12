@@ -118,20 +118,28 @@ export function Header() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center h-16 gap-3">
 
-            {/* ── Hexagon Logo ───────────────────────────────────────── */}
-            <Link href="/" className="flex items-center gap-2 flex-shrink-0 group">
-              <svg width="34" height="38" viewBox="0 0 34 38" fill="none"
-                className="group-hover:scale-105 transition-transform duration-200">
+            {/* ── Royal-serif gold brand lockup ───────────────────────── */}
+            <Link href="/" className="hx-brand flex items-center flex-shrink-0 group" aria-label="HEXASHOP home">
+              <svg width="32" height="36" viewBox="0 0 34 38" fill="none" className="hx-brand-hex">
+                <defs>
+                  <linearGradient id="hxGold" x1="0" y1="0" x2="34" y2="38" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#f5d778" />
+                    <stop offset="45%" stopColor="#e9b949" />
+                    <stop offset="70%" stopColor="#fff3c4" />
+                    <stop offset="100%" stopColor="#c9971c" />
+                  </linearGradient>
+                </defs>
+                {/* outer crest */}
                 <polygon points="17,1 33,10 33,28 17,37 1,28 1,10"
-                  fill="none" stroke="#F5A623" strokeWidth="1.8" />
-                <polygon points="17,6 28,12.5 28,25.5 17,32 6,25.5 6,12.5"
-                  fill="rgba(245,166,35,0.08)" stroke="rgba(245,166,35,0.35)" strokeWidth="1" />
-                <text x="17" y="23" textAnchor="middle" fill="#F5A623"
-                  fontSize="13" fontWeight="800" fontFamily="Inter, sans-serif">H</text>
+                  fill="none" stroke="url(#hxGold)" strokeWidth="1.6" />
+                {/* inner crest */}
+                <polygon points="17,5.5 28.5,12 28.5,26 17,32.5 5.5,26 5.5,12"
+                  fill="rgba(233,185,73,0.07)" stroke="rgba(233,185,73,0.45)" strokeWidth="0.8" />
+                <text x="17" y="24" textAnchor="middle" fill="url(#hxGold)"
+                  fontSize="14" fontWeight="700"
+                  fontFamily="var(--font-cinzel), Georgia, serif">H</text>
               </svg>
-              <span className="font-black text-lg tracking-tight hidden sm:block">
-                HEXA<span className="text-brand-secondary">SHOP</span>
-              </span>
+              <span className="hx-brand-word">HEXASHOP</span>
             </Link>
 
             {/* ── Desktop nav ────────────────────────────────────────── */}
