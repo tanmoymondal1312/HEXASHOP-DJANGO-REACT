@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict aBhEfWmON1Zm8i5MC3zIri58rEafPzVvl61F1HciVAogylydCEvHpbXRhAcxv3a
+\restrict od8LSZkt9fGhE1V0ccW1TcZRtb6BriGQGAvK4caB7Lzn5stJblzjnpUcDWEVynT
 
 -- Dumped from database version 16.14 (Ubuntu 16.14-0ubuntu0.24.04.1)
 -- Dumped by pg_dump version 16.14 (Ubuntu 16.14-0ubuntu0.24.04.1)
@@ -6796,6 +6796,44 @@ COPY public.admin_panel_pageview (id, path, ip, "timestamp") FROM stdin;
 5349	/api/v1/cart/	192.168.0.110	2026-07-10 16:13:30.822158+06
 5350	/api/v1/products/categories/	192.168.0.110	2026-07-10 16:13:30.822302+06
 5351	/api/v1/products/categories/	192.168.0.110	2026-07-10 16:13:30.84502+06
+5352	/api/v1/settings/hero-slides/	192.168.0.110	2026-07-11 18:31:55.926123+06
+5353	/api/v1/settings/hero-slides/	192.168.0.110	2026-07-11 18:31:55.927342+06
+5354	/api/v1/settings/	192.168.0.110	2026-07-11 18:31:55.954484+06
+5355	/api/v1/products/viral/	192.168.0.110	2026-07-11 18:31:56.044221+06
+5356	/api/v1/products/featured/	192.168.0.110	2026-07-11 18:31:56.046774+06
+5357	/api/v1/cart/	192.168.0.110	2026-07-11 18:32:14.802496+06
+5358	/api/v1/settings/	192.168.0.110	2026-07-11 18:32:14.80428+06
+5359	/api/v1/products/categories/	192.168.0.110	2026-07-11 18:32:14.843097+06
+5360	/api/v1/products/categories/	192.168.0.110	2026-07-11 18:32:14.847516+06
+5361	/api/v1/cart/	192.168.0.110	2026-07-11 18:32:15.927769+06
+5362	/api/v1/products/categories/	192.168.0.110	2026-07-11 18:32:15.928437+06
+5363	/api/v1/products/categories/	192.168.0.110	2026-07-11 18:32:15.941012+06
+5364	/api/v1/products/categories/	192.168.0.110	2026-07-11 18:46:07.468102+06
+5365	/api/v1/products/	192.168.0.110	2026-07-11 18:46:07.496402+06
+5366	/api/v1/cart/	192.168.0.110	2026-07-11 18:46:08.001199+06
+5367	/api/v1/products/categories/	192.168.0.110	2026-07-11 18:46:08.001339+06
+5368	/api/v1/settings/	192.168.0.110	2026-07-11 18:46:08.003295+06
+5369	/api/v1/products/categories/	192.168.0.110	2026-07-11 18:46:08.014343+06
+5370	/api/v1/settings/	192.168.0.110	2026-07-11 18:46:10.424515+06
+5371	/api/v1/products/featured/	192.168.0.110	2026-07-11 18:46:10.426766+06
+5372	/api/v1/settings/hero-slides/	192.168.0.110	2026-07-11 18:46:10.428531+06
+5373	/api/v1/products/viral/	192.168.0.110	2026-07-11 18:46:10.429508+06
+5375	/api/v1/products/categories/	192.168.0.110	2026-07-11 18:46:10.919209+06
+5374	/api/v1/cart/	192.168.0.110	2026-07-11 18:46:10.919055+06
+5376	/api/v1/products/categories/	192.168.0.110	2026-07-11 18:46:10.941157+06
+5377	/api/v1/settings/hero-slides/	192.168.0.110	2026-07-11 18:49:05.198513+06
+5378	/api/v1/settings/	192.168.0.110	2026-07-11 18:49:05.202388+06
+5379	/api/v1/products/viral/	192.168.0.110	2026-07-11 18:49:05.313648+06
+5380	/api/v1/products/featured/	192.168.0.110	2026-07-11 18:49:05.317844+06
+5383	/api/v1/cart/	192.168.0.110	2026-07-11 18:49:05.821284+06
+5381	/api/v1/products/categories/	192.168.0.110	2026-07-11 18:49:05.81804+06
+5387	/api/v1/cart/	192.168.0.110	2026-07-11 18:49:08.082949+06
+5389	/api/v1/products/categories/	192.168.0.110	2026-07-11 18:49:08.098582+06
+5382	/api/v1/settings/	192.168.0.110	2026-07-11 18:49:05.820768+06
+5384	/api/v1/products/categories/	192.168.0.110	2026-07-11 18:49:05.84174+06
+5385	/api/v1/products/categories/	192.168.0.110	2026-07-11 18:49:07.678142+06
+5386	/api/v1/products/	192.168.0.110	2026-07-11 18:49:07.695944+06
+5388	/api/v1/products/categories/	192.168.0.110	2026-07-11 18:49:08.094236+06
 \.
 
 
@@ -7639,52 +7677,36 @@ COPY public.product_colors (id, created_at, updated_at, name, hex_code, sort_ord
 --
 
 COPY public.product_images (id, created_at, updated_at, image, alt_text, sort_order, is_primary, product_id) FROM stdin;
-850	2026-05-11 18:27:08.683509+06	2026-05-11 18:27:08.683516+06	products/Regular_Fit_Bengal_Stripe_Templeton_Formal_Shirt_Blue.webp	Regular Fit Bengal Stripe Templeton Formal Shirt Blue	0	t	434
 851	2026-05-11 18:27:08.688824+06	2026-05-11 18:27:08.688832+06	products/Stylist_Watch_For_Men.webp	Stylist Watch For Men	0	t	435
-852	2026-05-11 18:27:08.697051+06	2026-05-11 18:27:08.697058+06	products/Womens_Saree.webp	Women's Saree	0	t	436
-853	2026-05-11 18:27:08.701968+06	2026-05-11 18:27:08.701977+06	products/Womens_Saree-White.webp	Women's Saree White	0	t	437
 854	2026-05-11 18:27:08.716547+06	2026-05-11 18:27:08.716555+06	products/Chic_Shoulder_Bags_for_Women_in_Bangladesh__Patchee_BD.webp	Chic Shoulder Bag for Women	0	t	438
 855	2026-05-11 18:27:08.721687+06	2026-05-11 18:27:08.721694+06	products/Chic_Shoulder_Bags_for_Women_in_Bangladesh__Patchee_BD_Brown.webp	Chic Shoulder Bag for Women Brown	0	t	439
-856	2026-05-11 18:27:08.726705+06	2026-05-11 18:27:08.726711+06	products/Wide-leg_High-Waist_Denim.webp	Wide-Leg High-Waist Denim Jeans	0	t	440
-857	2026-05-11 18:27:08.731701+06	2026-05-11 18:27:08.731707+06	products/Wide-leg_High-Waist_Denim_Black.webp	Wide-Leg High-Waist Denim Jeans Black	0	t	441
-858	2026-05-11 18:39:06.733657+06	2026-05-11 18:39:06.733665+06	products/keep-this_VBjUmwB.jpg	Black Chunky Knit Sneakers	0	t	442
 859	2026-05-11 18:39:06.74133+06	2026-05-11 18:39:06.741339+06	products/keep-this1_JJdkqrK.jpg	Velvet Mary Jane Ballet Flats	0	t	443
 860	2026-05-11 18:39:06.747889+06	2026-05-11 18:39:06.747896+06	products/keep-this2_l49pTuQ.jpg	Studded Pointed-Toe Ballet Flats	0	t	444
 861	2026-05-11 18:39:06.753379+06	2026-05-11 18:39:06.753387+06	products/keep-this-6_UuZ7Pv5.jpg	Double-Breasted Wool Blazer	0	t	445
 862	2026-05-11 18:39:06.760687+06	2026-05-11 18:39:06.760695+06	products/keep_this_7.jpg	Oversized White Leather Sneakers	0	t	446
 899	2026-07-10 15:39:41.841178+06	2026-07-10 15:39:41.841185+06	products/navy-suede-court-pump.jpg	Navy Suede Court Pump	0	t	478
-849	2026-05-11 18:27:08.673978+06	2026-05-11 18:27:08.674008+06	products/Regular_Fit_Bengal_Stripe_Templeton_Formal_Shirt.webp	Regular Fit Bengal Stripe Templeton Formal Shirt	0	t	433
+863	2026-05-11 18:39:06.766492+06	2026-05-11 18:39:06.7665+06	products/keep-this89_jO0eA6v_FLmZx7W.jpg	Belted Monogram Print Midi Dress	0	t	447
 900	2026-07-10 15:39:41.849906+06	2026-07-10 15:39:41.849913+06	products/bordeaux-platform-sandal.jpg	Bordeaux Platform Sandal	0	t	479
-901	2026-07-10 15:39:41.8581+06	2026-07-10 15:39:41.858109+06	products/ivory-lace-bridal-heel.jpg	Ivory Lace Bridal Heel	0	t	480
 902	2026-07-10 15:39:41.865811+06	2026-07-10 15:39:41.865818+06	products/crimson-racer-knit.jpg	Crimson Racer Knit	0	t	481
 868	2026-05-22 10:16:38.724413+06	2026-05-22 10:16:38.724422+06	products/images_1.jpeg	Belted Monogram Print Midi Dress	999	f	447
-863	2026-05-11 18:39:06.766492+06	2026-05-11 18:39:06.7665+06	products/keep-this89_jO0eA6v.jpg	Belted Monogram Print Midi Dress	0	t	447
+850	2026-05-11 18:27:08.683509+06	2026-05-11 18:27:08.683516+06	products/Regular_Fit_Bengal_Stripe_Templeton_Formal_Shirt_Blue.jpg	Regular Fit Bengal Stripe Templeton Formal Shirt Blue	0	t	434
 869	2026-07-10 15:39:41.678447+06	2026-07-10 15:39:41.678456+06	products/heritage-slim-rose-gold-watch.jpg	Héritage Slim Rose-Gold Watch	0	t	448
-870	2026-07-10 15:39:41.686875+06	2026-07-10 15:39:41.686883+06	products/rose-chronograph-40mm.jpg	Rosé Chronograph 40mm	0	t	449
 871	2026-07-10 15:39:41.691795+06	2026-07-10 15:39:41.691803+06	products/classic-silver-chronograph.jpg	Classic Silver Chronograph	0	t	450
-872	2026-07-10 15:39:41.69686+06	2026-07-10 15:39:41.696868+06	products/grand-reserve-automatic.jpg	Grand Réserve Automatic	0	t	451
 873	2026-07-10 15:39:41.702556+06	2026-07-10 15:39:41.702564+06	products/midnight-steel-executive.jpg	Midnight Steel Executive	0	t	452
 874	2026-07-10 15:39:41.708029+06	2026-07-10 15:39:41.708037+06	products/deep-sea-professional-diver.jpg	Deep-Sea Professional Diver	0	t	453
-875	2026-07-10 15:39:41.713457+06	2026-07-10 15:39:41.713465+06	products/scarlet-top-handle-mini-bag.jpg	Scarlet Top-Handle Mini Bag	0	t	454
 876	2026-07-10 15:39:41.718351+06	2026-07-10 15:39:41.718358+06	products/matelasse-camera-bag.jpg	Matelassé Camera Bag	0	t	455
-877	2026-07-10 15:39:41.724142+06	2026-07-10 15:39:41.724152+06	products/jardin-embroidered-satchel.jpg	Jardin Embroidered Satchel	0	t	456
 878	2026-07-10 15:39:41.730201+06	2026-07-10 15:39:41.730208+06	products/blush-chain-crossbody.jpg	Blush Chain Crossbody	0	t	457
 879	2026-07-10 15:39:41.73478+06	2026-07-10 15:39:41.734787+06	products/pearl-stud-shoulder-bag.jpg	Pearl-Stud Shoulder Bag	0	t	458
-880	2026-07-10 15:39:41.739599+06	2026-07-10 15:39:41.739607+06	products/cognac-doctor-bag.jpg	Cognac Doctor Bag	0	t	459
 881	2026-07-10 15:39:41.744155+06	2026-07-10 15:39:41.744162+06	products/croc-embossed-micro-tote.jpg	Croc-Embossed Micro Tote	0	t	460
 882	2026-07-10 15:39:41.74963+06	2026-07-10 15:39:41.749637+06	products/n5-eau-de-parfum-100ml.jpg	N°5 Eau de Parfum 100ml	0	t	461
 883	2026-07-10 15:39:41.756053+06	2026-07-10 15:39:41.756062+06	products/bleu-intense-pour-homme.jpg	Bleu Intense Pour Homme	0	t	462
 903	2026-07-10 15:39:41.873956+06	2026-07-10 15:39:41.873965+06	products/air-heritage-87.jpg	Air Heritage 87	0	t	482
-884	2026-07-10 15:39:41.762198+06	2026-07-10 15:39:41.762205+06	products/emerald-eros-intense.jpg	Emerald Eros Intense	0	t	463
 885	2026-07-10 15:39:41.7673+06	2026-07-10 15:39:41.767308+06	products/noir-absolu-extrait.jpg	Noir Absolu Extrait	0	t	464
 886	2026-07-10 15:39:41.773546+06	2026-07-10 15:39:41.773555+06	products/mademoiselle-rose-gold.jpg	Mademoiselle Rose Gold	0	t	465
-887	2026-07-10 15:39:41.77939+06	2026-07-10 15:39:41.779397+06	products/ambre-imperial.jpg	Ambre Impérial	0	t	466
 888	2026-07-10 15:39:41.784488+06	2026-07-10 15:39:41.784495+06	products/akoya-pearl-strand-necklace.jpg	Akoya Pearl Strand Necklace	0	t	467
 889	2026-07-10 15:39:41.789025+06	2026-07-10 15:39:41.789033+06	products/solitaire-promise-ring.jpg	Solitaire Promise Ring	0	t	468
 890	2026-07-10 15:39:41.793397+06	2026-07-10 15:39:41.793405+06	products/rose-gold-vine-bracelet.jpg	Rose-Gold Vine Bracelet	0	t	469
-891	2026-07-10 15:39:41.798457+06	2026-07-10 15:39:41.798465+06	products/chunky-curb-chain-bracelet.jpg	Chunky Curb Chain Bracelet	0	t	470
 892	2026-07-10 15:39:41.803281+06	2026-07-10 15:39:41.803288+06	products/glacier-diamond-tennis-bracelet.jpg	Glacier Diamond Tennis Bracelet	0	t	471
-893	2026-07-10 15:39:41.808507+06	2026-07-10 15:39:41.808514+06	products/sapphire-drop-earrings.jpg	Sapphire Drop Earrings	0	t	472
 894	2026-07-10 15:39:41.814216+06	2026-07-10 15:39:41.814223+06	products/wayfarer-classic-noir.jpg	Wayfarer Classic Noir	0	t	473
 895	2026-07-10 15:39:41.819084+06	2026-07-10 15:39:41.819091+06	products/round-gold-heritage.jpg	Round Gold Heritage	0	t	474
 896	2026-07-10 15:39:41.824418+06	2026-07-10 15:39:41.824431+06	products/aviator-copper-fade.jpg	Aviator Copper Fade	0	t	475
@@ -7694,17 +7716,33 @@ COPY public.product_images (id, created_at, updated_at, image, alt_text, sort_or
 905	2026-07-10 15:39:41.890519+06	2026-07-10 15:39:41.890527+06	products/court-legend-high-85.jpg	Court Legend High '85	0	t	484
 906	2026-07-10 15:39:41.898749+06	2026-07-10 15:39:41.898757+06	products/chestnut-dress-boot.jpg	Chestnut Dress Boot	0	t	485
 907	2026-07-10 15:39:41.9068+06	2026-07-10 15:39:41.906808+06	products/midnight-leather-derby.jpg	Midnight Leather Derby	0	t	486
-908	2026-07-10 15:39:41.914586+06	2026-07-10 15:39:41.914593+06	products/scarlet-flow-evening-gown.jpg	Scarlet Flow Evening Gown	0	t	487
-909	2026-07-10 15:39:41.921806+06	2026-07-10 15:39:41.921815+06	products/azure-slit-maxi-dress.jpg	Azure Slit Maxi Dress	0	t	488
-910	2026-07-10 15:39:41.929547+06	2026-07-10 15:39:41.929555+06	products/ivory-off-shoulder-mini.jpg	Ivory Off-Shoulder Mini	0	t	489
 911	2026-07-10 15:39:41.936595+06	2026-07-10 15:39:41.936603+06	products/aubergine-velvet-bodycon.jpg	Aubergine Velvet Bodycon	0	t	490
-912	2026-07-10 15:39:41.94403+06	2026-07-10 15:39:41.944038+06	products/noir-moto-leather-jacket.jpg	Noir Moto Leather Jacket	0	t	491
-913	2026-07-10 15:39:41.950989+06	2026-07-10 15:39:41.950997+06	products/cognac-suede-bomber.jpg	Cognac Suede Bomber	0	t	492
-914	2026-07-10 15:39:41.958114+06	2026-07-10 15:39:41.958122+06	products/sartorial-check-three-piece.jpg	Sartorial Check Three-Piece	0	t	493
-915	2026-07-10 15:39:41.964965+06	2026-07-10 15:39:41.964972+06	products/navy-boardroom-suit.jpg	Navy Boardroom Suit	0	t	494
-916	2026-07-10 15:39:41.976023+06	2026-07-10 15:39:41.97606+06	products/azure-wool-fedora.jpg	Azure Wool Fedora	0	t	495
+852	2026-05-11 18:27:08.697051+06	2026-05-11 18:27:08.697058+06	products/Womens_Saree.jpg	Women's Saree	0	t	436
+858	2026-05-11 18:39:06.733657+06	2026-05-11 18:39:06.733665+06	products/keep-this_VBjUmwB_MFEUrFC.jpg	Black Chunky Knit Sneakers	0	t	442
+856	2026-05-11 18:27:08.726705+06	2026-05-11 18:27:08.726711+06	products/Wide-leg_High-Waist_Denim.jpg	Wide-Leg High-Waist Denim Jeans	0	t	440
+901	2026-07-10 15:39:41.8581+06	2026-07-10 15:39:41.858109+06	products/ivory-lace-bridal-heel_kmOSX6R.jpg	Ivory Lace Bridal Heel	0	t	480
+849	2026-05-11 18:27:08.673978+06	2026-05-11 18:27:08.674008+06	products/Regular_Fit_Bengal_Stripe_Templeton_Formal_Shirt.jpg	Regular Fit Bengal Stripe Templeton Formal Shirt	0	t	433
+870	2026-07-10 15:39:41.686875+06	2026-07-10 15:39:41.686883+06	products/rose-chronograph-40mm_Za611k7.jpg	Rosé Chronograph 40mm	0	t	449
+875	2026-07-10 15:39:41.713457+06	2026-07-10 15:39:41.713465+06	products/scarlet-top-handle-mini-bag_uKChzt4.jpg	Scarlet Top-Handle Mini Bag	0	t	454
+872	2026-07-10 15:39:41.69686+06	2026-07-10 15:39:41.696868+06	products/grand-reserve-automatic_ltVTwo1.jpg	Grand Réserve Automatic	0	t	451
+880	2026-07-10 15:39:41.739599+06	2026-07-10 15:39:41.739607+06	products/cognac-doctor-bag_GAhJx0t.jpg	Cognac Doctor Bag	0	t	459
+877	2026-07-10 15:39:41.724142+06	2026-07-10 15:39:41.724152+06	products/jardin-embroidered-satchel_XVkc3E9.jpg	Jardin Embroidered Satchel	0	t	456
+884	2026-07-10 15:39:41.762198+06	2026-07-10 15:39:41.762205+06	products/emerald-eros-intense_K6nWNen.jpg	Emerald Eros Intense	0	t	463
+887	2026-07-10 15:39:41.77939+06	2026-07-10 15:39:41.779397+06	products/ambre-imperial_Ql0GsCK.jpg	Ambre Impérial	0	t	466
+891	2026-07-10 15:39:41.798457+06	2026-07-10 15:39:41.798465+06	products/chunky-curb-chain-bracelet_NIMG3AH.jpg	Chunky Curb Chain Bracelet	0	t	470
+893	2026-07-10 15:39:41.808507+06	2026-07-10 15:39:41.808514+06	products/sapphire-drop-earrings_Q4YIwZK.jpg	Sapphire Drop Earrings	0	t	472
+908	2026-07-10 15:39:41.914586+06	2026-07-10 15:39:41.914593+06	products/scarlet-flow-evening-gown_hdfLt79.jpg	Scarlet Flow Evening Gown	0	t	487
+910	2026-07-10 15:39:41.929547+06	2026-07-10 15:39:41.929555+06	products/ivory-off-shoulder-mini_Nh9xYbI.jpg	Ivory Off-Shoulder Mini	0	t	489
+912	2026-07-10 15:39:41.94403+06	2026-07-10 15:39:41.944038+06	products/noir-moto-leather-jacket_2gxH0jw.jpg	Noir Moto Leather Jacket	0	t	491
 917	2026-07-10 15:39:41.994781+06	2026-07-10 15:39:41.994816+06	products/ebene-leather-billfold.jpg	Ébène Leather Billfold	0	t	496
 918	2026-07-10 15:39:42.012133+06	2026-07-10 15:39:42.01216+06	products/saddle-stitch-leather-belt.jpg	Saddle-Stitch Leather Belt	0	t	497
+853	2026-05-11 18:27:08.701968+06	2026-05-11 18:27:08.701977+06	products/Womens_Saree-White.jpg	Women's Saree White	0	t	437
+857	2026-05-11 18:27:08.731701+06	2026-05-11 18:27:08.731707+06	products/Wide-leg_High-Waist_Denim_Black.jpg	Wide-Leg High-Waist Denim Jeans Black	0	t	441
+909	2026-07-10 15:39:41.921806+06	2026-07-10 15:39:41.921815+06	products/azure-slit-maxi-dress_4vrZ2eR.jpg	Azure Slit Maxi Dress	0	t	488
+913	2026-07-10 15:39:41.950989+06	2026-07-10 15:39:41.950997+06	products/cognac-suede-bomber_8DdKU23.jpg	Cognac Suede Bomber	0	t	492
+914	2026-07-10 15:39:41.958114+06	2026-07-10 15:39:41.958122+06	products/sartorial-check-three-piece_uA5DiU8.jpg	Sartorial Check Three-Piece	0	t	493
+915	2026-07-10 15:39:41.964965+06	2026-07-10 15:39:41.964972+06	products/navy-boardroom-suit_ML8Fsel.jpg	Navy Boardroom Suit	0	t	494
+916	2026-07-10 15:39:41.976023+06	2026-07-10 15:39:41.97606+06	products/azure-wool-fedora_rgVrPqu.jpg	Azure Wool Fedora	0	t	495
 \.
 
 
@@ -8091,7 +8129,7 @@ SELECT pg_catalog.setval('public.addresses_id_seq', 1, false);
 -- Name: admin_panel_pageview_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.admin_panel_pageview_id_seq', 5351, true);
+SELECT pg_catalog.setval('public.admin_panel_pageview_id_seq', 5389, true);
 
 
 --
@@ -8287,7 +8325,7 @@ SELECT pg_catalog.setval('public.product_colors_id_seq', 17, true);
 -- Name: product_images_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.product_images_id_seq', 918, true);
+SELECT pg_catalog.setval('public.product_images_id_seq', 919, true);
 
 
 --
@@ -10054,5 +10092,5 @@ ALTER TABLE ONLY public.wishlists
 -- PostgreSQL database dump complete
 --
 
-\unrestrict aBhEfWmON1Zm8i5MC3zIri58rEafPzVvl61F1HciVAogylydCEvHpbXRhAcxv3a
+\unrestrict od8LSZkt9fGhE1V0ccW1TcZRtb6BriGQGAvK4caB7Lzn5stJblzjnpUcDWEVynT
 
