@@ -1,0 +1,17 @@
+<svg width="34" height="38" viewBox="0 0 34 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="hxGold" x1="0" y1="0" x2="34" y2="38" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#f5d778"/>
+      <stop offset="45%" stop-color="#e9b949"/>
+      <stop offset="70%" stop-color="#fff3c4"/>
+      <stop offset="100%" stop-color="#c9971c"/>
+    </linearGradient>
+  </defs>
+  <!-- dark plate so the crest reads on any tab background -->
+  <polygon points="17,0.5 33.5,9.7 33.5,28.3 17,37.5 0.5,28.3 0.5,9.7" fill="#0A0E1A"/>
+  <!-- outer crest -->
+  <polygon points="17,1 33,10 33,28 17,37 1,28 1,10" fill="none" stroke="url(#hxGold)" stroke-width="2"/>
+  <!-- inner crest -->
+  <polygon points="17,5.5 28.5,12 28.5,26 17,32.5 5.5,26 5.5,12" fill="rgba(233,185,73,0.08)" stroke="rgba(233,185,73,0.5)" stroke-width="0.9"/>
+  <text x="17" y="25" text-anchor="middle" fill="url(#hxGold)" font-size="16" font-weight="700" font-family="Cinzel, Georgia, 'Times New Roman', serif">H</text>
+</svg>
