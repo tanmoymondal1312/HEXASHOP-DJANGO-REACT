@@ -69,9 +69,15 @@ class FirebaseLoginSerializer(serializers.Serializer):
     def validate(self, attrs):
         id_token = attrs["id_token"]
         try:
-            from firebase_admin import auth as fb_auth, initialize_app, _apps
+            from firebase_admin import auth as fb_auth, _apps, initialize_app, credentials
             if not _apps:
-                initialize_app()
+                import os
+                cred_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
+                if cred_path and os.path.exists(cred_path):
+                    cred = credentials.Certificate(cred_path)
+                    initialize_app(cred)
+                else:
+                    initialize_app()
             decoded = fb_auth.verify_id_token(id_token)
         except ImportError:
             raise serializers.ValidationError(
