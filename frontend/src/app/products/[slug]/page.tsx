@@ -2,13 +2,14 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
-  Shield, Truck, RefreshCcw, Package, ChevronRight, Star
+  Shield, Truck, RefreshCcw, Package, ChevronRight
 } from "lucide-react";
 import { productsApi } from "@/lib/api";
 import { ProductGallery } from "@/components/products/ProductGallery";
 import { ProductJsonLd, BreadcrumbJsonLd } from "@/components/seo/JsonLd";
 import { AddToCartSection } from "./AddToCartSection";
 import { ProductCard } from "@/components/products/ProductCard";
+import { ReviewSection } from "@/components/products/ReviewSection";
 import { StarRating } from "@/components/ui/StarRating";
 import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types";
@@ -277,57 +278,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
             </div>
           )}
 
-          {/* Reviews */}
+          {/* Reviews — client-side interactive section */}
           <div className="px-6 py-5">
-            <h2 className="text-base font-bold text-white mb-4 flex items-center gap-2">
-              <span className="w-1 h-4 bg-indigo-500 rounded-full inline-block" />
-              Customer Reviews
-              {product.review_count > 0 && (
-                <span className="text-xs font-normal text-brand-muted ml-1">
-                  ({product.review_count})
-                </span>
-              )}
-            </h2>
-
-            {product.reviews && product.reviews.length > 0 ? (
-              <div className="space-y-4 max-w-3xl">
-                {product.reviews.slice(0, 6).map((review) => (
-                  <div
-                    key={review.id}
-                    className="bg-brand-dark border border-brand-border rounded-2xl p-4"
-                  >
-                    <div className="flex items-start justify-between gap-3 mb-3">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-brand-primary/30 to-brand-secondary/30 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                          {review.user_name.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-white">{review.user_name}</p>
-                          {review.is_verified_purchase && (
-                            <span className="text-[10px] text-emerald-400 font-medium">
-                              ✓ Verified Purchase
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <StarRating rating={review.rating} size="sm" />
-                    </div>
-                    {review.title && (
-                      <p className="text-sm font-semibold text-white mb-1">{review.title}</p>
-                    )}
-                    <p className="text-sm text-brand-muted leading-relaxed">{review.body}</p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-10 max-w-sm mx-auto">
-                <Star className="h-10 w-10 text-brand-muted/30 mx-auto mb-3" />
-                <p className="text-sm font-medium text-white mb-1">No reviews yet</p>
-                <p className="text-xs text-brand-muted">
-                  Be the first to share your experience with this product.
-                </p>
-              </div>
-            )}
+            <ReviewSection productSlug={product.slug} />
           </div>
         </div>
 

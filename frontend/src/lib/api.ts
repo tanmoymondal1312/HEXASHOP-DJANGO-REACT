@@ -88,6 +88,12 @@ export const productsApi = {
   searchSuggest: (q: string) => api.get("/products/search/suggest/", { params: { q } }),
   createReview: (productSlug: string, data: Record<string, unknown>) =>
     api.post(`/products/${productSlug}/reviews/`, data),
+  reviews: (productSlug: string, params?: Record<string, string | number>) =>
+    api.get(`/products/${productSlug}/reviews/`, { params }),
+  reviewHelpful: (productSlug: string, reviewId: number) =>
+    api.post(`/products/${productSlug}/reviews/${reviewId}/helpful/`),
+  deleteReview: (productSlug: string, reviewId: number) =>
+    api.delete(`/products/${productSlug}/reviews/${reviewId}/delete/`),
 };
 
 // ─── Cart ─────────────────────────────────────────────────────────────────────

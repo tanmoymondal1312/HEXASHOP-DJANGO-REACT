@@ -5,7 +5,9 @@ from .views import (
     CategoryListView,
     ProductViewSet,
     RecentlyViewedView,
-    ReviewCreateView,
+    ReviewDeleteView,
+    ReviewHelpfulView,
+    ReviewViewSet,
     SearchSuggestView,
 )
 
@@ -18,8 +20,18 @@ urlpatterns = [
     path("recently-viewed/", RecentlyViewedView.as_view(), name="recently-viewed"),
     path(
         "<slug:product_slug>/reviews/",
-        ReviewCreateView.as_view(),
+        ReviewViewSet.as_view(),
         name="product-reviews",
+    ),
+    path(
+        "<slug:product_slug>/reviews/<int:pk>/delete/",
+        ReviewDeleteView.as_view(),
+        name="product-review-delete",
+    ),
+    path(
+        "<slug:product_slug>/reviews/<int:pk>/helpful/",
+        ReviewHelpfulView.as_view(),
+        name="product-review-helpful",
     ),
     path("", include(router.urls)),
 ]

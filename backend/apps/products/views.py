@@ -335,16 +335,113 @@ class SearchSuggestView(APIView):
         return Response(data)
 
 
-class ReviewCreateView(generics.CreateAPIView):
+class ReviewViewSet(generics.ListCreateAPIView):
+    """GET: paginated reviews for a product. POST: create a review."""
     serializer_class = ReviewSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
+    pagination_class = StandardPageNumberPagination
 
-    def perform_create(self, serializer):
-        product = generics.get_object_or_404(Product, slug=self.kwargs["product_slug"])
-        review = serializer.save(product=product)
-        # Recalculate denormalized rating
+    def get_permissions(self):
+        if self.request.method == "POST":
+            return [permissions.IsAuthenticated()]
+        return [permissions.AllowAny()]
+
+    def get_queryset(self):
+        slug = self.kwargs["product_slug"]
+        return (
+            Review.objects.filter(product__slug=slug)
+            .select_related("user")
+            .order_by("-created_at")
+        )
+
+    def list(self, request, *args, **kwargs):
+        slug = self.kwargs["product_slug"]
+        product = generics.get_object_or_404(Product, slug=slug)
+
+        reviews = self.get_queryset()
+        page = self.paginate_queryset(reviews)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            paginated = self.get_paginated_response(serializer.data)
+            data = paginated.data
+        else:
+            serializer = self.get_serializer(reviews, many=True)
+            data = {"results": serializer.data}
+
+        dist = (
+            reviews.values("rating")
+            .annotate(count=Count("id"))
+            .order_by("-rating")
+        )
+        distribution = {str(r["rating"]): r["count"] for r in dist}
+
+        data["distribution"] = distribution
+        data["avg_rating"] = str(product.avg_rating)
+        data["review_count"] = product.review_count
+        return Response(data)
+
+    def create(self, request, *args, **kwargs):
+        slug = self.kwargs["product_slug"]
+        product = generics.get_object_or_404(Product, slug=slug)
+
+        if Review.objects.filter(product=product, user=request.user).exists():
+            return Response(
+                {"detail": "You have already reviewed this product."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        has_purchased = (
+            product.orders.filter(user=request.user).exists()
+            if hasattr(product, "orders")
+            else False
+        )
+
+        review = serializer.save(
+            product=product,
+            user=request.user,
+            is_verified_purchase=has_purchased,
+        )
+
         agg = product.reviews.aggregate(avg=Avg("rating"), count=Count("id"))
         Product.objects.filter(pk=product.pk).update(
             avg_rating=agg["avg"] or 0, review_count=agg["count"] or 0
         )
         cache.delete(f"product_detail:{product.slug}")
+
+        return Response(
+            ReviewSerializer(review).data, status=status.HTTP_201_CREATED
+        )
+
+
+class ReviewDeleteView(generics.DestroyAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        slug = self.kwargs["product_slug"]
+        return Review.objects.filter(product__slug=slug, user=self.request.user)
+
+    def perform_destroy(self, instance):
+        product = instance.product
+        super().perform_destroy(instance)
+        agg = product.reviews.aggregate(avg=Avg("rating"), count=Count("id"))
+        Product.objects.filter(pk=product.pk).update(
+            avg_rating=agg["avg"] or 0, review_count=agg["count"] or 0
+        )
+        cache.delete(f"product_detail:{product.slug}")
+
+
+class ReviewHelpfulView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, product_slug, pk):
+        review = generics.get_object_or_404(
+            Review, pk=pk, product__slug=product_slug
+        )
+        Review.objects.filter(pk=review.pk).update(
+            helpful_count=F("helpful_count") + 1
+        )
+        review.refresh_from_db()
+        return Response({"helpful_count": review.helpful_count})
