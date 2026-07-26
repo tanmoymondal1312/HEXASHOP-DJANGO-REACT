@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 
 interface Props {
@@ -33,8 +33,18 @@ export default function BlurImage({
   onError,
 }: Props) {
   const [loaded, setLoaded] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
 
   const isLocal = src.includes("localhost") || src.includes("/media/");
+
+  // Handle race condition: image may already be cached/complete by the time
+  // React mounts this component, so onLoad never fires.
+  useEffect(() => {
+    const img = imgRef.current;
+    if (img && img.complete) {
+      setLoaded(true);
+    }
+  }, []);
 
   return (
     <>
@@ -54,6 +64,7 @@ export default function BlurImage({
       {/* Real image — z-index:3, always above blur layers */}
       {isLocal ? (
         <img
+          ref={imgRef}
           src={src}
           alt={alt}
           loading={priority ? "eager" : "lazy"}
