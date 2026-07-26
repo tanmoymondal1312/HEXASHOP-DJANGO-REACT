@@ -10,6 +10,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { authApi } from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
 import { useCartStore } from "@/store/cartStore";
+import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 import toast from "react-hot-toast";
 
 const schema = z.object({
@@ -56,6 +57,17 @@ export default function LoginPage() {
             </div>
             <h1 className="text-2xl font-bold">Welcome Back</h1>
             <p className="text-brand-muted text-sm mt-1">Sign in to your HEXASHOP account</p>
+          </div>
+
+          <GoogleSignInButton mode="login" />
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-brand-border" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-brand-surface px-3 text-brand-muted">or</span>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

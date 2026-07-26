@@ -3,6 +3,7 @@ from django.urls import path
 from .views import (
     AddressDetailView,
     AddressViewSet,
+    FirebaseLoginView,
     LoginView,
     LogoutView,
     MeView,
@@ -12,6 +13,7 @@ from .views import (
 
 urlpatterns = [
     path("register/", RegisterView.as_view(), name="auth-register"),
+    path("firebase-login/", FirebaseLoginView.as_view(), name="auth-firebase-login"),
     path("login/", LoginView.as_view(), name="auth-login"),
     path("logout/", LogoutView.as_view(), name="auth-logout"),
     path("token/refresh/", TokenRefreshCookieView.as_view(), name="auth-refresh"),

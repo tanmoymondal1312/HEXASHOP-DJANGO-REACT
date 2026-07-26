@@ -14,6 +14,7 @@ from .models import Address, AuditLog
 from .serializers import (
     AddressSerializer,
     CustomTokenObtainPairSerializer,
+    FirebaseLoginSerializer,
     RegisterSerializer,
     UserSerializer,
 )
@@ -67,6 +68,53 @@ class RegisterView(generics.CreateAPIView):
             user=user, action="register", ip_address=_get_client_ip(request)
         )
         # Merge any guest cart if session key provided
+        guest_key = request.data.get("guest_session_key")
+        if guest_key:
+            merge_guest_cart(guest_key, user)
+        return response
+
+
+class FirebaseLoginView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = FirebaseLoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        fb = serializer.validated_data["firebase_user"]
+        email = fb.get("email", "")
+        name = fb.get("name", "")
+        picture = fb.get("picture", "")
+        uid = fb["uid"]
+
+        if not email:
+            return Response(
+                {"detail": "Email not available from Google account."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user, created = User.objects.get_or_create(
+            email=email,
+            defaults={
+                "username": email.split("@")[0],
+                "first_name": name.split()[0] if name else "",
+                "last_name": " ".join(name.split()[1:]) if name and len(name.split()) > 1 else "",
+            },
+        )
+        if created:
+            UserProfile.objects.create(user=user)
+            if picture:
+                user.avatar = picture
+                user.save(update_fields=["avatar"])
+            AuditLog.objects.create(
+                user=user, action="register-google", ip_address=_get_client_ip(request)
+            )
+
+        refresh = RefreshToken.for_user(user)
+        response = Response(UserSerializer(user).data, status=status.HTTP_200_OK)
+        _set_auth_cookies(response, refresh)
+        AuditLog.objects.create(
+            user=user, action="login-google", ip_address=_get_client_ip(request)
+        )
         guest_key = request.data.get("guest_session_key")
         if guest_key:
             merge_guest_cart(guest_key, user)

@@ -67,6 +67,8 @@ export const authApi = {
   register: (data: Record<string, string>) => api.post("/auth/register/", data),
   login: (email: string, password: string, guestKey?: string) =>
     api.post("/auth/login/", { email, password, guest_session_key: guestKey }),
+  firebaseLogin: (idToken: string, guestKey?: string) =>
+    api.post("/auth/firebase-login/", { id_token: idToken, guest_session_key: guestKey }),
   logout: () => api.post("/auth/logout/"),
   me: () => api.get("/auth/me/"),
   updateMe: (data: Partial<{ first_name: string; last_name: string; phone: string }>) =>

@@ -6,25 +6,25 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { Eye, EyeOff } from "lucide-react";
 import { authApi } from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
+import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 import toast from "react-hot-toast";
 
 const schema = z.object({
-  first_name: z.string().min(1, "First name is required"),
-  last_name: z.string().min(1, "Last name is required"),
-  username: z.string().min(3, "Username must be at least 3 characters"),
+  full_name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  password2: z.string(),
-}).refine((d) => d.password === d.password2, {
-  message: "Passwords do not match",
-  path: ["password2"],
+  password: z
+    .string()
+    .min(4, "Password must be at least 4 characters")
+    .regex(/[a-zA-Z]/, "Password must contain at least 1 letter"),
 });
 
 type FormData = z.infer<typeof schema>;
 
 export default function RegisterPage() {
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const setUser = useAuthStore((s) => s.setUser);
 
@@ -49,21 +49,6 @@ export default function RegisterPage() {
     }
   };
 
-  const fields: Array<{
-    name: keyof FormData;
-    label: string;
-    type: string;
-    placeholder: string;
-    autoComplete: string;
-  }> = [
-    { name: "first_name", label: "First Name", type: "text", placeholder: "John", autoComplete: "given-name" },
-    { name: "last_name", label: "Last Name", type: "text", placeholder: "Doe", autoComplete: "family-name" },
-    { name: "username", label: "Username", type: "text", placeholder: "johndoe", autoComplete: "username" },
-    { name: "email", label: "Email Address", type: "email", placeholder: "john@example.com", autoComplete: "email" },
-    { name: "password", label: "Password", type: "password", placeholder: "••••••••", autoComplete: "new-password" },
-    { name: "password2", label: "Confirm Password", type: "password", placeholder: "••••••••", autoComplete: "new-password" },
-  ];
-
   return (
     <div className="min-h-[calc(100vh-10rem)] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
@@ -76,40 +61,69 @@ export default function RegisterPage() {
             <p className="text-brand-muted text-sm mt-1">Join HEXASHOP today</p>
           </div>
 
+          <GoogleSignInButton mode="register" />
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-brand-border" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-brand-surface px-3 text-brand-muted">or</span>
+            </div>
+          </div>
+
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              {fields.slice(0, 2).map((f) => (
-                <div key={f.name}>
-                  <label className="block text-sm font-medium mb-1.5">{f.label}</label>
-                  <input
-                    {...register(f.name)}
-                    type={f.type}
-                    autoComplete={f.autoComplete}
-                    placeholder={f.placeholder}
-                    className="w-full px-3 py-2.5 bg-brand-dark border border-brand-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
-                  />
-                  {errors[f.name] && (
-                    <p className="text-red-400 text-xs mt-1">{errors[f.name]?.message}</p>
-                  )}
-                </div>
-              ))}
+            <div>
+              <label className="block text-sm font-medium mb-1.5">Full Name</label>
+              <input
+                {...register("full_name")}
+                type="text"
+                autoComplete="name"
+                placeholder="John Doe"
+                className="w-full px-4 py-3 bg-brand-dark border border-brand-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
+              />
+              {errors.full_name && (
+                <p className="text-red-400 text-xs mt-1">{errors.full_name.message}</p>
+              )}
             </div>
 
-            {fields.slice(2).map((f) => (
-              <div key={f.name}>
-                <label className="block text-sm font-medium mb-1.5">{f.label}</label>
+            <div>
+              <label className="block text-sm font-medium mb-1.5">Email Address</label>
+              <input
+                {...register("email")}
+                type="email"
+                autoComplete="email"
+                placeholder="john@example.com"
+                className="w-full px-4 py-3 bg-brand-dark border border-brand-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
+              />
+              {errors.email && (
+                <p className="text-red-400 text-xs mt-1">{errors.email.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1.5">Password</label>
+              <div className="relative">
                 <input
-                  {...register(f.name)}
-                  type={f.type}
-                  autoComplete={f.autoComplete}
-                  placeholder={f.placeholder}
-                  className="w-full px-4 py-3 bg-brand-dark border border-brand-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                  {...register("password")}
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  placeholder="••••"
+                  className="w-full px-4 py-3 bg-brand-dark border border-brand-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary pr-11"
                 />
-                {errors[f.name] && (
-                  <p className="text-red-400 text-xs mt-1">{errors[f.name]?.message}</p>
-                )}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-muted hover:text-white"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
-            ))}
+              {errors.password && (
+                <p className="text-red-400 text-xs mt-1">{errors.password.message}</p>
+              )}
+              <p className="text-brand-muted text-xs mt-1.5">Min 4 characters with at least 1 letter</p>
+            </div>
 
             <button
               type="submit"
