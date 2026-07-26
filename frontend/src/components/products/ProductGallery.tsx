@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import Image from "next/image";
 import { ChevronLeft, ChevronRight, X, ZoomIn } from "lucide-react";
 import { cn, resolveImageUrl } from "@/lib/utils";
 import BlurImage from "@/components/ui/BlurImage";
@@ -12,9 +11,6 @@ interface ProductGalleryProps {
   productName: string;
   colorImageMap?: Record<number, number>; // colorId → imageId
 }
-
-const PLACEHOLDER =
-  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iIzExMTgyNyIvPjwvc3ZnPg==";
 
 export function ProductGallery({ images, productName, colorImageMap = {} }: ProductGalleryProps) {
   const [active, setActive] = useState(0);
@@ -190,15 +186,12 @@ export function ProductGallery({ images, productName, colorImageMap = {} }: Prod
                     : "border-brand-border opacity-60 hover:opacity-100 hover:border-brand-border"
                 )}
               >
-                <Image
+                <img
                   src={img.image}
                   alt={img.alt_text || `${productName} view ${i + 1}`}
-                  fill
-                  sizes="72px"
-                  className="object-cover"
-                  unoptimized={img.image.includes("localhost") || img.image.includes("/media/")}
-                  placeholder="blur"
-                  blurDataURL={img.blur_data || PLACEHOLDER}
+                  loading="lazy"
+                  draggable={false}
+                  className="absolute inset-0 w-full h-full object-cover"
                 />
               </button>
             ))}
@@ -227,16 +220,11 @@ export function ProductGallery({ images, productName, colorImageMap = {} }: Prod
             className="relative w-full h-full max-w-4xl max-h-[90vh] mx-8"
             onClick={(e) => e.stopPropagation()}
           >
-            <Image
+            <img
               src={currentImg.image}
               alt={currentImg.alt_text || productName}
-              fill
-              sizes="90vw"
-              className="object-contain"
-              priority
-              unoptimized={currentImg.image.includes("localhost") || currentImg.image.includes("/media/")}
-              placeholder="blur"
-              blurDataURL={currentImg.blur_data || PLACEHOLDER}
+              draggable={false}
+              className="absolute inset-0 w-full h-full object-contain"
             />
           </div>
 
@@ -268,7 +256,7 @@ export function ProductGallery({ images, productName, colorImageMap = {} }: Prod
                     i === active ? "border-brand-primary" : "border-white/20 opacity-50 hover:opacity-80"
                   )}
                 >
-                  <Image src={img.image} alt={`View ${i + 1}`} fill sizes="48px" className="object-cover" unoptimized={img.image.includes("localhost") || img.image.includes("/media/")} />
+                  <img src={img.image} alt={`View ${i + 1}`} loading="lazy" draggable={false} className="absolute inset-0 w-full h-full object-cover" />
                 </button>
               ))}
             </div>

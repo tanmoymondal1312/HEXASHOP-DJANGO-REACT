@@ -43,9 +43,14 @@ export function Footer() {
   return (
     <footer className="bg-brand-surface border-t border-brand-border mt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {/* Mobile: 2-col grid — Brand + Categories on row 1, Help + Newsletter on row 2 */}
+        {/* Tablet: 2-col — Brand spans full, rest 2-col */}
+        {/* Desktop: 4-col */}
+        {/* Mobile: 2×2 grid (Brand+Categories row 1, Help+Newsletter row 2) */}
+        {/* md+: 4-col single row */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {/* Brand */}
-          <div>
+          <div className="overflow-hidden">
             <Link href="/" className="block mb-4" aria-label="HEXASHOP home">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -60,7 +65,7 @@ export function Footer() {
             <p className="text-sm text-brand-muted leading-relaxed mb-4">
               Premium fashion that defines your style. Quality you can trust, prices you'll love.
             </p>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               {[Instagram, Twitter, Facebook, Youtube].map((Icon, i) => (
                 <a
                   key={i}
@@ -73,7 +78,7 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Shop */}
+          {/* Categories */}
           <div>
             <h3 className="font-semibold mb-4 text-brand-primary">Categories</h3>
             <ul className="space-y-2">
