@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ShoppingCart, Heart, Bell, Minus, Plus } from "lucide-react";
+import { ShoppingCart, Heart, Bell, Minus, Plus, Zap } from "lucide-react";
 import { Product, ProductColor, ProductVariant } from "@/types";
 import { useCartStore } from "@/store/cartStore";
 import { useWishlist } from "@/hooks/useWishlist";
@@ -87,12 +87,23 @@ export function AddToCartSection({ product }: Props) {
   const canAdd     = !!selectedVariant?.is_in_stock && quantity <= (selectedVariant?.stock ?? 0);
   const isOutOfStock = selectedVariant ? !selectedVariant.is_in_stock : allSizes.length === 0;
 
+  const openCartDrawer = useCartStore((s) => s.openCart);
+
   const handleAddToCart = async () => {
     if (!selectedVariant) {
       toast.error(selectedSize ? "This combination is out of stock." : "Please select a size.");
       return;
     }
     await addItem(selectedVariant.id, quantity);
+  };
+
+  const handleBuyNow = async () => {
+    if (!selectedVariant) {
+      toast.error(selectedSize ? "This combination is out of stock." : "Please select a size.");
+      return;
+    }
+    await addItem(selectedVariant.id, quantity);
+    openCartDrawer();
   };
 
   const handleStockAlert = async () => {
@@ -235,28 +246,38 @@ export function AddToCartSection({ product }: Props) {
 
       {/* ── CTA buttons ─────────────────────────────────────────────────── */}
       {canAdd ? (
-        <div className="flex gap-3">
+        <div className="space-y-3">
           <button
             type="button"
-            onClick={handleAddToCart}
-            className="btn-primary flex-1 flex items-center justify-center gap-2"
+            onClick={handleBuyNow}
+            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-brand-primary to-emerald-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-brand-primary/25 hover:shadow-xl hover:shadow-brand-primary/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
           >
-            <ShoppingCart className="h-5 w-5" />
-            Add to Cart
+            <Zap className="h-5 w-5" />
+            Buy Now
           </button>
-          <button
-            type="button"
-            onClick={() => isAuthenticated && toggle(product.id)}
-            className={cn(
-              "p-3 rounded-xl border-2 transition-colors",
-              isWished
-                ? "border-brand-primary bg-brand-primary/10 text-brand-primary"
-                : "border-brand-border hover:border-brand-primary hover:text-brand-primary"
-            )}
-            aria-label="Add to wishlist"
-          >
-            <Heart className={cn("h-5 w-5", isWished && "fill-brand-primary")} />
-          </button>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              className="btn-primary flex-1 flex items-center justify-center gap-2"
+            >
+              <ShoppingCart className="h-5 w-5" />
+              Add to Cart
+            </button>
+            <button
+              type="button"
+              onClick={() => isAuthenticated && toggle(product.id)}
+              className={cn(
+                "p-3 rounded-xl border-2 transition-colors",
+                isWished
+                  ? "border-brand-primary bg-brand-primary/10 text-brand-primary"
+                  : "border-brand-border hover:border-brand-primary hover:text-brand-primary"
+              )}
+              aria-label="Add to wishlist"
+            >
+              <Heart className={cn("h-5 w-5", isWished && "fill-brand-primary")} />
+            </button>
+          </div>
         </div>
       ) : (
         <div className="space-y-2">
