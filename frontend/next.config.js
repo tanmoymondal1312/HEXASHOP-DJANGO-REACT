@@ -15,6 +15,11 @@ const nextConfig = {
         pathname: "/**",
       },
       {
+        protocol: "https",
+        hostname: "hexashop.mediaghor.com",
+        pathname: "/media/**",
+      },
+      {
         protocol: "http",
         hostname: "localhost",
         port: "8000",

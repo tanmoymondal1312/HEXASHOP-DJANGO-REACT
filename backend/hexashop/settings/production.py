@@ -33,3 +33,8 @@ REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"] = [  # noqa
 CSRF_TRUSTED_ORIGINS = [
     o.strip() for o in os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",")
 ]
+
+# Use local filesystem storage if Cloudinary credentials not provided
+if not os.environ.get("CLOUDINARY_CLOUD_NAME"):
+    DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
+    MEDIA_URL = "/media/"

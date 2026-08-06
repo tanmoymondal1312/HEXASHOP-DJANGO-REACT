@@ -59,3 +59,4 @@ Thumbs.db
 
 # Docker
 *.override.yml
+backend/firebase-service-account.json
